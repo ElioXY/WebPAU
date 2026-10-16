@@ -28,7 +28,7 @@ const range = years.length
 const statDocs = exams.length;
 const statSubjects = new Set(exams.map((e) => e.subject)).size;
 
-/* agrupació per any + convocatòria, ja ordenat pel catàleg */
+/* agrupación por año + convocatoria, ya ordenado por el catálogo */
 interface Group {
   year: number;
   session: string;
@@ -41,7 +41,7 @@ for (const exam of exams) {
   else groups.push({ year: exam.year, session: exam.session, items: [exam] });
 }
 
-/* dades compactes per al client: [id, subjectIdx, year, sessionIdx, typeIdx] */
+/* datos compactos para el cliente: [id, subjectIdx, year, sessionIdx, typeIdx] */
 const compact = exams.map((e) => [
   e.id,
   subjectOrder.indexOf(e.subject),
@@ -62,11 +62,13 @@ const fmtSize = (kb?: number | null) => {
   return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`;
 };
 
-const generalCodes = new Set(subjects.filter((s) => s.phase === 'general').map((s) => s.code));
+const accesoCodes = new Set(
+  subjects.filter((s) => s.phases.includes('acceso')).map((s) => s.code)
+);
 const usedCodes = new Set(exams.map((e) => e.subject));
-const visibleSubjects = subjects.filter((s) => usedCodes.has(s.code) || generalCodes.has(s.code));
+const visibleSubjects = subjects.filter((s) => usedCodes.has(s.code) || accesoCodes.has(s.code));
 
-/* bandes del hero: una per any, del més nou al més antic */
+/* bandas del hero: una por año, del más nuevo al más antiguo */
 const yearBands = years.map((year) => ({
   year,
   items: exams.filter((e) => e.year === year),
@@ -74,8 +76,8 @@ const yearBands = years.map((year) => ({
 ---
 
 <Base
-  title="WebPAU · Todos los exámenes de la PAU"
-  description="Archivo de enunciados, soluciones y criterios de corrección de la PAU. Filtra por asignatura, año y convocatoria, y descarga el PDF."
+  title="WebPAU · Todos los exámenes de la PAU en Andalucía"
+  description="Archivo de enunciados, soluciones y criterios de corrección de la PAU en Andalucía. Filtra por asignatura, año, convocatoria y fase, y descarga el PDF."
 >
   <header class="site-head">
     <div class="wrap">
@@ -101,15 +103,15 @@ const yearBands = years.map((year) => ({
         <div class="hero-top">
           <div>
             <p class="mono" style="color: var(--ink-3)">
-              Proves d'Accés a la Universitat · Catalunya
+              Prueba de Acceso a la Universidad · Andalucía
             </p>
-            <h1>Encuentra el ejercicio que te toca.</h1>
+            <h1>Encuentra el ejercicio que <em>te toca</em>.</h1>
           </div>
           <div class="hero-aside">
             <p class="lede">
-              Enunciados, soluciones y criterios de corrección de todas las asignaturas,
-              ordenados por año y convocatoria. Cada PDF que subes se publica en cuanto
-              lo confirmas.
+              Enunciados, soluciones y criterios de corrección de la PAU en Andalucía,
+              ordenados por año y convocatoria y filtrables por fase de acceso o de
+              admisión. Cada PDF que subes se publica en cuanto lo confirmas.
             </p>
             <div class="stats" hidden={statDocs === 0}>
               <div class="stat"><b>{statDocs}</b><span>documentos</span></div>
@@ -152,8 +154,14 @@ const yearBands = years.map((year) => ({
             </div>
           ) : (
             <div class="sheet-empty">
+              <div class="omr omr-deco" aria-hidden="true">
+                {Array.from({ length: 40 }, (_, i) => (
+                  <i data-on={i % 3 === 1 ? '1' : '0'} />
+                ))}
+              </div>
               <p class="lede" style="margin-inline:auto">
-                Todavía no hay ningún documento en el archivo.
+                El archivo está esperando su primer examen. En cuanto se suba un PDF,
+                aparecerá aquí como una casilla marcada más.
               </p>
             </div>
           )}
@@ -183,6 +191,7 @@ const yearBands = years.map((year) => ({
           </p>
         </div>
 
+        {exams.length > 0 && (
         <form class="filters" id="filters" role="search" autocomplete="off">
           <div class="filter-row">
             <div class="field grow">
@@ -193,8 +202,9 @@ const yearBands = years.map((year) => ({
                 id="q"
                 name="q"
                 type="search"
-                placeholder="Buscar: matemàtiques, filosofia, 2024…"
+                placeholder="Buscar: matemáticas, filosofía, 2024…"
               />
+              <kbd class="kbd hide-s" aria-hidden="true">/</kbd>
             </div>
 
             <label class="visually-hidden" for="y">Año</label>
@@ -207,9 +217,9 @@ const yearBands = years.map((year) => ({
 
             <label class="visually-hidden" for="phase">Fase</label>
             <select class="select" id="phase" name="phase" style="max-width: 9.5rem">
-              <option value="">Toda la fase</option>
-              <option value="general">Fase general</option>
-              <option value="especifica">Fase específica</option>
+              <option value="">Todas las fases</option>
+              <option value="acceso">Fase de acceso</option>
+              <option value="admision">Fase de admisión</option>
             </select>
           </div>
 
@@ -238,15 +248,18 @@ const yearBands = years.map((year) => ({
                 class="chip"
                 type="button"
                 data-s={s.code}
-                data-phase={s.phase}
+                data-phase={s.phases.join(',')}
                 aria-pressed="false"
-                title={`${s.name} · ${s.phase === 'general' ? 'Fase general' : 'Fase específica'}`}
+                title={`${s.name} · ${s.phases
+                  .map((p) => (p === 'acceso' ? 'Fase de acceso' : 'Fase de admisión'))
+                  .join(' · ')}`}
               >
                 {s.short} <em>{subjectCounts.get(s.code) ?? 0}</em>
               </button>
             ))}
           </div>
         </form>
+        )}
 
         <div id="results">
           {groups.length > 0 ? (
@@ -298,11 +311,26 @@ const yearBands = years.map((year) => ({
               </div>
             ))
           ) : (
-            <div class="empty" id="catalogEmpty">
+            <div class="empty empty-state" id="catalogEmpty">
+              <div class="omr omr-deco" aria-hidden="true">
+                {Array.from({ length: 27 }, (_, i) => (
+                  <i data-on={i % 4 === 2 ? '1' : '0'} />
+                ))}
+              </div>
               <h2>Aún no hay nada en el archivo</h2>
               <p>
                 Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán
                 aquí listos para descargar, filtrados por asignatura, año y convocatoria.
+              </p>
+              <p class="empty-cta">
+                <a
+                  class="dl"
+                  href="https://github.com/ElioXY/WebPAU"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Ver el proyecto en GitHub
+                </a>
               </p>
               <p class="owner-note mono">
                 Si gestionas el archivo: sube el primero con <code>npm run admin</code>
@@ -329,9 +357,9 @@ const yearBands = years.map((year) => ({
         <div>
           <h3>Sobre WebPAU</h3>
           <p>
-            Archivo abierto de exámenes de acceso a la universidad. Cada documento se
-            guarda en este repositorio con su asignatura, año, convocatoria y tipo, para
-            que se pueda encontrar sin saber de dónde viene.
+            Archivo abierto de exámenes de la PAU en Andalucía. Cada documento se guarda
+            en este repositorio con su asignatura, año, convocatoria y tipo, para que se
+            pueda encontrar sin saber de dónde viene.
           </p>
         </div>
         <div>
@@ -361,7 +389,7 @@ const yearBands = years.map((year) => ({
 
   <script type="application/json" id="catalog-data" set:html={JSON.stringify({
     exams: compact,
-    subjects: visibleSubjects.map((s) => [s.code, s.phase, s.name]),
+    subjects: visibleSubjects.map((s) => [s.code, s.phases.join(','), s.name]),
     types: DOC_TYPES.map((t) => [t.id, t.short, t.label]),
     base,
   })} />

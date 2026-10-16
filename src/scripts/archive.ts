@@ -1,25 +1,25 @@
 /* =========================================================================
-   Filtratge del fitxer — sense framework, sense estat duplicat.
-   L'estat viu a l'URL (?q=&y=&ss=&t=&s=&p=) perquè es pugui compartir.
-   Sense JavaScript el servidor ja renderitza tot el llistat complet.
+   Filtrado del archivo — sin framework, sin estado duplicado.
+   El estado vive en la URL (?q=&y=&ss=&t=&s=&p=) para poder compartirlo.
+   Sin JavaScript el servidor ya renderiza todo el listado completo.
    ========================================================================= */
 
 type Row = [id: string, subjectIdx: number, year: number, sessionIdx: number, typeIdx: number];
 interface Payload {
   exams: Row[];
-  subjects: [string, string, string][]; // [code, phase, name]
+  subjects: [string, string, string][]; // [code, fases, name]
   types: [string, string, string][]; // [id, etiqueta corta, etiqueta larga]
   base: string;
 }
 
-const SESSIONS = ['juny', 'setembre'];
+const SESSIONS = ['ordinaria', 'extraordinaria'];
 
-/* paraules clau per buscar sense conèixer el vocabulari exacte */
+/* palabras clave para buscar sin conocer el vocabulario exacto */
 const TYPE_KEYWORDS: Record<string, string> = {
-  enunciats: 'enunciat examen',
-  resolucions: 'solucions soluciones',
-  criteris: 'criteris correccio',
-  plantilla: 'plantilla full omr',
+  enunciados: 'enunciado examen',
+  soluciones: 'soluciones resoluciones',
+  criterios: 'criterios correccion',
+  plantilla: 'plantilla hoja respuestas omr',
 };
 
 interface State {
@@ -42,7 +42,7 @@ const payload: Payload = JSON.parse(
 );
 
 const codes = payload.subjects.map((s) => s[0]);
-const phases = payload.subjects.map((s) => s[1]);
+const phaseLists = payload.subjects.map((s) => s[1].split(',').filter(Boolean));
 const names = payload.subjects.map((s) => s[2]);
 const TYPES = payload.types.map((t) => t[0]);
 const TYPE_LABEL = new Map(payload.types.map((t) => [t[0], t[1]]));
@@ -91,7 +91,7 @@ const typeBtns = $$<HTMLButtonElement>('#segType button');
 interface Exam {
   id: string;
   code: string;
-  phase: string;
+  phases: string[];
   name: string;
   year: number;
   session: string;
@@ -107,7 +107,7 @@ const exams: Exam[] = payload.exams.map(([id, subjectIdx, year, sessionIdx, type
   return {
     id,
     code,
-    phase: phases[subjectIdx] ?? '',
+    phases: phaseLists[subjectIdx] ?? [],
     name,
     year,
     session,
@@ -138,13 +138,13 @@ const state = readState();
 let tokens: string[] = [];
 
 /** `ignore` permet fer el recompte facetat: què hi hauria si es canviés
- *  només aquesta dimensió (com fan els filtres de la majoria de botigs). */
+ *  solo esta dimensión (como hacen los filtros de casi todas las tiendas). */
 const matches = (e: Exam, ignore?: 's' | 't' | 'y'): boolean => {
   if (ignore !== 'y' && state.y && String(e.year) !== state.y) return false;
   if (state.ss && e.session !== state.ss) return false;
   if (ignore !== 't' && state.t && e.type !== state.t) return false;
   if (ignore !== 's' && state.s && e.code !== state.s) return false;
-  if (state.p && e.phase !== state.p) return false;
+  if (state.p && !e.phases.includes(state.p)) return false;
   for (const tok of tokens) if (!e.hay.includes(tok)) return false;
   return true;
 };
@@ -204,7 +204,7 @@ function apply(): void {
     group.count.textContent = shown === 1 ? '1 documento' : `${shown} documentos`;
   }
 
-  /* el xip «Todas» mostra el total ignorant el filtre d'assignatura */
+  /* el chip «Todas» muestra el total ignorando el filtro de asignatura */
   const allChip = chips.find((c) => (c.dataset.s ?? '') === '');
   if (allChip) {
     const em = allChip.querySelector('em');
@@ -221,7 +221,7 @@ function apply(): void {
     if (em) em.textContent = String(n);
   }
 
-  /* els segments de tipus també mostren què hi hauria */
+  /* los segmentos de tipo también muestran qué habría */
   for (const btn of typeBtns) {
     const t = btn.dataset.t ?? '';
     btn.setAttribute('aria-pressed', String(state.t === t));
@@ -251,9 +251,11 @@ function describe(): string {
   if (state.q) bits.push(`«${state.q}»`);
   if (state.s) bits.push(names[codes.indexOf(state.s)] ?? state.s);
   if (state.y) bits.push(state.y);
-  if (state.ss) bits.push(state.ss === 'juny' ? 'convocatoria de juny' : 'convocatoria de setembre');
+  if (state.ss) {
+    bits.push(state.ss === 'ordinaria' ? 'convocatoria ordinaria' : 'convocatoria extraordinaria');
+  }
   if (state.t) bits.push(TYPE_LABEL.get(state.t) ?? state.t);
-  if (state.p) bits.push(state.p === 'general' ? 'fase general' : 'fase específica');
+  if (state.p) bits.push(state.p === 'acceso' ? 'fase de acceso' : 'fase de admisión');
   return bits.join(' · ') || 'esos filtros';
 }
 
@@ -312,7 +314,23 @@ clearBtn?.addEventListener('click', resetAll);
 clearBtn2?.addEventListener('click', resetAll);
 form?.addEventListener('submit', (event) => event.preventDefault());
 
-/* clic a un quadrat del hero → fila corresponent del llistat */
+/* atajos: «/» enfoca la búsqueda, «Esc» la desenfoca */
+document.addEventListener('keydown', (event) => {
+  const target = event.target as HTMLElement | null;
+  const typing =
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target?.isContentEditable;
+  if (event.key === '/' && !typing) {
+    event.preventDefault();
+    inputQ?.focus();
+    inputQ?.select();
+  }
+  if (event.key === 'Escape' && document.activeElement === inputQ) inputQ?.blur();
+});
+
+/* clic en una casilla del hero → fila correspondiente del listado */
 
 for (const [id, cell] of cells) {
   cell.addEventListener('click', () => {

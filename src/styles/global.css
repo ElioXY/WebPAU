@@ -1,9 +1,9 @@
 /* =========================================================================
    WebPAU — sistema visual
-   Concepto: el full de respostes (OMR). La quadrícula de quadrats és el
-   llenguatge del lloc: un quadrat ple = un document. Tot el sistema —
-   tipus de document, resultats, estat buit — es dibuixa amb el mateix
-   vocabulari gràfic.
+   Concepto: la hoja de respuestas (OMR). La cuadrícula de casillas es el
+   lenguaje del sitio: una casilla llena = un documento. Todo el sistema
+   —tipo de documento, resultados, estado vacío— se dibuja con el mismo
+   vocabulario gráfico.
    ========================================================================= */
 
 @import '@fontsource-variable/archivo/wdth.css';
@@ -11,8 +11,10 @@
 @import '@fontsource/ibm-plex-mono/500.css';
 
 :root {
+  color-scheme: light;
+
   /* superfícies */
-  --stock: #dddEd7;
+  --stock: #ddded7;
   --stock-deep: #cbcdc2;
   --sheet: #fbfbf9;
   --sheet-2: #f3f3ee;
@@ -49,6 +51,32 @@
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+/* --------------------------------------------------------------- tema oscuro */
+/* la hoja de respuestas en negativo: pizarra oscura, tinta clara, mismos acentos */
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --stock: #14161a;
+  --stock-deep: #0d0f12;
+  --sheet: #1b1e23;
+  --sheet-2: #23272e;
+
+  --ink: #eceef2;
+  --ink-2: #b6bcc5;
+  --ink-3: #868d97;
+
+  --rule: #363b43;
+  --rule-2: #2a2e35;
+
+  --seal: #8aa2f7;
+  --seal-wash: #1d2436;
+  --stamp: #e2907f;
+  --stamp-wash: #34231f;
+
+  --focus: #8aa2f7;
+}
+
 /* ------------------------------------------------------------------ reset */
 
 *,
@@ -70,6 +98,7 @@ html {
 body {
   background: var(--stock);
   color: var(--ink);
+  transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
   font-family: var(--sans);
   font-size: clamp(0.975rem, 0.93rem + 0.22vw, 1.0625rem);
   line-height: 1.6;
@@ -201,11 +230,11 @@ main {
 }
 
 /* ------------------------------------------------------------------ omr  */
-/* el quadrat és la unitat bàsica del lloc */
+/* la casilla es la unidad básica del sitio */
 
 /* ------------------------------------------------------------- banda omr */
-/* el quadrat és la unitat bàsica del lloc: una banda per any, amb el
-   document ja arxivat omplint la pista i el que no, buit. */
+/* la casilla es la unidad básica del sitio: una banda por año, con el
+   documento ya archivado rellenando la pista y el que no, vacío. */
 
 .omr {
   display: grid;
@@ -699,7 +728,7 @@ main {
   text-decoration-thickness: 1px;
 }
 
-/* xips d'assignatura */
+/* chips de asignatura */
 
 .chips {
   display: flex;
@@ -897,13 +926,13 @@ main {
   background: var(--ink);
 }
 
-.tag[data-t='enunciats'] i {
+.tag[data-t='enunciados'] i {
   background: var(--ink);
 }
-.tag[data-t='resolucions'] i {
+.tag[data-t='soluciones'] i {
   background: var(--seal);
 }
-.tag[data-t='criteris'] i {
+.tag[data-t='criterios'] i {
   background: var(--stamp);
 }
 .tag[data-t='plantilla'] i {
@@ -1084,4 +1113,234 @@ main {
 
 [hidden] {
   display: none !important;
+}
+
+/* ------------------------------------------------ mejoras de diseño (v2) */
+
+/* lavado suave bajo el hero para dar profundidad a la hoja */
+.hero {
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 60%;
+  background: radial-gradient(
+    120% 100% at 78% -20%,
+    color-mix(in srgb, var(--seal) 9%, transparent),
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+.hero > .wrap {
+  position: relative;
+}
+
+/* etiqueta mono del hero, con un pequeño filete */
+.hero-top > div > .mono {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-top > div > .mono::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* hoja vacía: banda OMR decorativa, no interactiva */
+.sheet-empty .omr-deco,
+.empty-state .omr-deco {
+  margin-bottom: 1.5rem;
+}
+
+.empty-state .omr-deco {
+  margin-inline: 0;
+}
+
+.omr-deco {
+  width: fit-content;
+  max-width: 100%;
+  grid-template-columns: repeat(10, 9px);
+  gap: 5px;
+  padding: 11px;
+  background-color: var(--sheet-2);
+  background-image: radial-gradient(var(--rule) 0.5px, transparent 0.6px);
+  background-size: 7px 7px;
+  border: 1px solid var(--rule-2);
+  margin-inline: auto;
+}
+
+.omr-deco i {
+  border-color: color-mix(in srgb, var(--rule) 70%, transparent);
+}
+
+.omr-deco i[data-on='1'] {
+  background: var(--seal);
+  border-color: var(--seal);
+}
+
+.omr-deco i:nth-child(4n)[data-on='1'] {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* estado vacío con llamada a la acción */
+.empty-cta {
+  margin-top: 1.35rem;
+}
+
+.empty .owner-note code {
+  white-space: nowrap;
+}
+
+/* pista de atajo de teclado en el buscador */
+.kbd {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  color: var(--ink-2);
+  background: var(--sheet-2);
+  border: 1px solid var(--rule);
+  padding: 0.18rem 0.4rem;
+  pointer-events: none;
+}
+
+.field .input {
+  padding-right: 2.3rem;
+}
+
+@media (max-width: 640px) {
+  .kbd {
+    display: none;
+  }
+  .field .input {
+    padding-right: 0.7rem;
+  }
+}
+
+/* ------------------------------------------------ controles flotantes */
+
+.controls {
+  position: fixed;
+  right: clamp(0.75rem, 2.5vw, 1.5rem);
+  bottom: clamp(0.75rem, 2.5vw, 1.5rem);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.ctrl {
+  appearance: none;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--sheet) 92%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease),
+    border-color 0.15s var(--ease), transform 0.15s var(--ease), opacity 0.2s var(--ease);
+}
+
+.ctrl:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--sheet);
+}
+
+.ctrl:active {
+  transform: translateY(1px);
+}
+
+.ctrl[hidden] {
+  display: none;
+}
+
+.ctrl svg {
+  width: 15px;
+  height: 15px;
+}
+
+.ctrl-ico {
+  display: grid;
+  place-items: center;
+}
+
+/* el icono mostrado describe el modo al que cambiarás */
+:root[data-theme='light'] .ctrl-ico[data-theme-ico='dark'],
+:root[data-theme='dark'] .ctrl-ico[data-theme-ico='light'] {
+  display: none;
+}
+
+@keyframes ctrl-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ctrl:not([hidden]) {
+  animation: ctrl-in 0.28s var(--ease) backwards;
+}
+
+/* ------------------------------- barras de desplazamiento discretas */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rule);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+  background-clip: content-box;
+}
+
+/* ------------------------------- ajustes finos del tema oscuro */
+
+:root[data-theme='dark'] .site-foot {
+  color: var(--ink-2);
+}
+
+:root[data-theme='dark'] body {
+  background-image: radial-gradient(
+    120% 80% at 50% -10%,
+    color-mix(in srgb, var(--seal) 6%, transparent),
+    transparent 60%
+  );
+  background-attachment: fixed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctrl:not([hidden]) {
+    animation: none;
+  }
 }

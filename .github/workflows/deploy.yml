@@ -2,7 +2,11 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    # Se escuchan ambas ramas para que el flujo no quede muerto si cambia la
+    # rama por defecto del repositorio; el job solo publica desde la rama que
+    # sea por defecto en ese momento (si no, una rama antigua sobrescribiría
+    # la web con contenido viejo).
+    branches: [main, mejora-web-espanol]
     paths:
       - 'src/**'
       - 'public/**'
@@ -24,6 +28,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

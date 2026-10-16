@@ -2,67 +2,70 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export type Phase = 'general' | 'especifica';
+/** La PAU de Andalucía se organiza en fase de acceso (obligatoria) y fase de
+ *  admisión (voluntaria). Una misma materia de modalidad puede examinarse en
+ *  ambas, de ahí que `phases` sea una lista. */
+export type Phase = 'acceso' | 'admision';
 
 export interface Subject {
   code: string;
   name: string;
   short: string;
-  phase: Phase;
+  phases: Phase[];
   aliases: string[];
 }
 
-export type DocType = 'enunciats' | 'resolucions' | 'criteris' | 'plantilla';
+export type DocType = 'enunciados' | 'soluciones' | 'criterios' | 'plantilla';
 
 export const DOC_TYPES: { id: DocType; label: string; short: string; hint: string }[] = [
   {
-    id: 'enunciats',
-    label: 'Enunciats',
-    short: 'Enunciat',
+    id: 'enunciados',
+    label: 'Enunciados',
+    short: 'Enunciado',
     hint: 'El examen que te dan en el aula',
   },
   {
-    id: 'resolucions',
-    label: 'Resolucions',
-    short: 'Solucions',
+    id: 'soluciones',
+    label: 'Soluciones',
+    short: 'Soluciones',
     hint: 'Las soluciones oficiales',
   },
   {
-    id: 'criteris',
-    label: 'Criteris de correcció',
-    short: 'Criteris',
+    id: 'criterios',
+    label: 'Criterios de corrección',
+    short: 'Criterios',
     hint: 'Cómo se puntúa cada pregunta',
   },
   {
     id: 'plantilla',
-    label: 'Full de respostes',
-    short: 'Full',
+    label: 'Hoja de respuestas',
+    short: 'Hoja',
     hint: 'La plantilla OMR en blanco',
   },
 ];
 
-export type Session = 'juny' | 'setembre';
+export type Session = 'ordinaria' | 'extraordinaria';
 
 export const SESSIONS: { id: Session; label: string; long: string }[] = [
-  { id: 'juny', label: 'Juny', long: 'Convocatòria de juny' },
-  { id: 'setembre', label: 'Setembre', long: 'Convocatòria de setembre' },
+  { id: 'ordinaria', label: 'Ordinaria', long: 'Convocatoria ordinaria · junio' },
+  { id: 'extraordinaria', label: 'Extraordinaria', long: 'Convocatoria extraordinaria · julio' },
 ];
 
 export interface Exam {
-  /** stable slug, e.g. "mat-2024-juny-enunciats" */
+  /** slug estable, p. ej. "mate-2025-ordinaria-enunciados" */
   id: string;
   subject: string;
   year: number;
   session: Session;
   type: DocType;
-  /** page count in the PDF, optional */
+  /** número de páginas del PDF, opcional */
   pages?: number | null;
-  /** repo-relative path, e.g. "exams/2024/juny/MAT/mat-2024-juny-enunciats.pdf" */
+  /** ruta relativa al repo, p. ej. "exams/2025/ordinaria/MAT/mate-2025-ordinaria-enunciados.pdf" */
   file: string;
   /** original file name as uploaded */
   originalName?: string;
   sizeKB?: number | null;
-  language?: 'ca' | 'es' | '';
+  language?: 'es' | '';
   official?: boolean;
   notes?: string;
   addedAt: string;
@@ -131,23 +134,9 @@ export function subjectLabel(subjects: Subject[], code: string): string {
   return subjects.find((s) => s.code === code)?.name ?? code;
 }
 
-/** Turn an arbitrary string into a URL-safe slug. */
-export function slugify(input: string): string {
-  const map: Record<string, string> = {
-    à: 'a', á: 'a', â: 'a', ä: 'a',
-    è: 'e', é: 'e', ê: 'e', ë: 'e',
-    ì: 'i', í: 'i', î: 'i', ï: 'i',
-    ò: 'o', ó: 'o', ô: 'o', ö: 'o',
-    ù: 'u', ú: 'u', û: 'u', ü: 'u',
-    ç: 'c', ñ: 'n', '·': '-', '/': '-',
-  };
-  return input
-    .toLowerCase()
-    .replace(/[àáâäèéêëìíîïòóôöùúûüçñ·/]/g, (ch) => map[ch] ?? ch)
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
-}
+/* El slug y el recuento de páginas viven en un módulo sin `node:` porque los
+   usa también el panel del navegador; aquí solo se reexportan. */
+export { slugify, estimatePdfPages } from './slug';
 
 /** Human title used on cards and in the admin table. */
 export function examTitle(
@@ -156,7 +145,7 @@ export function examTitle(
   typeLabel: string
 ): string {
   const subj = subjectLabel(subjects, exam.subject);
-  const session = exam.session === 'juny' ? 'juny' : 'setembre';
+  const session = SESSIONS.find((s) => s.id === exam.session)?.label ?? exam.session;
   return `${subj} · ${exam.year} · ${session} · ${typeLabel}`;
 }
 
@@ -182,15 +171,6 @@ export function fileExists(exam: Exam): boolean {
   } catch {
     return false;
   }
-}
-
-/** Rough page count by counting /Type /Page objects. Best effort, no dependency. */
-export function estimatePdfPages(buffer: Buffer): number | null {
-  const text = buffer.toString('latin1');
-  const matches = text.match(/\/Type\s*\/Page[^s]/g);
-  if (!matches) return null;
-  const count = text.match(/\/Count\s+(\d+)/);
-  return count ? Number(count[1]) : matches.length;
 }
 
 export function formatBytes(kb: number | null | undefined): string {
