@@ -1,0 +1,28 @@
+{
+  "name": "webpau",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Archivo público de exámenes de la PAU (Proves d'Accés a la Universitat) y panel de administración.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "admin": "node admin/server.ts"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "express": "^4.22.3",
+    "multer": "^2.0.2",
+    "nanoid": "^5.1.16"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
+    "astro": "^7.4.0",
+    "typescript": "^6.0.3"
+  }
+}

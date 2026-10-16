@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base
+  title="Página no encontrada · WebPAU"
+  description="Esta página no existe en WebPAU. Vuelve al archivo de exámenes."
+>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href={`${base}/`}>
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        WebPAU
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div class="empty" style="padding-block: clamp(4rem, 14vh, 9rem)">
+        <div class="omr" style="max-width: 150px; margin-bottom: 2rem" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i data-on="1"></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <h2>Este cuadrat no está marcado</h2>
+        <p>
+          La página que buscas no existe. Si has seguido un enlace a un examen que ya no
+          está, puede que se haya retirado del archivo.
+        </p>
+        <p style="margin-top: 1.5rem">
+          <a class="dl" href={`${base}/#archivo`}>Ir al archivo</a>
+        </p>
+      </div>
+    </div>
+  </main>
+</Base>

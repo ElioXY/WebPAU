@@ -1,0 +1,372 @@
+---
+import Base from '../layouts/Base.astro';
+import { DOC_TYPES, SESSIONS, loadCatalog, loadSubjects, subjectLabel } from '../lib/catalog';
+import SearchIcon from '../components/icons/Search.astro';
+import DownloadIcon from '../components/icons/Download.astro';
+import ArrowIcon from '../components/icons/Arrow.astro';
+import GitHubIcon from '../components/icons/GitHub.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pdfUrl = (file: string) => `${base}/${file.replace(/^\//, '')}`;
+
+const catalog = loadCatalog();
+const subjects = loadSubjects();
+const exams = catalog.exams;
+
+const subjectOrder = subjects.map((s) => s.code);
+const sessionOrder = SESSIONS.map((s) => s.id);
+const typeOrder = DOC_TYPES.map((t) => t.id);
+const typeById = new Map(DOC_TYPES.map((t) => [t.id, t]));
+
+const years = [...new Set(exams.map((e) => e.year))].sort((a, b) => b - a);
+const range = years.length
+  ? years.length === 1
+    ? String(years[0])
+    : `${years[years.length - 1]}–${years[0]}`
+  : '—';
+
+const statDocs = exams.length;
+const statSubjects = new Set(exams.map((e) => e.subject)).size;
+
+/* agrupació per any + convocatòria, ja ordenat pel catàleg */
+interface Group {
+  year: number;
+  session: string;
+  items: typeof exams;
+}
+const groups: Group[] = [];
+for (const exam of exams) {
+  const last = groups[groups.length - 1];
+  if (last && last.year === exam.year && last.session === exam.session) last.items.push(exam);
+  else groups.push({ year: exam.year, session: exam.session, items: [exam] });
+}
+
+/* dades compactes per al client: [id, subjectIdx, year, sessionIdx, typeIdx] */
+const compact = exams.map((e) => [
+  e.id,
+  subjectOrder.indexOf(e.subject),
+  e.year,
+  sessionOrder.indexOf(e.session),
+  typeOrder.indexOf(e.type),
+]);
+
+const subjectCounts = new Map<string, number>();
+const yearCounts = new Map<number, number>();
+for (const e of exams) {
+  subjectCounts.set(e.subject, (subjectCounts.get(e.subject) ?? 0) + 1);
+  yearCounts.set(e.year, (yearCounts.get(e.year) ?? 0) + 1);
+}
+
+const fmtSize = (kb?: number | null) => {
+  if (!kb) return '';
+  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`;
+};
+
+const generalCodes = new Set(subjects.filter((s) => s.phase === 'general').map((s) => s.code));
+const usedCodes = new Set(exams.map((e) => e.subject));
+const visibleSubjects = subjects.filter((s) => usedCodes.has(s.code) || generalCodes.has(s.code));
+
+/* bandes del hero: una per any, del més nou al més antic */
+const yearBands = years.map((year) => ({
+  year,
+  items: exams.filter((e) => e.year === year),
+}));
+---
+
+<Base
+  title="WebPAU · Todos los exámenes de la PAU"
+  description="Archivo de enunciados, soluciones y criterios de corrección de la PAU. Filtra por asignatura, año y convocatoria, y descarga el PDF."
+>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href={`${base}/`}>
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        WebPAU
+      </a>
+      <div class="head-meta mono">
+        <span class="hide-s">{statDocs} documentos</span>
+        <span class="sep hide-s" aria-hidden="true"></span>
+        <span class="hide-s">{statSubjects} asignaturas</span>
+        <a class="link-btn" href="https://github.com/ElioXY/WebPAU" target="_blank" rel="noreferrer">
+          <span class="hide-s">GitHub</span>
+          <GitHubIcon />
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-top">
+          <div>
+            <p class="mono" style="color: var(--ink-3)">
+              Proves d'Accés a la Universitat · Catalunya
+            </p>
+            <h1>Encuentra el ejercicio que te toca.</h1>
+          </div>
+          <div class="hero-aside">
+            <p class="lede">
+              Enunciados, soluciones y criterios de corrección de todas las asignaturas,
+              ordenados por año y convocatoria. Cada PDF que subes se publica en cuanto
+              lo confirmas.
+            </p>
+            <div class="stats" hidden={statDocs === 0}>
+              <div class="stat"><b>{statDocs}</b><span>documentos</span></div>
+              <div class="stat"><b>{statSubjects}</b><span>asignaturas</span></div>
+              <div class="stat"><b>{range}</b><span>años</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet">
+          <div class="sheet-head">
+            <p class="mono">El archivo, marcado</p>
+            <p class="mono" aria-live="polite">
+              <span id="markedCount">{statDocs}</span>&nbsp;{statDocs === 1 ? 'casilla marcada' : 'casillas marcadas'}
+            </p>
+          </div>
+
+          {exams.length > 0 ? (
+            <div id="heroGrid">
+              {yearBands.map((band) => (
+                <div class="band" data-year={band.year}>
+                  <div class="band-head">
+                    <span class="band-year">{band.year}</span>
+                    <span class="band-n" data-band-count>{band.items.length}</span>
+                  </div>
+                  <div class="omr">
+                    {band.items.map((exam, i) => (
+                      <button
+                        class="cell-btn"
+                        type="button"
+                        data-id={exam.id}
+                        style={`--i:${Math.min(i, 90)}`}
+                        title={`${subjectLabel(subjects, exam.subject)} · ${exam.year} · ${SESSIONS.find((s) => s.id === exam.session)?.label} · ${typeById.get(exam.type)?.label}`}
+                        aria-label={`${subjectLabel(subjects, exam.subject)}, ${exam.year}, ${typeById.get(exam.type)?.label}`}
+                      ><i></i></button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="sheet-empty">
+              <p class="lede" style="margin-inline:auto">
+                Todavía no hay ningún documento en el archivo.
+              </p>
+            </div>
+          )}
+
+          <div class="sheet-foot">
+            <p class="mono">
+              {exams.length > 0
+                ? 'Cada casilla es un documento. Fíltralo y las bandas se vacían.'
+                : 'Sube el primer PDF desde el panel de administración.'}
+            </p>
+            {exams.length > 0 && (
+              <a class="link-btn mono" href="#archivo">
+                Ver el listado <ArrowIcon />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="archive" id="archivo">
+      <div class="wrap">
+        <div class="results-head" style="margin-bottom: 0.75rem">
+          <h2>Archivo</h2>
+          <p class="count">
+            <span id="resultCount">{statDocs}</span>&nbsp;{statDocs === 1 ? 'documento' : 'documentos'}
+          </p>
+        </div>
+
+        <form class="filters" id="filters" role="search" autocomplete="off">
+          <div class="filter-row">
+            <div class="field grow">
+              <SearchIcon />
+              <label class="visually-hidden" for="q">Buscar asignatura o texto</label>
+              <input
+                class="input"
+                id="q"
+                name="q"
+                type="search"
+                placeholder="Buscar: matemàtiques, filosofia, 2024…"
+              />
+            </div>
+
+            <label class="visually-hidden" for="y">Año</label>
+            <select class="select" id="y" name="y" style="max-width: 8.5rem">
+              <option value="">Todos los años</option>
+              {years.map((y) => (
+                <option value={y}>{y} · {yearCounts.get(y)}</option>
+              ))}
+            </select>
+
+            <label class="visually-hidden" for="phase">Fase</label>
+            <select class="select" id="phase" name="phase" style="max-width: 9.5rem">
+              <option value="">Toda la fase</option>
+              <option value="general">Fase general</option>
+              <option value="especifica">Fase específica</option>
+            </select>
+          </div>
+
+          <div class="filter-row">
+            <div class="seg" role="group" aria-label="Convocatoria" id="segSession">
+              <button type="button" data-ss="" aria-pressed="true">Cualquiera</button>
+              {SESSIONS.map((s) => (
+                <button type="button" data-ss={s.id} aria-pressed="false">{s.label}</button>
+              ))}
+            </div>
+            <div class="seg" role="group" aria-label="Tipo de documento" id="segType">
+              <button type="button" data-t="" aria-pressed="true">Todos</button>
+              {DOC_TYPES.map((t) => (
+                <button type="button" data-t={t.id} aria-pressed="false">{t.short}</button>
+              ))}
+            </div>
+            <button type="button" class="btn-ghost" id="clearFilters" hidden>Limpiar filtros</button>
+          </div>
+
+          <div class="chips" role="group" aria-label="Asignatura" id="chips">
+            <button class="chip" type="button" data-s="" aria-pressed="true">
+              Todas <em>{statDocs}</em>
+            </button>
+            {visibleSubjects.map((s) => (
+              <button
+                class="chip"
+                type="button"
+                data-s={s.code}
+                data-phase={s.phase}
+                aria-pressed="false"
+                title={`${s.name} · ${s.phase === 'general' ? 'Fase general' : 'Fase específica'}`}
+              >
+                {s.short} <em>{subjectCounts.get(s.code) ?? 0}</em>
+              </button>
+            ))}
+          </div>
+        </form>
+
+        <div id="results">
+          {groups.length > 0 ? (
+            groups.map((group) => (
+              <div class="year-group" data-year={group.year} data-ss={group.session}>
+                <div class="year-head">
+                  <h3>{group.year}</h3>
+                  <span class="session">{SESSIONS.find((s) => s.id === group.session)?.long}</span>
+                  <span class="n" data-group-count>{group.items.length}</span>
+                </div>
+                {group.items.map((exam) => {
+                  const type = typeById.get(exam.type)!;
+                  const meta = [
+                    exam.pages ? `${exam.pages} p.` : null,
+                    fmtSize(exam.sizeKB),
+                  ]
+                    .filter(Boolean)
+                    .join('  ·  ');
+                  return (
+                    <div
+                      class="row"
+                      data-id={exam.id}
+                      data-s={exam.subject}
+                      data-y={exam.year}
+                      data-ss={exam.session}
+                      data-t={exam.type}
+                    >
+                      <span class="row-code">{exam.subject}</span>
+                      <div class="row-title">
+                        <a href={pdfUrl(exam.file)} title={exam.notes || undefined}>
+                          {subjectLabel(subjects, exam.subject)}
+                        </a>
+                        <span class="tag" data-t={exam.type} title={type.hint}>
+                          <i aria-hidden="true"></i>{type.short}
+                        </span>
+                        {exam.official === false && (
+                          <span class="unofficial" title="Documento no oficial">no oficial</span>
+                        )}
+                      </div>
+                      {meta && <p class="row-meta">{meta}</p>}
+                      <div class="row-actions">
+                        <a class="dl" href={pdfUrl(exam.file)} download>
+                          <DownloadIcon /><span>PDF</span>
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))
+          ) : (
+            <div class="empty" id="catalogEmpty">
+              <h2>Aún no hay nada en el archivo</h2>
+              <p>
+                Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán
+                aquí listos para descargar, filtrados por asignatura, año y convocatoria.
+              </p>
+              <p class="owner-note mono">
+                Si gestionas el archivo: sube el primero con <code>npm run admin</code>
+                y pulsa «Subir a GitHub».
+              </p>
+            </div>
+          )}
+
+          <div class="empty" id="noMatches" hidden>
+            <h2>Ningún documento coincide</h2>
+            <p id="noMatchesText"></p>
+            <p style="margin-top: 1rem">
+              <button class="btn-ghost" type="button" id="clearFilters2">Quitar todos los filtros</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <h3>Sobre WebPAU</h3>
+          <p>
+            Archivo abierto de exámenes de acceso a la universidad. Cada documento se
+            guarda en este repositorio con su asignatura, año, convocatoria y tipo, para
+            que se pueda encontrar sin saber de dónde viene.
+          </p>
+        </div>
+        <div>
+          <h3>Asignaturas</h3>
+          <ul>
+            {subjects.slice(0, 6).map((s) => (
+              <li><a href={`?s=${s.code}#archivo`}>{s.name}</a></li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3>El proyecto</h3>
+          <ul>
+            <li><a href="https://github.com/ElioXY/WebPAU" target="_blank" rel="noreferrer">Código en GitHub</a></li>
+            <li><a href="https://github.com/ElioXY/WebPAU/issues" target="_blank" rel="noreferrer">Falta un examen</a></li>
+            <li><a href={`${base}/404`}>Página no encontrada</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="foot-note">
+        Los documentos son de propiedad de los organismos que los emiten. WebPAU solo los
+        reúne y los hace accesibles: si eres el titular de un documento y prefieres que
+        no se difunda, abre un issue en el repositorio y lo quitamos.
+      </p>
+    </div>
+  </footer>
+
+  <script type="application/json" id="catalog-data" set:html={JSON.stringify({
+    exams: compact,
+    subjects: visibleSubjects.map((s) => [s.code, s.phase, s.name]),
+    types: DOC_TYPES.map((t) => [t.id, t.short, t.label]),
+    base,
+  })} />
+
+  <script>
+    import '../scripts/archive.ts';
+  </script>
+</Base>

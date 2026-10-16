@@ -1,0 +1,158 @@
+{
+  "subjects": [
+    {
+      "code": "MAT",
+      "name": "Matemàtiques",
+      "short": "Mat.",
+      "phase": "general",
+      "aliases": ["matematicas", "matemàtiques", "maths", "math", "mates"]
+    },
+    {
+      "code": "HIS",
+      "name": "Història",
+      "short": "Història",
+      "phase": "general",
+      "aliases": ["historia", "història", "history"]
+    },
+    {
+      "code": "FIL",
+      "name": "Filosofia",
+      "short": "Fil.",
+      "phase": "general",
+      "aliases": ["filosofia", "philosophy", "filosofía"]
+    },
+    {
+      "code": "CAT",
+      "name": "Llengua catalana i literatura",
+      "short": "Lle. cat.",
+      "phase": "general",
+      "aliases": ["catalan", "catalana", "llengua catalana", "literatura catalana", "cat"]
+    },
+    {
+      "code": "CAS",
+      "name": "Llengua castellana i literatura",
+      "short": "Lle. cast.",
+      "phase": "general",
+      "aliases": ["castellano", "castellana", "literatura castellana", "lengua castellana", "español", "cas"]
+    },
+    {
+      "code": "BIO",
+      "name": "Biologia",
+      "short": "Biol.",
+      "phase": "especifica",
+      "aliases": ["biologia", "biología", "biology"]
+    },
+    {
+      "code": "FIS",
+      "name": "Física",
+      "short": "Fís.",
+      "phase": "especifica",
+      "aliases": ["fisica", "física", "physics"]
+    },
+    {
+      "code": "QUI",
+      "name": "Química",
+      "short": "Quím.",
+      "phase": "especifica",
+      "aliases": ["quimica", "química", "chemistry"]
+    },
+    {
+      "code": "TEC",
+      "name": "Tecnologia Industrial",
+      "short": "Tec. Ind.",
+      "phase": "especifica",
+      "aliases": ["tecnologia industrial", "tecnología industrial", "technology"]
+    },
+    {
+      "code": "ECO",
+      "name": "Economia de l'empresa",
+      "short": "Eco. emp.",
+      "phase": "especifica",
+      "aliases": ["economia", "economía", "empresa", "business", "economia de l'empresa"]
+    },
+    {
+      "code": "GEO",
+      "name": "Geografia",
+      "short": "Geogr.",
+      "phase": "especifica",
+      "aliases": ["geografia", "geografía", "geography"]
+    },
+    {
+      "code": "HMC",
+      "name": "Història del món contemporani",
+      "short": "H. Món cont.",
+      "phase": "especifica",
+      "aliases": ["historia contemporanea", "historia del mundo contemporáneo", "història del món contemporani", "h. mon contemporani"]
+    },
+    {
+      "code": "HDA",
+      "name": "Història de l'art",
+      "short": "H. de l'art",
+      "phase": "especifica",
+      "aliases": ["historia del arte", "història de l'art", "art history"]
+    },
+    {
+      "code": "LCA",
+      "name": "Literatura catalana",
+      "short": "Lit. cat.",
+      "phase": "especifica",
+      "aliases": ["literatura catalana", "llengua i literatura"]
+    },
+    {
+      "code": "LCA2",
+      "name": "Literatura castellana",
+      "short": "Lit. cast.",
+      "phase": "especifica",
+      "aliases": ["literatura castellana", "llengua y literatura"]
+    },
+    {
+      "code": "ESC",
+      "name": "Arts escèniques",
+      "short": "Arts esc.",
+      "phase": "especifica",
+      "aliases": ["arts esceniques", "teatre", "drama", "performing arts"]
+    },
+    {
+      "code": "DIB",
+      "name": "Dibuix artístic",
+      "short": "Dibuix",
+      "phase": "especifica",
+      "aliases": ["dibujo", "dibuix artistic", "dibuix"]
+    },
+    {
+      "code": "DIS",
+      "name": "Disseny",
+      "short": "Disseny",
+      "phase": "especifica",
+      "aliases": ["disseny", "diseño", "design"]
+    },
+    {
+      "code": "LAT",
+      "name": "Llatí",
+      "short": "Llatí",
+      "phase": "especifica",
+      "aliases": ["llati", "latín", "latin", "latino"]
+    },
+    {
+      "code": "GRE",
+      "name": "Grec clàssic",
+      "short": "Grec",
+      "phase": "especifica",
+      "aliases": ["grec", "griego", "greek", "grec classic"]
+    },
+    {
+      "code": "TEC2",
+      "name": "Tecnologies digitals i programació",
+      "short": "Tec. dig.",
+      "phase": "especifica",
+      "aliases": ["informatica", "programacio", "programación", "tecnologies digitals"]
+    },
+    {
+      "code": "ACT",
+      "name": "Activitats artístiques",
+      "short": "Act. art.",
+      "phase": "especifica",
+      "aliases": ["activitats artistiques", "artes Plasticas y Escénicas"]
+    }
+  ]
+}
