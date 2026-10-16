@@ -1,5 +1,22 @@
 {
   "version": 1,
-  "updatedAt": null,
-  "exams": []
+  "updatedAt": "2026-10-16T19:26:27.806Z",
+  "exams": [
+    {
+      "id": "fis-2026-ordinaria-enunciados",
+      "subject": "FIS",
+      "year": 2026,
+      "session": "ordinaria",
+      "type": "enunciados",
+      "pages": 2,
+      "file": "exams/2026/ordinaria/FIS/fis-2026-ordinaria-enunciados.pdf",
+      "originalName": "Examen Física de Andalucía (Ordinaria de 2026) [www.examenesdepau.com].pdf",
+      "sizeKB": 182,
+      "language": "es",
+      "official": true,
+      "notes": "",
+      "addedAt": "2026-10-16T19:26:27.806Z",
+      "updatedAt": "2026-10-16T19:26:27.806Z"
+    }
+  ]
 }
