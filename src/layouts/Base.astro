@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Controls from '../components/Controls.astro';
 
 interface Props {
   title: string;
@@ -13,7 +14,7 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site ?? 'htt
 ---
 
 <!doctype html>
-<html lang="ca">
+<html lang="es" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,28 +22,45 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site ?? 'htt
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
-    <meta name="theme-color" content="#dddEd7" />
-    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ddded7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="WebPAU" />
+    <meta property="og:locale" content="es_ES" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta name="twitter:card" content="summary" />
 
-    <link rel="alternate" hreflang="ca" href={canonicalUrl} />
+    <link rel="alternate" hreflang="es" href={canonicalUrl} />
     <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme =
+            saved === 'light' || saved === 'dark' ? saved : prefersDark ? 'dark' : 'light';
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
 
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
       name: title,
       description,
-      inLanguage: 'ca',
+      inLanguage: 'es',
     })} />
   </head>
   <body>
     <slot />
+    <Controls />
   </body>
 </html>

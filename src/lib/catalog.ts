@@ -17,26 +17,26 @@ export type DocType = 'enunciats' | 'resolucions' | 'criteris' | 'plantilla';
 export const DOC_TYPES: { id: DocType; label: string; short: string; hint: string }[] = [
   {
     id: 'enunciats',
-    label: 'Enunciats',
-    short: 'Enunciat',
+    label: 'Enunciados',
+    short: 'Enunciado',
     hint: 'El examen que te dan en el aula',
   },
   {
     id: 'resolucions',
-    label: 'Resolucions',
-    short: 'Solucions',
+    label: 'Resoluciones',
+    short: 'Soluciones',
     hint: 'Las soluciones oficiales',
   },
   {
     id: 'criteris',
-    label: 'Criteris de correcció',
-    short: 'Criteris',
+    label: 'Criterios de corrección',
+    short: 'Criterios',
     hint: 'Cómo se puntúa cada pregunta',
   },
   {
     id: 'plantilla',
-    label: 'Full de respostes',
-    short: 'Full',
+    label: 'Hoja de respuestas',
+    short: 'Hoja',
     hint: 'La plantilla OMR en blanco',
   },
 ];
@@ -44,8 +44,8 @@ export const DOC_TYPES: { id: DocType; label: string; short: string; hint: strin
 export type Session = 'juny' | 'setembre';
 
 export const SESSIONS: { id: Session; label: string; long: string }[] = [
-  { id: 'juny', label: 'Juny', long: 'Convocatòria de juny' },
-  { id: 'setembre', label: 'Setembre', long: 'Convocatòria de setembre' },
+  { id: 'juny', label: 'Junio', long: 'Convocatoria de junio' },
+  { id: 'setembre', label: 'Septiembre', long: 'Convocatoria de septiembre' },
 ];
 
 export interface Exam {
@@ -156,7 +156,7 @@ export function examTitle(
   typeLabel: string
 ): string {
   const subj = subjectLabel(subjects, exam.subject);
-  const session = exam.session === 'juny' ? 'juny' : 'setembre';
+  const session = exam.session === 'juny' ? 'junio' : 'septiembre';
   return `${subj} · ${exam.year} · ${session} · ${typeLabel}`;
 }
 

@@ -114,6 +114,15 @@ El estado vive en la URL, así que cualquier vista se puede compartir o enlazar:
 
 Ejemplo: <https://elioxy.github.io/WebPAU/?s=FIL&y=2024&t=resolucions>
 
+### Interfaz
+
+- **Tema claro / oscuro.** Se elige automáticamente según el sistema y puedes
+  cambiarlo con el botón flotante; la preferencia se guarda en el navegador.
+- **Atajo `/`.** Enfoca el buscador al instante. `Esc` lo desenfoca.
+- **Volver arriba.** Aparece un botón flotante al bajar por la página.
+- Cuando el archivo está vacío, la web oculta los filtros y muestra un estado
+  de bienvenida con acceso al repositorio.
+
 ## Notas prácticas
 
 - **Tamaño del repositorio.** Cada PDF aumenta el tamaño del repo para siempre

@@ -2,42 +2,42 @@
   "subjects": [
     {
       "code": "MAT",
-      "name": "Matemàtiques",
+      "name": "Matemáticas",
       "short": "Mat.",
       "phase": "general",
-      "aliases": ["matematicas", "matemàtiques", "maths", "math", "mates"]
+      "aliases": ["matematicas", "matemáticas", "matematiques", "matemàtiques", "maths", "math", "mates"]
     },
     {
       "code": "HIS",
-      "name": "Història",
-      "short": "Història",
+      "name": "Historia",
+      "short": "Historia",
       "phase": "general",
       "aliases": ["historia", "història", "history"]
     },
     {
       "code": "FIL",
-      "name": "Filosofia",
+      "name": "Filosofía",
       "short": "Fil.",
       "phase": "general",
-      "aliases": ["filosofia", "philosophy", "filosofía"]
+      "aliases": ["filosofia", "filosofía", "philosophy"]
     },
     {
       "code": "CAT",
-      "name": "Llengua catalana i literatura",
-      "short": "Lle. cat.",
+      "name": "Lengua catalana y literatura",
+      "short": "Len. cat.",
       "phase": "general",
-      "aliases": ["catalan", "catalana", "llengua catalana", "literatura catalana", "cat"]
+      "aliases": ["catalan", "catalana", "llengua catalana", "literatura catalana", "lengua catalana", "cat"]
     },
     {
       "code": "CAS",
-      "name": "Llengua castellana i literatura",
-      "short": "Lle. cast.",
+      "name": "Lengua castellana y literatura",
+      "short": "Len. cast.",
       "phase": "general",
       "aliases": ["castellano", "castellana", "literatura castellana", "lengua castellana", "español", "cas"]
     },
     {
       "code": "BIO",
-      "name": "Biologia",
+      "name": "Biología",
       "short": "Biol.",
       "phase": "especifica",
       "aliases": ["biologia", "biología", "biology"]
@@ -58,36 +58,36 @@
     },
     {
       "code": "TEC",
-      "name": "Tecnologia Industrial",
+      "name": "Tecnología Industrial",
       "short": "Tec. Ind.",
       "phase": "especifica",
       "aliases": ["tecnologia industrial", "tecnología industrial", "technology"]
     },
     {
       "code": "ECO",
-      "name": "Economia de l'empresa",
+      "name": "Economía de la empresa",
       "short": "Eco. emp.",
       "phase": "especifica",
       "aliases": ["economia", "economía", "empresa", "business", "economia de l'empresa"]
     },
     {
       "code": "GEO",
-      "name": "Geografia",
+      "name": "Geografía",
       "short": "Geogr.",
       "phase": "especifica",
       "aliases": ["geografia", "geografía", "geography"]
     },
     {
       "code": "HMC",
-      "name": "Història del món contemporani",
-      "short": "H. Món cont.",
+      "name": "Historia del mundo contemporáneo",
+      "short": "H. Mundo cont.",
       "phase": "especifica",
       "aliases": ["historia contemporanea", "historia del mundo contemporáneo", "història del món contemporani", "h. mon contemporani"]
     },
     {
       "code": "HDA",
-      "name": "Història de l'art",
-      "short": "H. de l'art",
+      "name": "Historia del arte",
+      "short": "H. del arte",
       "phase": "especifica",
       "aliases": ["historia del arte", "història de l'art", "art history"]
     },
@@ -107,52 +107,52 @@
     },
     {
       "code": "ESC",
-      "name": "Arts escèniques",
-      "short": "Arts esc.",
+      "name": "Artes escénicas",
+      "short": "Artes esc.",
       "phase": "especifica",
-      "aliases": ["arts esceniques", "teatre", "drama", "performing arts"]
+      "aliases": ["arts esceniques", "artes escénicas", "teatre", "drama", "performing arts"]
     },
     {
       "code": "DIB",
-      "name": "Dibuix artístic",
-      "short": "Dibuix",
+      "name": "Dibujo artístico",
+      "short": "Dibujo",
       "phase": "especifica",
-      "aliases": ["dibujo", "dibuix artistic", "dibuix"]
+      "aliases": ["dibujo", "dibuix artistic", "dibuix", "dibujo artístico"]
     },
     {
       "code": "DIS",
-      "name": "Disseny",
-      "short": "Disseny",
+      "name": "Diseño",
+      "short": "Diseño",
       "phase": "especifica",
       "aliases": ["disseny", "diseño", "design"]
     },
     {
       "code": "LAT",
-      "name": "Llatí",
-      "short": "Llatí",
+      "name": "Latín",
+      "short": "Latín",
       "phase": "especifica",
       "aliases": ["llati", "latín", "latin", "latino"]
     },
     {
       "code": "GRE",
-      "name": "Grec clàssic",
-      "short": "Grec",
+      "name": "Griego clásico",
+      "short": "Griego",
       "phase": "especifica",
-      "aliases": ["grec", "griego", "greek", "grec classic"]
+      "aliases": ["grec", "griego", "greek", "grec classic", "griego clásico"]
     },
     {
       "code": "TEC2",
-      "name": "Tecnologies digitals i programació",
+      "name": "Tecnologías digitales y programación",
       "short": "Tec. dig.",
       "phase": "especifica",
-      "aliases": ["informatica", "programacio", "programación", "tecnologies digitals"]
+      "aliases": ["informatica", "programacio", "programación", "tecnologies digitals", "tecnologías digitales"]
     },
     {
       "code": "ACT",
-      "name": "Activitats artístiques",
+      "name": "Actividades artísticas",
       "short": "Act. art.",
       "phase": "especifica",
-      "aliases": ["activitats artistiques", "artes Plasticas y Escénicas"]
+      "aliases": ["activitats artistiques", "actividades artísticas", "artes plasticas y escenicas"]
     }
   ]
 }

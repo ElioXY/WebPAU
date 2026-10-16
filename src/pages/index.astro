@@ -28,7 +28,7 @@ const range = years.length
 const statDocs = exams.length;
 const statSubjects = new Set(exams.map((e) => e.subject)).size;
 
-/* agrupació per any + convocatòria, ja ordenat pel catàleg */
+/* agrupación por año + convocatoria, ya ordenado por el catálogo */
 interface Group {
   year: number;
   session: string;
@@ -41,7 +41,7 @@ for (const exam of exams) {
   else groups.push({ year: exam.year, session: exam.session, items: [exam] });
 }
 
-/* dades compactes per al client: [id, subjectIdx, year, sessionIdx, typeIdx] */
+/* datos compactos para el cliente: [id, subjectIdx, year, sessionIdx, typeIdx] */
 const compact = exams.map((e) => [
   e.id,
   subjectOrder.indexOf(e.subject),
@@ -66,7 +66,7 @@ const generalCodes = new Set(subjects.filter((s) => s.phase === 'general').map((
 const usedCodes = new Set(exams.map((e) => e.subject));
 const visibleSubjects = subjects.filter((s) => usedCodes.has(s.code) || generalCodes.has(s.code));
 
-/* bandes del hero: una per any, del més nou al més antic */
+/* bandas del hero: una por año, del más nuevo al más antiguo */
 const yearBands = years.map((year) => ({
   year,
   items: exams.filter((e) => e.year === year),
@@ -101,9 +101,9 @@ const yearBands = years.map((year) => ({
         <div class="hero-top">
           <div>
             <p class="mono" style="color: var(--ink-3)">
-              Proves d'Accés a la Universitat · Catalunya
+              Pruebas de Acceso a la Universidad · Cataluña
             </p>
-            <h1>Encuentra el ejercicio que te toca.</h1>
+            <h1>Encuentra el ejercicio que <em>te toca</em>.</h1>
           </div>
           <div class="hero-aside">
             <p class="lede">
@@ -152,8 +152,14 @@ const yearBands = years.map((year) => ({
             </div>
           ) : (
             <div class="sheet-empty">
+              <div class="omr omr-deco" aria-hidden="true">
+                {Array.from({ length: 40 }, (_, i) => (
+                  <i data-on={i % 3 === 1 ? '1' : '0'} />
+                ))}
+              </div>
               <p class="lede" style="margin-inline:auto">
-                Todavía no hay ningún documento en el archivo.
+                El archivo está esperando su primer examen. En cuanto se suba un PDF,
+                aparecerá aquí como una casilla marcada más.
               </p>
             </div>
           )}
@@ -183,6 +189,7 @@ const yearBands = years.map((year) => ({
           </p>
         </div>
 
+        {exams.length > 0 && (
         <form class="filters" id="filters" role="search" autocomplete="off">
           <div class="filter-row">
             <div class="field grow">
@@ -193,8 +200,9 @@ const yearBands = years.map((year) => ({
                 id="q"
                 name="q"
                 type="search"
-                placeholder="Buscar: matemàtiques, filosofia, 2024…"
+                placeholder="Buscar: matemáticas, filosofía, 2024…"
               />
+              <kbd class="kbd hide-s" aria-hidden="true">/</kbd>
             </div>
 
             <label class="visually-hidden" for="y">Año</label>
@@ -247,6 +255,7 @@ const yearBands = years.map((year) => ({
             ))}
           </div>
         </form>
+        )}
 
         <div id="results">
           {groups.length > 0 ? (
@@ -298,11 +307,26 @@ const yearBands = years.map((year) => ({
               </div>
             ))
           ) : (
-            <div class="empty" id="catalogEmpty">
+            <div class="empty empty-state" id="catalogEmpty">
+              <div class="omr omr-deco" aria-hidden="true">
+                {Array.from({ length: 27 }, (_, i) => (
+                  <i data-on={i % 4 === 2 ? '1' : '0'} />
+                ))}
+              </div>
               <h2>Aún no hay nada en el archivo</h2>
               <p>
                 Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán
                 aquí listos para descargar, filtrados por asignatura, año y convocatoria.
+              </p>
+              <p class="empty-cta">
+                <a
+                  class="dl"
+                  href="https://github.com/ElioXY/WebPAU"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Ver el proyecto en GitHub
+                </a>
               </p>
               <p class="owner-note mono">
                 Si gestionas el archivo: sube el primero con <code>npm run admin</code>

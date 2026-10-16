@@ -1,7 +1,7 @@
 /* =========================================================================
-   Filtratge del fitxer — sense framework, sense estat duplicat.
-   L'estat viu a l'URL (?q=&y=&ss=&t=&s=&p=) perquè es pugui compartir.
-   Sense JavaScript el servidor ja renderitza tot el llistat complet.
+   Filtrado del archivo — sin framework, sin estado duplicado.
+   El estado vive en la URL (?q=&y=&ss=&t=&s=&p=) para poder compartirlo.
+   Sin JavaScript el servidor ya renderiza todo el listado completo.
    ========================================================================= */
 
 type Row = [id: string, subjectIdx: number, year: number, sessionIdx: number, typeIdx: number];
@@ -14,12 +14,12 @@ interface Payload {
 
 const SESSIONS = ['juny', 'setembre'];
 
-/* paraules clau per buscar sense conèixer el vocabulari exacte */
+/* palabras clave para buscar sin conocer el vocabulario exacto */
 const TYPE_KEYWORDS: Record<string, string> = {
-  enunciats: 'enunciat examen',
-  resolucions: 'solucions soluciones',
-  criteris: 'criteris correccio',
-  plantilla: 'plantilla full omr',
+  enunciats: 'enunciado examen enunciat',
+  resolucions: 'soluciones resoluciones solucions',
+  criteris: 'criterios correccion criteris correcció',
+  plantilla: 'plantilla hoja respuestas full respostes omr',
 };
 
 interface State {
@@ -138,7 +138,7 @@ const state = readState();
 let tokens: string[] = [];
 
 /** `ignore` permet fer el recompte facetat: què hi hauria si es canviés
- *  només aquesta dimensió (com fan els filtres de la majoria de botigs). */
+ *  solo esta dimensión (como hacen los filtros de casi todas las tiendas). */
 const matches = (e: Exam, ignore?: 's' | 't' | 'y'): boolean => {
   if (ignore !== 'y' && state.y && String(e.year) !== state.y) return false;
   if (state.ss && e.session !== state.ss) return false;
@@ -204,7 +204,7 @@ function apply(): void {
     group.count.textContent = shown === 1 ? '1 documento' : `${shown} documentos`;
   }
 
-  /* el xip «Todas» mostra el total ignorant el filtre d'assignatura */
+  /* el chip «Todas» muestra el total ignorando el filtro de asignatura */
   const allChip = chips.find((c) => (c.dataset.s ?? '') === '');
   if (allChip) {
     const em = allChip.querySelector('em');
@@ -221,7 +221,7 @@ function apply(): void {
     if (em) em.textContent = String(n);
   }
 
-  /* els segments de tipus també mostren què hi hauria */
+  /* los segmentos de tipo también muestran qué habría */
   for (const btn of typeBtns) {
     const t = btn.dataset.t ?? '';
     btn.setAttribute('aria-pressed', String(state.t === t));
@@ -251,7 +251,7 @@ function describe(): string {
   if (state.q) bits.push(`«${state.q}»`);
   if (state.s) bits.push(names[codes.indexOf(state.s)] ?? state.s);
   if (state.y) bits.push(state.y);
-  if (state.ss) bits.push(state.ss === 'juny' ? 'convocatoria de juny' : 'convocatoria de setembre');
+  if (state.ss) bits.push(state.ss === 'juny' ? 'convocatoria de junio' : 'convocatoria de septiembre');
   if (state.t) bits.push(TYPE_LABEL.get(state.t) ?? state.t);
   if (state.p) bits.push(state.p === 'general' ? 'fase general' : 'fase específica');
   return bits.join(' · ') || 'esos filtros';
@@ -312,7 +312,23 @@ clearBtn?.addEventListener('click', resetAll);
 clearBtn2?.addEventListener('click', resetAll);
 form?.addEventListener('submit', (event) => event.preventDefault());
 
-/* clic a un quadrat del hero → fila corresponent del llistat */
+/* atajos: «/» enfoca la búsqueda, «Esc» la desenfoca */
+document.addEventListener('keydown', (event) => {
+  const target = event.target as HTMLElement | null;
+  const typing =
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target?.isContentEditable;
+  if (event.key === '/' && !typing) {
+    event.preventDefault();
+    inputQ?.focus();
+    inputQ?.select();
+  }
+  if (event.key === 'Escape' && document.activeElement === inputQ) inputQ?.blur();
+});
+
+/* clic en una casilla del hero → fila correspondiente del listado */
 
 for (const [id, cell] of cells) {
   cell.addEventListener('click', () => {

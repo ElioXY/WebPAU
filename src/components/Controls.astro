@@ -1,0 +1,67 @@
+---
+import SunIcon from './icons/Sun.astro';
+import MoonIcon from './icons/Moon.astro';
+import ArrowUpIcon from './icons/ArrowUp.astro';
+---
+
+<div class="controls" aria-label="Controles de la página">
+  <button class="ctrl" type="button" id="themeToggle" aria-pressed="false">
+    <span class="ctrl-ico" data-theme-ico="light"><MoonIcon /></span>
+    <span class="ctrl-ico" data-theme-ico="dark"><SunIcon /></span>
+    <span class="visually-hidden" id="themeToggleLabel">Cambiar a modo oscuro</span>
+  </button>
+  <button class="ctrl" type="button" id="toTop" hidden>
+    <ArrowUpIcon />
+    <span class="visually-hidden">Volver arriba</span>
+  </button>
+</div>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const label = document.getElementById('themeToggleLabel');
+  const toTop = document.getElementById('toTop');
+
+  const apply = (theme: 'light' | 'dark') => {
+    root.dataset.theme = theme;
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {
+      /* almacenamiento no disponible */
+    }
+    toggle?.setAttribute('aria-pressed', String(theme === 'dark'));
+    if (label) label.textContent = theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+  };
+
+  toggle?.addEventListener('click', () => {
+    apply(root.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+
+  /* si el usuario no ha elegido, seguimos el sistema en vivo */
+  const mql = window.matchMedia('(prefers-color-scheme: dark)');
+  mql.addEventListener('change', (event) => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem('theme');
+    } catch {
+      /* nada */
+    }
+    if (!saved) apply(event.matches ? 'dark' : 'light');
+  });
+
+  const onScroll = () => {
+    if (toTop) toTop.hidden = window.scrollY < 480;
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  toTop?.addEventListener('click', () =>
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  );
+
+  /* estado inicial del botón de tema */
+  toggle?.setAttribute('aria-pressed', String(root.dataset.theme === 'dark'));
+  if (label) {
+    label.textContent =
+      root.dataset.theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+  }
+</script>
