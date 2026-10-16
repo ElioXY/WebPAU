@@ -1,0 +1,255 @@
+---
+/**
+ * Panel de administración, servido como una página más del sitio.
+ *
+ * No necesita servidor: habla directamente con la API de GitHub y publica
+ * los PDFs en el repositorio, con lo que Pages reconstruye la web pública.
+ */
+import '../styles/admin.css';
+import { DOC_TYPES, SESSIONS } from '../lib/catalog';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+/* El repositorio se deduce del sitio publicado; se puede forzar por entorno
+   (PUBLIC_GH_OWNER / PUBLIC_GH_REPO) para dominios propios o bifurcaciones. */
+const site = Astro.site ?? new URL('https://github.io');
+const hostOwner = site.hostname.split('.')[0];
+const baseRepo = base.replace(/^\//, '');
+const owner = import.meta.env.PUBLIC_GH_OWNER ?? hostOwner;
+const repo = import.meta.env.PUBLIC_GH_REPO ?? (baseRepo || hostOwner);
+
+/** Tope de subida: la API de blobs de GitHub admite más, pero el navegador
+ *  tiene que codificar el PDF entero en base64 en memoria. */
+const maxMb = 50;
+
+const config = {
+  owner,
+  repo,
+  base,
+  maxMb,
+  types: DOC_TYPES.map((t) => [t.id, t.short, t.label, t.hint]),
+  sessions: SESSIONS.map((s) => [s.id, s.label, s.long]),
+};
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>WebPAU · Panel de administración</title>
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+  </head>
+  <body>
+    <!-- ------------------------------------------------------------- acceso -->
+    <div class="gate" id="gate" hidden>
+      <form class="gate-card" id="gateForm">
+        <div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <h1>WebPAU</h1>
+        <p class="gate-sub">Panel de administración del archivo</p>
+
+        <label for="tokenInput">Token de GitHub</label>
+        <input
+          id="tokenInput"
+          class="input"
+          type="password"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="github_pat_…"
+        />
+        <p class="gate-error" id="gateError" role="alert" hidden></p>
+        <button class="btn btn-primary btn-block" type="submit" id="gateSubmit">Entrar</button>
+
+        <div class="gate-warn">
+          <b>El token se guarda en este navegador.</b> Crea uno <i>fine-grained</i> limitado a
+          <code>{owner}/{repo}</code>, con estos ajustes:
+          <ol>
+            <li>Repository access → <b>Only select repositories</b> → <code>{repo}</code></li>
+            <li>Permissions → <b>Contents: Read and write</b></li>
+            <li>Expiration → la que prefieras</li>
+          </ol>
+          Con otro ámbito, cualquiera que use este navegador podría tocar tus repositorios.
+        </div>
+
+        <p class="gate-hint">
+          ¿Sin token? <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">Créalo en GitHub</a>
+          y pégalo aquí. Se guarda solo en este dispositivo.
+        </p>
+      </form>
+    </div>
+
+    <!-- ---------------------------------------------------------- aplicación -->
+    <div class="app" id="app" hidden>
+      <header class="bar">
+        <div class="bar-brand">
+          <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <strong>WebPAU</strong>
+          <span class="bar-sub">administración</span>
+        </div>
+
+        <div class="bar-state" id="barState" data-state="idle">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="barStateText">Conectando…</span>
+        </div>
+
+        <div class="bar-actions">
+          <a class="btn" href={`${base}/`} target="_blank" rel="noreferrer">Ver la web</a>
+          <button class="btn" id="btnSync" type="button">Sincronizar</button>
+          <button class="btn" id="btnLogout" type="button">Salir</button>
+        </div>
+      </header>
+
+      <main class="split">
+        <!-- ------------------------------------------------------- subida -->
+        <section class="pane pane-upload" aria-labelledby="uploadTitle">
+          <h2 id="uploadTitle" class="pane-title">Subir documentos</h2>
+
+          <form id="uploadForm">
+            <div class="drop" id="drop" tabindex="0" role="button" aria-describedby="dropHint">
+              <input id="files" type="file" accept="application/pdf,.pdf" multiple hidden />
+              <div class="drop-idle" id="dropIdle">
+                <div class="drop-squares" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <p><strong>Arrastra PDFs aquí</strong></p>
+                <p class="drop-hint" id="dropHint">o toca para elegir varios a la vez</p>
+              </div>
+            </div>
+            <ul class="drop-list" id="fileList" hidden></ul>
+            <p class="drop-foot" id="dropFoot" hidden>
+              <span id="dropTotal"></span>
+              <button class="btn btn-sm" type="button" id="btnClearFiles">Vaciar</button>
+            </p>
+
+            <div class="fields">
+              <div class="field">
+                <label for="subject">Asignatura</label>
+                <select class="input" id="subject" required></select>
+              </div>
+
+              <div class="field">
+                <label for="year">Año</label>
+                <input class="input" id="year" type="number" min="1980" max="2100" required />
+              </div>
+
+              <div class="field">
+                <span class="label">Convocatoria</span>
+                <div class="seg" id="sessionSeg" role="radiogroup" aria-label="Convocatoria"></div>
+              </div>
+
+              <div class="field">
+                <span class="label">Tipo de documento</span>
+                <div class="types" id="typeGroup" role="radiogroup" aria-label="Tipo de documento"></div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="language">Idioma</label>
+                  <select class="input" id="language">
+                    <option value="es">Castellano</option>
+                    <option value="">Indiferente</option>
+                  </select>
+                </div>
+                <div class="field field-check">
+                  <label class="check">
+                    <input type="checkbox" id="official" checked />
+                    <span>Documento oficial</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="notes">Notas <span class="opt">opcional</span></label>
+                <textarea
+                  class="input"
+                  id="notes"
+                  rows="2"
+                  placeholder="fuente, avisos, variantes…"></textarea>
+              </div>
+
+              <p class="form-error" id="uploadError" role="alert" hidden></p>
+
+              <button class="btn btn-primary btn-block" id="btnUpload" type="submit">
+                Publicar <span id="uploadCount"></span>
+              </button>
+
+              <div class="progress" id="progress" hidden data-state="busy">
+                <div class="progress-head">
+                  <span id="progressLabel">Preparando…</span>
+                  <span class="pc" id="progressPct">0 %</span>
+                </div>
+                <div class="progress-track"><span class="progress-fill" id="progressFill"></span></div>
+                <ul class="progress-log" id="progressLog"></ul>
+              </div>
+
+              <p class="hint">
+                Al publicar, los PDFs y el catálogo se guardan en el repositorio en un solo
+                commit. GitHub Pages tarda alrededor de un minuto en reconstruir la web.
+              </p>
+            </div>
+          </form>
+        </section>
+
+        <!-- ------------------------------------------------------ listado -->
+        <section class="pane pane-list" aria-labelledby="listTitle">
+          <div class="pane-head">
+            <h2 id="listTitle" class="pane-title">
+              Documentos <span class="pill" id="totalPill">0</span>
+            </h2>
+            <div class="list-tools">
+              <input class="input input-search" id="search" type="search" placeholder="Buscar…" />
+              <select class="input" id="filterSession" aria-label="Filtrar por convocatoria"></select>
+              <select class="input" id="filterType" aria-label="Filtrar por tipo"></select>
+              <label class="check check-inline">
+                <input type="checkbox" id="onlyMissing" />
+                <span>Solo sin PDF</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table" id="table">
+              <thead>
+                <tr>
+                  <th class="c-code">Cód.</th>
+                  <th class="c-name">Asignatura</th>
+                  <th class="c-year">Año</th>
+                  <th class="c-ses">Conv.</th>
+                  <th>Tipo</th>
+                  <th class="c-meta">Archivo</th>
+                  <th class="c-act"><span class="visually-hidden">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+            <p class="table-empty" id="tableEmpty" hidden>
+              <strong>Aún no hay documentos.</strong>
+              Sube un PDF desde el formulario para empezar el archivo.
+            </p>
+            <p class="table-empty" id="tableFiltered" hidden>
+              <strong>Ningún documento coincide.</strong>
+              Prueba a quitar filtros o a buscar otra cosa.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+    <dialog class="dlg" id="confirmDlg">
+      <h3 id="confirmTitle">Confirmar</h3>
+      <p id="confirmText"></p>
+      <div class="dlg-actions">
+        <button class="btn" id="confirmNo" type="button">Cancelar</button>
+        <button class="btn btn-danger" id="confirmYes" type="button">Eliminar</button>
+      </div>
+    </dialog>
+
+    <script type="application/json" id="admin-config" set:html={JSON.stringify(config)} />
+    <script>
+      import '../scripts/admin.ts';
+    </script>
+  </body>
+</html>

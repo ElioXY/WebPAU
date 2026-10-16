@@ -1,11 +1,17 @@
 /* =========================================================================
-   WebPAU · Panel de administración
+   WebPAU — Panel de administración
    Mismo lenguaje visual que el sitio público (papel, tinta, cuadrados),
    pero más denso: esto es una herramienta, no una landing.
    ========================================================================= */
 
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
 :root {
-  --stock: #dddEd7;
+  color-scheme: light;
+
+  --stock: #ddded7;
   --sheet: #fbfbf9;
   --sheet-2: #f2f2ed;
   --ink: #15181d;
@@ -18,8 +24,11 @@
   --stamp: #b0372a;
   --stamp-wash: #f7e8e5;
   --ok: #2f6b4f;
-  --sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-    Roboto, sans-serif;
+  --ok-wash: #e4efe8;
+  --warn: #8a6212;
+  --warn-wash: #f7eed9;
+
+  --sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Consolas, monospace;
   --bar-h: 52px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -96,11 +105,12 @@ textarea {
   place-items: center;
   padding: 1.5rem;
   background: var(--stock);
+  overflow-y: auto;
   z-index: 100;
 }
 
 .gate-card {
-  width: min(400px, 100%);
+  width: min(460px, 100%);
   background: var(--sheet);
   border: 1px solid var(--rule);
   padding: 1.75rem;
@@ -143,7 +153,7 @@ textarea {
 .hint {
   font-size: 0.75rem;
   color: var(--ink-3);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .hint code,
@@ -155,17 +165,40 @@ textarea {
   padding: 0.05rem 0.25rem;
 }
 
+/* Aviso de seguridad: el token vive en este navegador. */
+.gate-warn {
+  margin-top: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+  background: var(--warn-wash);
+  padding: 0.6rem 0.7rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--warn) 80%, var(--ink));
+}
+
+.gate-warn ol {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.gate-warn b {
+  font-weight: 600;
+}
+
 /* ------------------------------------------------------------------ bar */
 
 .bar {
   position: sticky;
   top: 0;
   z-index: 40;
-  height: var(--bar-h);
+  min-height: var(--bar-h);
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding-inline: 1rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 1rem;
   background: color-mix(in srgb, var(--stock) 90%, transparent);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--rule);
@@ -191,19 +224,19 @@ textarea {
   border-left: 1px solid var(--rule);
 }
 
-.bar-git {
+/* Estado de sincronización: sustituye al antiguo «git status». */
+.bar-state {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  min-width: 0;
   font-family: var(--mono);
   font-size: 0.6875rem;
   color: var(--ink-2);
-  min-width: 0;
-  overflow: hidden;
 }
 
-.bar-git .dot {
+.bar-state .dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -211,8 +244,29 @@ textarea {
   flex: none;
 }
 
-.bar-git[data-dirty='true'] .dot {
+.bar-state[data-state='busy'] .dot {
+  background: var(--seal);
+  animation: pulse 1s var(--ease) infinite alternate;
+}
+
+.bar-state[data-state='stale'] .dot {
   background: var(--stamp);
+}
+
+.bar-state[data-state='warn'] .dot {
+  background: var(--warn);
+}
+
+.bar-state span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.25;
+  }
 }
 
 .bar-actions {
@@ -235,6 +289,7 @@ textarea {
   color: var(--ink);
   cursor: pointer;
   white-space: nowrap;
+  text-decoration: none;
   transition: background-color 0.14s var(--ease), border-color 0.14s var(--ease),
     color 0.14s var(--ease), opacity 0.14s var(--ease);
 }
@@ -293,9 +348,11 @@ textarea {
   font-weight: 500;
 }
 
+/* Girando: usado en botones cuyo texto desaparece mientras trabajan. */
 .btn.is-busy {
   position: relative;
   color: transparent;
+  pointer-events: none;
 }
 
 .btn.is-busy::after {
@@ -303,11 +360,15 @@ textarea {
   position: absolute;
   width: 12px;
   height: 12px;
-  border: 2px solid currentColor;
+  border: 2px solid var(--sheet);
   border-top-color: transparent;
   border-radius: 50%;
-  color: var(--sheet);
   animation: spin 0.7s linear infinite;
+}
+
+.btn-danger.is-busy::after {
+  border-color: #fff;
+  border-top-color: transparent;
 }
 
 @keyframes spin {
@@ -320,7 +381,7 @@ textarea {
 
 .split {
   display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
+  grid-template-columns: 360px minmax(0, 1fr);
   gap: 1rem;
   padding: 1rem;
   align-items: start;
@@ -401,11 +462,14 @@ textarea {
   background: var(--seal-wash);
 }
 
-.drop.has-files {
-  border-style: solid;
-  text-align: left;
-  cursor: default;
-  padding: 0.6rem;
+/* Con archivos ya elegidos la zona se encoge: la lista manda. */
+.drop.is-compact {
+  padding: 0.7rem 1rem;
+}
+
+.drop.is-compact .drop-squares,
+.drop.is-compact .drop-hint {
+  display: none;
 }
 
 .drop-squares {
@@ -441,9 +505,10 @@ textarea {
 .drop-list {
   list-style: none;
   padding: 0;
+  margin-top: 0.5rem;
   display: grid;
   gap: 2px;
-  max-height: 190px;
+  max-height: 210px;
   overflow-y: auto;
 }
 
@@ -472,6 +537,11 @@ textarea {
   flex: none;
 }
 
+.drop-list li.is-bad b {
+  color: var(--stamp);
+  text-decoration: line-through;
+}
+
 .drop-list li button {
   border: 0;
   background: none;
@@ -485,6 +555,21 @@ textarea {
 
 .drop-list li button:hover {
   color: var(--stamp);
+}
+
+.drop-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  padding: 0 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--ink-3);
+}
+
+.drop-foot .grow {
+  margin-left: auto;
 }
 
 /* --------------------------------------------------------------- fields */
@@ -560,7 +645,8 @@ textarea.input {
 }
 
 .seg {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   border: 1px solid var(--rule);
   overflow: hidden;
 }
@@ -637,19 +723,89 @@ textarea.input {
   border-color: var(--ink);
 }
 
+/* ------------------------------------------------------------- progreso */
+
+.progress {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--rule);
+  background: var(--sheet-2);
+}
+
+.progress-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+
+.progress-head .pc {
+  margin-left: auto;
+  color: var(--ink-3);
+}
+
+.progress-track {
+  height: 6px;
+  background: var(--rule-2);
+  overflow: hidden;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--ink);
+  transition: width 0.18s var(--ease);
+}
+
+.progress[data-state='ok'] .progress-fill {
+  background: var(--ok);
+}
+
+.progress[data-state='error'] .progress-fill {
+  background: var(--stamp);
+}
+
+.progress-log {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.1rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  max-height: 84px;
+  overflow-y: auto;
+}
+
 /* --------------------------------------------------------------- tabla */
 
 .list-tools {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* En la barra de filtros los campos se ajustan a su contenido: con el
+   `width: 100%` general cada uno se comía una línea entera. */
+.list-tools .input {
+  width: auto;
 }
 
 .input-search {
   width: 200px;
   padding: 0.35rem 0.5rem;
   font-size: 0.75rem;
+}
+
+input[type='number'].input {
+  max-width: 10rem;
 }
 
 .check-inline {
@@ -659,7 +815,7 @@ textarea.input {
 }
 
 .table-wrap {
-  max-height: calc(100dvh - var(--bar-h) - 5rem);
+  max-height: calc(100dvh - var(--bar-h) - 5.5rem);
   overflow: auto;
 }
 
@@ -695,10 +851,6 @@ textarea.input {
   background: var(--sheet-2);
 }
 
-.table tr.is-editing {
-  background: var(--seal-wash);
-}
-
 .c-code,
 .c-year,
 .c-ses,
@@ -707,6 +859,16 @@ textarea.input {
   font-size: 0.6875rem;
   color: var(--ink-3);
   white-space: nowrap;
+}
+
+.c-name {
+  min-width: 220px;
+}
+
+/* Publicación en curso: las acciones de la tabla quedan inertes. */
+.pane-list[data-busy='true'] .row-actions {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .c-act {
@@ -756,6 +918,15 @@ textarea.input {
   margin-left: 0.4rem;
 }
 
+.row-notes {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 42ch;
+}
+
 .type-tag {
   display: inline-flex;
   align-items: center;
@@ -784,10 +955,89 @@ textarea.input {
 }
 
 .table-empty {
-  padding: 2.5rem 1rem;
+  padding: 3rem 1rem;
   text-align: center;
   color: var(--ink-3);
   font-size: 0.8125rem;
+}
+
+.table-empty strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  margin-bottom: 0.3rem;
+}
+
+/*
+ * En móvil una tabla de siete columnas es inservible: cada fila pasa a ser
+ * una ficha con sus etiquetas delante (vienen de `data-label`).
+ */
+@media (max-width: 720px) {
+  .table-wrap {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: auto;
+  }
+
+  .table tr {
+    border: 1px solid var(--rule);
+    background: var(--sheet);
+    margin: 0.6rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .table tbody tr:hover {
+    background: var(--sheet);
+  }
+
+  .table td {
+    border: 0;
+    padding: 0.15rem 0;
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    color: var(--ink-3);
+    min-width: 5.5rem;
+    flex: none;
+  }
+
+  .table td:not([data-label])::before {
+    display: none;
+  }
+
+  .c-name {
+    min-width: 0;
+  }
+
+  .row-actions {
+    justify-content: flex-start;
+  }
+
+  .row-notes {
+    max-width: none;
+    white-space: normal;
+  }
+
+  .edit-row td {
+    display: block;
+  }
 }
 
 /* ------------------------------------------------------- fila en edición */
@@ -828,6 +1078,7 @@ textarea.input {
   gap: 0.4rem;
   justify-content: flex-end;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 760px) {
@@ -841,6 +1092,7 @@ textarea.input {
   font-family: var(--mono);
   font-size: 0.625rem;
   color: var(--ink-3);
+  overflow-wrap: anywhere;
 }
 
 /* --------------------------------------------------------------- toasts */
@@ -852,7 +1104,7 @@ textarea.input {
   z-index: 90;
   display: grid;
   gap: 0.4rem;
-  max-width: min(420px, calc(100vw - 2rem));
+  max-width: min(440px, calc(100vw - 2rem));
 }
 
 .toast {
@@ -861,6 +1113,7 @@ textarea.input {
   padding: 0.55rem 0.75rem;
   font-size: 0.8125rem;
   border-left: 3px solid var(--seal);
+  white-space: pre-line;
   animation: toast-in 0.22s var(--ease);
   box-shadow: 0 6px 22px rgb(0 0 0 / 0.18);
 }
@@ -871,6 +1124,10 @@ textarea.input {
 
 .toast[data-kind='ok'] {
   border-left-color: var(--ok);
+}
+
+.toast a {
+  color: #fff;
 }
 
 .toast.is-out {
@@ -897,7 +1154,7 @@ textarea.input {
   border: 1px solid var(--rule);
   background: var(--sheet);
   padding: 1.25rem;
-  max-width: 400px;
+  max-width: 420px;
   width: calc(100vw - 2rem);
 }
 

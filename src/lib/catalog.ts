@@ -134,23 +134,9 @@ export function subjectLabel(subjects: Subject[], code: string): string {
   return subjects.find((s) => s.code === code)?.name ?? code;
 }
 
-/** Turn an arbitrary string into a URL-safe slug. */
-export function slugify(input: string): string {
-  const map: Record<string, string> = {
-    à: 'a', á: 'a', â: 'a', ä: 'a',
-    è: 'e', é: 'e', ê: 'e', ë: 'e',
-    ì: 'i', í: 'i', î: 'i', ï: 'i',
-    ò: 'o', ó: 'o', ô: 'o', ö: 'o',
-    ù: 'u', ú: 'u', û: 'u', ü: 'u',
-    ç: 'c', ñ: 'n', '·': '-', '/': '-',
-  };
-  return input
-    .toLowerCase()
-    .replace(/[àáâäèéêëìíîïòóôöùúûüçñ·/]/g, (ch) => map[ch] ?? ch)
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
-}
+/* El slug y el recuento de páginas viven en un módulo sin `node:` porque los
+   usa también el panel del navegador; aquí solo se reexportan. */
+export { slugify, estimatePdfPages } from './slug';
 
 /** Human title used on cards and in the admin table. */
 export function examTitle(
@@ -185,15 +171,6 @@ export function fileExists(exam: Exam): boolean {
   } catch {
     return false;
   }
-}
-
-/** Rough page count by counting /Type /Page objects. Best effort, no dependency. */
-export function estimatePdfPages(buffer: Buffer): number | null {
-  const text = buffer.toString('latin1');
-  const matches = text.match(/\/Type\s*\/Page[^s]/g);
-  if (!matches) return null;
-  const count = text.match(/\/Count\s+(\d+)/);
-  return count ? Number(count[1]) : matches.length;
 }
 
 export function formatBytes(kb: number | null | undefined): string {
