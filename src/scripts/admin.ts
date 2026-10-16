@@ -986,7 +986,14 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-if (token) {
+/* Sin propietario el panel no puede ni empezar: mejor decirlo que dejar que
+   falle con un 404 de la API, que no explica nada. */
+if (!ref.owner || !ref.repo) {
+  exit(
+    'El panel no sabe a qué repositorio apuntar: la web se ha construido sin propietario. Revisa la variable SITE_URL del workflow de despliegue.'
+  );
+  $<HTMLButtonElement>('#gateSubmit').disabled = true;
+} else if (token) {
   connect();
 } else {
   exit();

@@ -43,7 +43,10 @@ jobs:
       - name: Build
         env:
           SITE_BASE: /${{ github.event.repository.name }}
-          SITE_URL: https://${{ github.repository.owner }}.github.io
+          # Ojo: la propiedad es `repository_owner`. `github.repository.owner` no
+          # existe y se interpola como cadena vacía, con lo que el sitio se
+          # publicaba con el host roto «https://.github.io».
+          SITE_URL: https://${{ github.repository_owner }}.github.io
         run: npm run build
 
       - uses: actions/configure-pages@v5

@@ -10,13 +10,21 @@ import { DOC_TYPES, SESSIONS } from '../lib/catalog';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-/* El repositorio se deduce del sitio publicado; se puede forzar por entorno
-   (PUBLIC_GH_OWNER / PUBLIC_GH_REPO) para dominios propios o bifurcaciones. */
+/*
+ * El repositorio se deduce del sitio publicado; se puede forzar por entorno
+ * (PUBLIC_GH_OWNER / PUBLIC_GH_REPO) para dominios propios o bifurcaciones.
+ *
+ * Se usa `||` y no `??` a propósito: una variable definida pero vacía debe
+ * caer al valor deducido. Un host mal formado —«https://.github.io», que es lo
+ * que salía cuando el workflow no resolvía el propietario— deja el primer
+ * segmento en cadena vacía, y el panel lo detecta y lo dice en vez de fallar
+ * con un 404 de la API que no explica nada.
+ */
 const site = Astro.site ?? new URL('https://github.io');
 const hostOwner = site.hostname.split('.')[0];
 const baseRepo = base.replace(/^\//, '');
-const owner = import.meta.env.PUBLIC_GH_OWNER ?? hostOwner;
-const repo = import.meta.env.PUBLIC_GH_REPO ?? (baseRepo || hostOwner);
+const owner = (import.meta.env.PUBLIC_GH_OWNER || hostOwner).trim();
+const repo = (import.meta.env.PUBLIC_GH_REPO || baseRepo).trim();
 
 /** Tope de subida: la API de blobs de GitHub admite más, pero el navegador
  *  tiene que codificar el PDF entero en base64 en memoria. */
