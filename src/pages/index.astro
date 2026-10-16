@@ -1,9 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
-import { DOC_TYPES, SESSIONS, loadCatalog, loadSubjects, subjectLabel } from '../lib/catalog';
+import {
+  DOC_TYPES,
+  SESSIONS,
+  loadCatalog,
+  loadSubjects,
+  subjectLabel,
+  type Session,
+} from '../lib/catalog';
 import SearchIcon from '../components/icons/Search.astro';
 import DownloadIcon from '../components/icons/Download.astro';
-import ArrowIcon from '../components/icons/Arrow.astro';
 import GitHubIcon from '../components/icons/GitHub.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -13,12 +19,13 @@ const catalog = loadCatalog();
 const subjects = loadSubjects();
 const exams = catalog.exams;
 
-const subjectOrder = subjects.map((s) => s.code);
-const sessionOrder = SESSIONS.map((s) => s.id);
 const typeOrder = DOC_TYPES.map((t) => t.id);
 const typeById = new Map(DOC_TYPES.map((t) => [t.id, t]));
+const sessionOrder = SESSIONS.map((s) => s.id);
+const sessionLong = new Map(SESSIONS.map((s) => [s.id, s.long]));
 
 const years = [...new Set(exams.map((e) => e.year))].sort((a, b) => b - a);
+const recentYears = years.slice(0, 4);
 const range = years.length
   ? years.length === 1
     ? String(years[0])
@@ -28,18 +35,30 @@ const range = years.length
 const statDocs = exams.length;
 const statSubjects = new Set(exams.map((e) => e.subject)).size;
 
-/* agrupación por año + convocatoria, ya ordenado por el catálogo */
-interface Group {
-  year: number;
-  session: string;
-  items: typeof exams;
+/* recuento y años de cada asignatura, para las tarjetas del mosaico */
+const subjectCounts = new Map<string, number>();
+const subjectYears = new Map<string, number[]>();
+const yearCounts = new Map<number, number>();
+for (const e of exams) {
+  subjectCounts.set(e.subject, (subjectCounts.get(e.subject) ?? 0) + 1);
+  yearCounts.set(e.year, (yearCounts.get(e.year) ?? 0) + 1);
+  const list = subjectYears.get(e.subject) ?? [];
+  if (!list.includes(e.year)) list.push(e.year);
+  subjectYears.set(e.subject, list);
 }
-const groups: Group[] = [];
-for (const exam of exams) {
-  const last = groups[groups.length - 1];
-  if (last && last.year === exam.year && last.session === exam.session) last.items.push(exam);
-  else groups.push({ year: exam.year, session: exam.session, items: [exam] });
-}
+for (const list of subjectYears.values()) list.sort((a, b) => b - a);
+
+/* las asignaturas que enseña el sitio: las que tienen documentos o son de acceso */
+const usedCodes = new Set(exams.map((e) => e.subject));
+const accesoCodes = new Set(
+  subjects.filter((s) => s.phases.includes('acceso')).map((s) => s.code)
+);
+const visibleSubjects = subjects.filter((s) => usedCodes.has(s.code) || accesoCodes.has(s.code));
+
+/* el payload del cliente debe usar el MISMO orden que las tarjetas:
+   si no, el índice de asignatura que viaja en cada fila apunta a otra materia */
+const subjectOrder = visibleSubjects.map((s) => s.code);
+const subjectPhases = new Map(visibleSubjects.map((s) => [s.code, s.phases.join(',')]));
 
 /* datos compactos para el cliente: [id, subjectIdx, year, sessionIdx, typeIdx] */
 const compact = exams.map((e) => [
@@ -50,11 +69,17 @@ const compact = exams.map((e) => [
   typeOrder.indexOf(e.type),
 ]);
 
-const subjectCounts = new Map<string, number>();
-const yearCounts = new Map<number, number>();
-for (const e of exams) {
-  subjectCounts.set(e.subject, (subjectCounts.get(e.subject) ?? 0) + 1);
-  yearCounts.set(e.year, (yearCounts.get(e.year) ?? 0) + 1);
+/* agrupación por año + convocatoria, ya ordenado por el catálogo */
+interface Group {
+  year: number;
+  session: Session;
+  items: typeof exams;
+}
+const groups: Group[] = [];
+for (const exam of exams) {
+  const last = groups[groups.length - 1];
+  if (last && last.year === exam.year && last.session === exam.session) last.items.push(exam);
+  else groups.push({ year: exam.year, session: exam.session, items: [exam] });
 }
 
 const fmtSize = (kb?: number | null) => {
@@ -62,17 +87,23 @@ const fmtSize = (kb?: number | null) => {
   return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`;
 };
 
-const accesoCodes = new Set(
-  subjects.filter((s) => s.phases.includes('acceso')).map((s) => s.code)
-);
-const usedCodes = new Set(exams.map((e) => e.subject));
-const visibleSubjects = subjects.filter((s) => usedCodes.has(s.code) || accesoCodes.has(s.code));
+const yearLabel = (list: number[]) =>
+  list.length === 0
+    ? 'sin documentos'
+    : list.length <= 3
+      ? list.join(', ')
+      : `${list[list.length - 1]}–${list[0]}`;
 
-/* bandas del hero: una por año, del más nuevo al más antiguo */
-const yearBands = years.map((year) => ({
-  year,
-  items: exams.filter((e) => e.year === year),
-}));
+const phaseLabel = (phases: string[]) =>
+  phases.map((p) => (p === 'acceso' ? 'Fase de acceso' : 'Fase de admisión')).join(' · ');
+
+/* el mosaico separa lo que ya está de lo que aún no: las materias sin
+   documentos quedan al final, con un trazo discontinuo */
+const docSubjects = visibleSubjects.filter((s) => usedCodes.has(s.code));
+const pendingSubjects = visibleSubjects.filter((s) => !usedCodes.has(s.code));
+
+/* el pie enlaza solo lo que existe: nada de anunciar asignaturas vacías */
+const footSubjects = docSubjects.slice(0, 8);
 ---
 
 <Base
@@ -80,186 +111,184 @@ const yearBands = years.map((year) => ({
   description="Archivo de enunciados, soluciones y criterios de corrección de la PAU en Andalucía. Filtra por asignatura, año, convocatoria y fase, y descarga el PDF."
 >
   <header class="site-head">
-    <div class="wrap">
+    <div class="wrap head-bar">
       <a class="brand" href={`${base}/`}>
         <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         WebPAU
       </a>
-      <div class="head-meta mono">
+      <nav class="head-nav" aria-label="Secciones">
+        {/* el mosaico solo existe si hay documentos que enseñar */}
+        {exams.length > 0 && <a href="#asignaturas">Asignaturas</a>}
+        <a href="#archivo">Archivo</a>
+      </nav>
+      <p class="head-meta mono">
         <span class="hide-s">{statDocs} documentos</span>
-        <span class="sep hide-s" aria-hidden="true"></span>
+        <span class="sep hide-s" aria-hidden="true">·</span>
         <span class="hide-s">{statSubjects} asignaturas</span>
-        <a class="link-btn" href="https://github.com/ElioXY/WebPAU" target="_blank" rel="noreferrer">
-          <span class="hide-s">GitHub</span>
-          <GitHubIcon />
-        </a>
-      </div>
+      </p>
+      <a
+        class="cta"
+        href="https://github.com/ElioXY/WebPAU"
+        target="_blank"
+        rel="noreferrer"
+      >GitHub</a>
     </div>
   </header>
 
   <main>
     <section class="hero">
       <div class="wrap">
-        <div class="hero-top">
-          <div>
-            <p class="mono" style="color: var(--ink-3)">
-              Prueba de Acceso a la Universidad · Andalucía
-            </p>
-            <h1>Encuentra el ejercicio que <em>te toca</em>.</h1>
-          </div>
-          <div class="hero-aside">
-            <p class="lede">
-              Enunciados, soluciones y criterios de corrección de la PAU en Andalucía,
-              ordenados por año y convocatoria y filtrables por fase de acceso o de
-              admisión. Cada PDF que subes se publica en cuanto lo confirmas.
-            </p>
-            <div class="stats" hidden={statDocs === 0}>
-              <div class="stat"><b>{statDocs}</b><span>documentos</span></div>
-              <div class="stat"><b>{statSubjects}</b><span>asignaturas</span></div>
-              <div class="stat"><b>{range}</b><span>años</span></div>
-            </div>
-          </div>
-        </div>
+        <p class="kicker">PAU · Andalucía</p>
+        <h1>Encuentra el ejercicio que <em>te toca</em>.</h1>
+        <p class="lede">
+          Enunciados, soluciones y criterios de corrección de la PAU en Andalucía,
+          reunidos por asignatura, año y convocatoria. Elige una materia y descarga
+          el PDF.
+        </p>
 
-        <div class="sheet">
-          <div class="sheet-head">
-            <p class="mono">El archivo, marcado</p>
-            <p class="mono" aria-live="polite">
-              <span id="markedCount">{statDocs}</span>&nbsp;{statDocs === 1 ? 'casilla marcada' : 'casillas marcadas'}
-            </p>
-          </div>
+        {exams.length > 0 && (
+          <form class="filters" id="filters" role="search" autocomplete="off">
+            <div class="filter-row find">
+              <div class="field grow">
+                <SearchIcon />
+                <label class="visually-hidden" for="q">Buscar asignatura o texto</label>
+                <input
+                  class="input"
+                  id="q"
+                  name="q"
+                  type="search"
+                  placeholder="Buscar asignatura, año o convocatoria…"
+                />
+                <kbd class="kbd" aria-hidden="true">/</kbd>
+              </div>
 
-          {exams.length > 0 ? (
-            <div id="heroGrid">
-              {yearBands.map((band) => (
-                <div class="band" data-year={band.year}>
-                  <div class="band-head">
-                    <span class="band-year">{band.year}</span>
-                    <span class="band-n" data-band-count>{band.items.length}</span>
-                  </div>
-                  <div class="omr">
-                    {band.items.map((exam, i) => (
-                      <button
-                        class="cell-btn"
-                        type="button"
-                        data-id={exam.id}
-                        style={`--i:${Math.min(i, 90)}`}
-                        title={`${subjectLabel(subjects, exam.subject)} · ${exam.year} · ${SESSIONS.find((s) => s.id === exam.session)?.label} · ${typeById.get(exam.type)?.label}`}
-                        aria-label={`${subjectLabel(subjects, exam.subject)}, ${exam.year}, ${typeById.get(exam.type)?.label}`}
-                      ><i></i></button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              <label class="visually-hidden" for="y">Año</label>
+              <select class="select" id="y" name="y">
+                <option value="">Todos los años</option>
+                {years.map((y) => (
+                  <option value={y}>{y} · {yearCounts.get(y)}</option>
+                ))}
+              </select>
+
+              <label class="visually-hidden" for="phase">Fase</label>
+              <select class="select" id="phase" name="phase">
+                <option value="">Todas las fases</option>
+                <option value="acceso">Fase de acceso</option>
+                <option value="admision">Fase de admisión</option>
+              </select>
+
+              <button class="btn-primary" type="submit">Buscar</button>
             </div>
-          ) : (
-            <div class="sheet-empty">
-              <div class="omr omr-deco" aria-hidden="true">
-                {Array.from({ length: 40 }, (_, i) => (
-                  <i data-on={i % 3 === 1 ? '1' : '0'} />
+
+            <div class="filter-row tools">
+              <div class="seg" role="group" aria-label="Convocatoria" id="segSession">
+                <button type="button" data-ss="" aria-pressed="true">Cualquiera</button>
+                {SESSIONS.map((s) => (
+                  <button type="button" data-ss={s.id} aria-pressed="false">{s.label}</button>
                 ))}
               </div>
-              <p class="lede" style="margin-inline:auto">
-                El archivo está esperando su primer examen. En cuanto se suba un PDF,
-                aparecerá aquí como una casilla marcada más.
-              </p>
+              <div class="seg" role="group" aria-label="Tipo de documento" id="segType">
+                <button type="button" data-t="" aria-pressed="true">Todos</button>
+                {DOC_TYPES.map((t) => (
+                  <button type="button" data-t={t.id} aria-pressed="false">{t.short}</button>
+                ))}
+              </div>
+              <button type="button" class="btn-ghost" id="clearFilters" hidden>Limpiar filtros</button>
             </div>
-          )}
-
-          <div class="sheet-foot">
-            <p class="mono">
-              {exams.length > 0
-                ? 'Cada casilla es un documento. Fíltralo y las bandas se vacían.'
-                : 'Sube el primer PDF desde el panel de administración.'}
-            </p>
-            {exams.length > 0 && (
-              <a class="link-btn mono" href="#archivo">
-                Ver el listado <ArrowIcon />
-              </a>
-            )}
-          </div>
-        </div>
+          </form>
+        )}
       </div>
     </section>
 
+    {exams.length > 0 && (
+      <section class="subjects" id="asignaturas">
+        <div class="wrap">
+          <div class="results-head">
+            <h2>Explora por asignatura</h2>
+            <p class="count">
+              {statSubjects} {statSubjects === 1 ? 'materia' : 'materias'} · {range}
+            </p>
+          </div>
+
+          <div class="legend">
+            <span><i aria-hidden="true"></i> Fase de acceso</span>
+            <span><i data-phase="admision" aria-hidden="true"></i> Fase de admisión</span>
+            <span>Las barras marcan los años con documentos</span>
+          </div>
+
+          <div class="chips" role="group" aria-label="Asignatura" id="chips">
+            <button
+              class="chip"
+              type="button"
+              data-s=""
+              data-phases="acceso,admision"
+              aria-pressed="true"
+            >
+              <span class="nm">Todas las asignaturas</span>
+              <span class="ct"><em>{statDocs}</em> docs. · {range}</span>
+              <span class="bar" aria-hidden="true">
+                {recentYears.map((y) => <i data-on={yearCounts.has(y) ? '1' : '0'} />)}
+              </span>
+            </button>
+
+            {docSubjects.map((s) => {
+              const list = subjectYears.get(s.code) ?? [];
+              return (
+                <button
+                  class="chip"
+                  type="button"
+                  data-s={s.code}
+                  data-phases={s.phases.join(',')}
+                  aria-pressed="false"
+                  title={`${s.name} · ${phaseLabel(s.phases)}`}
+                >
+                  <span class="nm">{s.name}</span>
+                  <span class="ct">
+                    <em>{subjectCounts.get(s.code) ?? 0}</em> docs. · {yearLabel(list)}
+                  </span>
+                  <span class="bar" aria-hidden="true">
+                    {recentYears.map((y) => <i data-on={list.includes(y) ? '1' : '0'} />)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {pendingSubjects.length > 0 && (
+            <>
+              <p class="chips-label">Aún sin documentos</p>
+              <div class="chips chips-pending">
+                {pendingSubjects.map((s) => (
+                  <button
+                    class="chip"
+                    type="button"
+                    data-s={s.code}
+                    data-phases={s.phases.join(',')}
+                    aria-pressed="false"
+                    title={`${s.name} · ${phaseLabel(s.phases)}`}
+                  >
+                    <span class="nm">{s.name}</span>
+                    <span class="ct"><em>0</em> docs.</span>
+                    <span class="bar" aria-hidden="true">
+                      {recentYears.map(() => <i data-on="0" />)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+    )}
+
     <section class="archive" id="archivo">
       <div class="wrap">
-        <div class="results-head" style="margin-bottom: 0.75rem">
+        <div class="results-head">
           <h2>Archivo</h2>
           <p class="count">
             <span id="resultCount">{statDocs}</span>&nbsp;{statDocs === 1 ? 'documento' : 'documentos'}
           </p>
         </div>
-
-        {exams.length > 0 && (
-        <form class="filters" id="filters" role="search" autocomplete="off">
-          <div class="filter-row">
-            <div class="field grow">
-              <SearchIcon />
-              <label class="visually-hidden" for="q">Buscar asignatura o texto</label>
-              <input
-                class="input"
-                id="q"
-                name="q"
-                type="search"
-                placeholder="Buscar: matemáticas, filosofía, 2024…"
-              />
-              <kbd class="kbd hide-s" aria-hidden="true">/</kbd>
-            </div>
-
-            <label class="visually-hidden" for="y">Año</label>
-            <select class="select" id="y" name="y" style="max-width: 8.5rem">
-              <option value="">Todos los años</option>
-              {years.map((y) => (
-                <option value={y}>{y} · {yearCounts.get(y)}</option>
-              ))}
-            </select>
-
-            <label class="visually-hidden" for="phase">Fase</label>
-            <select class="select" id="phase" name="phase" style="max-width: 9.5rem">
-              <option value="">Todas las fases</option>
-              <option value="acceso">Fase de acceso</option>
-              <option value="admision">Fase de admisión</option>
-            </select>
-          </div>
-
-          <div class="filter-row">
-            <div class="seg" role="group" aria-label="Convocatoria" id="segSession">
-              <button type="button" data-ss="" aria-pressed="true">Cualquiera</button>
-              {SESSIONS.map((s) => (
-                <button type="button" data-ss={s.id} aria-pressed="false">{s.label}</button>
-              ))}
-            </div>
-            <div class="seg" role="group" aria-label="Tipo de documento" id="segType">
-              <button type="button" data-t="" aria-pressed="true">Todos</button>
-              {DOC_TYPES.map((t) => (
-                <button type="button" data-t={t.id} aria-pressed="false">{t.short}</button>
-              ))}
-            </div>
-            <button type="button" class="btn-ghost" id="clearFilters" hidden>Limpiar filtros</button>
-          </div>
-
-          <div class="chips" role="group" aria-label="Asignatura" id="chips">
-            <button class="chip" type="button" data-s="" aria-pressed="true">
-              Todas <em>{statDocs}</em>
-            </button>
-            {visibleSubjects.map((s) => (
-              <button
-                class="chip"
-                type="button"
-                data-s={s.code}
-                data-phase={s.phases.join(',')}
-                aria-pressed="false"
-                title={`${s.name} · ${s.phases
-                  .map((p) => (p === 'acceso' ? 'Fase de acceso' : 'Fase de admisión'))
-                  .join(' · ')}`}
-              >
-                {s.short} <em>{subjectCounts.get(s.code) ?? 0}</em>
-              </button>
-            ))}
-          </div>
-        </form>
-        )}
 
         <div id="results">
           {groups.length > 0 ? (
@@ -267,12 +296,22 @@ const yearBands = years.map((year) => ({
               <div class="year-group" data-year={group.year} data-ss={group.session}>
                 <div class="year-head">
                   <h3>{group.year}</h3>
-                  <span class="session">{SESSIONS.find((s) => s.id === group.session)?.long}</span>
-                  <span class="n" data-group-count>{group.items.length}</span>
+                  <span class="session">{sessionLong.get(group.session) ?? group.session}</span>
+                  <span class="n" data-group-count>
+                    {group.items.length}&nbsp;{group.items.length === 1 ? 'documento' : 'documentos'}
+                  </span>
                 </div>
                 {group.items.map((exam) => {
-                  const type = typeById.get(exam.type)!;
+                  /* un tipo desconocido no debe tumbar el build entero: se
+                     muestra tal cual en vez de reventar */
+                  const type = typeById.get(exam.type) ?? {
+                    id: exam.type,
+                    short: exam.type,
+                    label: exam.type,
+                    hint: 'Tipo de documento no reconocido',
+                  };
                   const meta = [
+                    exam.subject,
                     exam.pages ? `${exam.pages} p.` : null,
                     fmtSize(exam.sizeKB),
                   ]
@@ -283,23 +322,25 @@ const yearBands = years.map((year) => ({
                       class="row"
                       data-id={exam.id}
                       data-s={exam.subject}
+                      data-p={subjectPhases.get(exam.subject) ?? ''}
                       data-y={exam.year}
                       data-ss={exam.session}
                       data-t={exam.type}
                     >
-                      <span class="row-code">{exam.subject}</span>
+                      <span class="stripe" aria-hidden="true"></span>
                       <div class="row-title">
                         <a href={pdfUrl(exam.file)} title={exam.notes || undefined}>
                           {subjectLabel(subjects, exam.subject)}
                         </a>
-                        <span class="tag" data-t={exam.type} title={type.hint}>
-                          <i aria-hidden="true"></i>{type.short}
-                        </span>
-                        {exam.official === false && (
-                          <span class="unofficial" title="Documento no oficial">no oficial</span>
-                        )}
+                        <p class="row-meta">{meta}</p>
                       </div>
-                      {meta && <p class="row-meta">{meta}</p>}
+                      {exam.official === false && (
+                        <span class="unofficial" title="Documento no oficial">no oficial</span>
+                      )}
+                      <span class="tag" data-t={exam.type} title={type.hint}>
+                        <i aria-hidden="true"></i>
+                        {type.short}
+                      </span>
                       <div class="row-actions">
                         <a class="dl" href={pdfUrl(exam.file)} download>
                           <DownloadIcon /><span>PDF</span>
@@ -312,15 +353,11 @@ const yearBands = years.map((year) => ({
             ))
           ) : (
             <div class="empty empty-state" id="catalogEmpty">
-              <div class="omr omr-deco" aria-hidden="true">
-                {Array.from({ length: 27 }, (_, i) => (
-                  <i data-on={i % 4 === 2 ? '1' : '0'} />
-                ))}
-              </div>
+              <p class="badge" aria-hidden="true">0</p>
               <h2>Aún no hay nada en el archivo</h2>
               <p>
-                Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán
-                aquí listos para descargar, filtrados por asignatura, año y convocatoria.
+                Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán aquí
+                ordenados por asignatura, año y convocatoria, listos para descargar.
               </p>
               <p class="empty-cta">
                 <a
@@ -329,21 +366,22 @@ const yearBands = years.map((year) => ({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Ver el proyecto en GitHub
+                  <GitHubIcon /><span>Ver el proyecto en GitHub</span>
                 </a>
               </p>
               <p class="owner-note mono">
-                Si gestionas el archivo: sube el primero con <code>npm run admin</code>
-                y pulsa «Subir a GitHub».
+                Si gestionas el archivo: sube el primero con <code>npm run admin</code> y pulsa
+                «Subir a GitHub».
               </p>
             </div>
           )}
 
           <div class="empty" id="noMatches" hidden>
+            <p class="badge" aria-hidden="true">?</p>
             <h2>Ningún documento coincide</h2>
             <p id="noMatchesText"></p>
-            <p style="margin-top: 1rem">
-              <button class="btn-ghost" type="button" id="clearFilters2">Quitar todos los filtros</button>
+            <p class="empty-cta">
+              <button class="dl" type="button" id="clearFilters2">Quitar todos los filtros</button>
             </p>
           </div>
         </div>
@@ -364,11 +402,19 @@ const yearBands = years.map((year) => ({
         </div>
         <div>
           <h3>Asignaturas</h3>
-          <ul>
-            {subjects.slice(0, 6).map((s) => (
-              <li><a href={`?s=${s.code}#archivo`}>{s.name}</a></li>
-            ))}
-          </ul>
+          {footSubjects.length > 0 ? (
+            <ul>
+              {footSubjects.map((s) => (
+                <li>
+                  <a href={`?s=${s.code}#archivo`}>
+                    {s.name} <span class="mono">{subjectCounts.get(s.code) ?? 0}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Todavía no hay asignaturas con documentos publicados.</p>
+          )}
         </div>
         <div>
           <h3>El proyecto</h3>
@@ -391,6 +437,7 @@ const yearBands = years.map((year) => ({
     exams: compact,
     subjects: visibleSubjects.map((s) => [s.code, s.phases.join(','), s.name]),
     types: DOC_TYPES.map((t) => [t.id, t.short, t.label]),
+    sessions: SESSIONS.map((s) => [s.id, s.long]),
     base,
   })} />
 

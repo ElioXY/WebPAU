@@ -9,10 +9,9 @@ interface Payload {
   exams: Row[];
   subjects: [string, string, string][]; // [code, fases, name]
   types: [string, string, string][]; // [id, etiqueta corta, etiqueta larga]
+  sessions: [string, string][]; // [id, etiqueta]
   base: string;
 }
-
-const SESSIONS = ['ordinaria', 'extraordinaria'];
 
 /* palabras clave para buscar sin conocer el vocabulario exacto */
 const TYPE_KEYWORDS: Record<string, string> = {
@@ -41,6 +40,11 @@ const payload: Payload = JSON.parse(
   document.getElementById('catalog-data')!.textContent!
 );
 
+/* los ids y las etiquetas de convocatoria salen del catálogo, no de una copia
+   local: si el catálogo cambia, el filtro sigue casando con las filas */
+const SESSION_IDS = payload.sessions.map((s) => s[0]);
+const SESSION_LABEL = new Map(payload.sessions.map((s) => [s[0], s[1]]));
+
 const codes = payload.subjects.map((s) => s[0]);
 const phaseLists = payload.subjects.map((s) => s[1].split(',').filter(Boolean));
 const names = payload.subjects.map((s) => s[2]);
@@ -59,22 +63,12 @@ const selectPhase = $<HTMLSelectElement>('#phase');
 const clearBtn = $<HTMLButtonElement>('#clearFilters');
 const clearBtn2 = $<HTMLButtonElement>('#clearFilters2');
 const countEl = $<HTMLElement>('#resultCount');
-const markedEl = $<HTMLElement>('#markedCount');
-const heroGrid = $<HTMLElement>('#heroGrid');
 const emptyEl = $<HTMLElement>('#catalogEmpty');
 const noMatchEl = $<HTMLElement>('#noMatches');
 const noMatchText = $<HTMLElement>('#noMatchesText');
 
 const rows = new Map<string, HTMLElement>();
-const cells = new Map<string, HTMLElement>();
 for (const el of $$<HTMLElement>('.row[data-id]')) rows.set(el.dataset.id!, el);
-for (const el of $$<HTMLElement>('.cell-btn[data-id]')) cells.set(el.dataset.id!, el);
-
-const bands = $$<HTMLElement>('.band').map((el) => ({
-  el,
-  count: el.querySelector<HTMLElement>('[data-band-count]'),
-  cells: Array.from(el.querySelectorAll<HTMLElement>('.cell-btn[data-id]')),
-}));
 
 const groups = $$<HTMLElement>('.year-group').map((el) => ({
   el,
@@ -102,7 +96,7 @@ interface Exam {
 const exams: Exam[] = payload.exams.map(([id, subjectIdx, year, sessionIdx, typeIdx]) => {
   const code = codes[subjectIdx] ?? '';
   const name = names[subjectIdx] ?? code;
-  const session = SESSIONS[sessionIdx] ?? '';
+  const session = SESSION_IDS[sessionIdx] ?? '';
   const type = TYPES[typeIdx] ?? '';
   return {
     id,
@@ -186,15 +180,6 @@ function apply(): void {
 
     const row = rows.get(e.id);
     if (row) row.hidden = !ok;
-    const cell = cells.get(e.id);
-    if (cell) cell.hidden = !ok;
-  }
-
-  for (const band of bands) {
-    let shown = 0;
-    for (const cell of band.cells) if (!cell.hidden) shown++;
-    band.el.hidden = shown === 0;
-    if (band.count) band.count.textContent = String(shown);
   }
 
   for (const group of groups) {
@@ -213,9 +198,11 @@ function apply(): void {
 
   for (const chip of chips) {
     const code = chip.dataset.s ?? '';
+    /* el chip «Todas» también se marca o se desmarca: si no, sigue encendido
+       cuando hay una asignatura elegida (y también al abrir un enlace ?s=) */
+    chip.setAttribute('aria-pressed', String(state.s === code));
     if (code === '') continue;
     const n = perCode.get(code) ?? 0;
-    chip.setAttribute('aria-pressed', String(state.s === code));
     chip.classList.toggle('is-dim', n === 0 && state.s !== code);
     const em = chip.querySelector('em');
     if (em) em.textContent = String(n);
@@ -231,8 +218,6 @@ function apply(): void {
   }
 
   if (countEl) countEl.textContent = String(total);
-  if (markedEl) markedEl.textContent = String(total);
-  if (heroGrid) heroGrid.hidden = total === 0;
 
   const catalogEmpty = exams.length === 0;
   if (emptyEl) emptyEl.hidden = !catalogEmpty;
@@ -252,7 +237,8 @@ function describe(): string {
   if (state.s) bits.push(names[codes.indexOf(state.s)] ?? state.s);
   if (state.y) bits.push(state.y);
   if (state.ss) {
-    bits.push(state.ss === 'ordinaria' ? 'convocatoria ordinaria' : 'convocatoria extraordinaria');
+    /* el catálogo ya trae la etiqueta larga: «Convocatoria ordinaria · junio» */
+    bits.push(SESSION_LABEL.get(state.ss) ?? state.ss);
   }
   if (state.t) bits.push(TYPE_LABEL.get(state.t) ?? state.t);
   if (state.p) bits.push(state.p === 'acceso' ? 'fase de acceso' : 'fase de admisión');
@@ -312,7 +298,12 @@ for (const chip of chips) {
 
 clearBtn?.addEventListener('click', resetAll);
 clearBtn2?.addEventListener('click', resetAll);
-form?.addEventListener('submit', (event) => event.preventDefault());
+
+/* el filtrado ya es en vivo: «Buscar» solo lleva al listado */
+form?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  document.getElementById('archivo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 /* atajos: «/» enfoca la búsqueda, «Esc» la desenfoca */
 document.addEventListener('keydown', (event) => {
@@ -322,29 +313,14 @@ document.addEventListener('keydown', (event) => {
     target instanceof HTMLTextAreaElement ||
     target instanceof HTMLSelectElement ||
     target?.isContentEditable;
-  if (event.key === '/' && !typing) {
+  /* sin buscador en la página (archivo vacío) la tecla no se secuestra */
+  if (event.key === '/' && !typing && inputQ) {
     event.preventDefault();
-    inputQ?.focus();
-    inputQ?.select();
+    inputQ.focus();
+    inputQ.select();
   }
   if (event.key === 'Escape' && document.activeElement === inputQ) inputQ?.blur();
 });
-
-/* clic en una casilla del hero → fila correspondiente del listado */
-
-for (const [id, cell] of cells) {
-  cell.addEventListener('click', () => {
-    const row = rows.get(id);
-    if (!row) return;
-    if (row.hidden) resetAll();
-    requestAnimationFrame(() => {
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      row.classList.remove('is-target');
-      void row.offsetWidth;
-      row.classList.add('is-target');
-    });
-  });
-}
 
 window.addEventListener('popstate', () => {
   Object.assign(state, readState());
