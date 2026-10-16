@@ -2,7 +2,9 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    # Se despliega desde ambas ramas: al cambiar la rama por defecto del
+    # repositorio, los pushes no deben dejar de publicar en silencio.
+    branches: [main, mejora-web-espanol]
     paths:
       - 'src/**'
       - 'public/**'
