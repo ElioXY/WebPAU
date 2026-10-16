@@ -247,7 +247,7 @@ app.post('/api/exams', guard, upload.array('files', 8), (req, res) => {
       file: relative,
       originalName: file.originalname,
       sizeKB: Math.round(buffer.byteLength / 1024),
-      language: (['ca', 'es', ''] as const).includes(language as 'ca') ? (language as Exam['language']) : '',
+      language: language === 'es' ? 'es' : '',
       official: readString(req.body.official) === 'true',
       notes: readString(req.body.notes),
       addedAt: now,
@@ -289,9 +289,7 @@ app.patch('/api/exams/:id', guard, (req, res) => {
   }
   if (req.body.language !== undefined) {
     const language = readString(req.body.language);
-    exam.language = (['ca', 'es', ''] as const).includes(language as 'ca')
-      ? (language as Exam['language'])
-      : '';
+    exam.language = language === 'es' ? 'es' : '';
   }
   if (req.body.official !== undefined) {
     exam.official = req.body.official === true || readString(req.body.official) === 'true';

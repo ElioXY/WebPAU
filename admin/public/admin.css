@@ -613,13 +613,13 @@ textarea.input {
   background: var(--ink-3);
 }
 
-.type-btn[data-v='enunciats'] i {
+.type-btn[data-v='enunciados'] i {
   background: var(--ink);
 }
-.type-btn[data-v='resolucions'] i {
+.type-btn[data-v='soluciones'] i {
   background: var(--seal);
 }
-.type-btn[data-v='criteris'] i {
+.type-btn[data-v='criterios'] i {
   background: var(--stamp);
 }
 .type-btn[data-v='plantilla'] i {
@@ -772,10 +772,10 @@ textarea.input {
   flex: none;
   background: var(--ink);
 }
-.type-tag[data-t='resolucions'] i {
+.type-tag[data-t='soluciones'] i {
   background: var(--seal);
 }
-.type-tag[data-t='criteris'] i {
+.type-tag[data-t='criterios'] i {
   background: var(--stamp);
 }
 .type-tag[data-t='plantilla'] i {

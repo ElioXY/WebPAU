@@ -119,12 +119,12 @@ function paintSubjects() {
   const previous = sel.value;
   sel.innerHTML = '';
   for (const [phase, label] of [
-    ['general', 'Fase general'],
-    ['especifica', 'Fase específica'],
+    ['acceso', 'Fase de acceso'],
+    ['admision', 'Fase de admisión'],
   ]) {
     const group = document.createElement('optgroup');
     group.label = label;
-    for (const s of state.subjects.filter((x) => x.phase === phase)) {
+    for (const s of state.subjects.filter((x) => x.phases.includes(phase))) {
       const opt = document.createElement('option');
       opt.value = s.code;
       opt.textContent = `${s.name} (${s.code})`;
@@ -144,7 +144,7 @@ function paintTypes() {
     btn.className = 'type-btn';
     btn.dataset.v = t.id;
     btn.title = `${t.label} · ${t.hint}`;
-    btn.setAttribute('aria-pressed', String(t.id === 'enunciats'));
+    btn.setAttribute('aria-pressed', String(t.id === 'enunciados'));
     btn.innerHTML = `<i></i><span>${t.short}</span>`;
     btn.addEventListener('click', () => {
       $$('.type-btn', box).forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
@@ -336,7 +336,7 @@ function renderTable() {
         missing.has(exam.id) ? '<span class="badge-missing">falta el PDF</span>' : ''
       }${exam.notes ? `<div class="c-meta">${escapeHtml(exam.notes)}</div>` : ''}</td>
       <td class="c-year">${exam.year}</td>
-      <td class="c-ses">${exam.session === 'juny' ? 'juny' : 'set.'}</td>
+      <td class="c-ses">${exam.session === 'ordinaria' ? 'ord.' : 'extr.'}</td>
       <td><span class="type-tag" data-t="${exam.type}"><i></i>${type?.short ?? exam.type}</span></td>
       <td class="c-meta">${fmtBytes(exam.sizeKB)} · ${fmtDate(exam.addedAt)}</td>
       <td class="c-act">
@@ -379,8 +379,8 @@ function buildEditRow(exam) {
       <div class="field">
         <span class="label">Convocatoria</span>
         <select class="input" data-k="session">
-          <option value="juny"${exam.session === 'juny' ? ' selected' : ''}>Junio</option>
-          <option value="setembre"${exam.session === 'setembre' ? ' selected' : ''}>Septiembre</option>
+          <option value="ordinaria"${exam.session === 'ordinaria' ? ' selected' : ''}>Ordinaria</option>
+          <option value="extraordinaria"${exam.session === 'extraordinaria' ? ' selected' : ''}>Extraordinaria</option>
         </select>
       </div>
       <div class="field">
@@ -390,7 +390,6 @@ function buildEditRow(exam) {
       <div class="field">
         <span class="label">Idioma</span>
         <select class="input" data-k="language">
-          <option value="ca"${exam.language === 'ca' ? ' selected' : ''}>Catalán</option>
           <option value="es"${exam.language === 'es' ? ' selected' : ''}>Castellano</option>
           <option value=""${!exam.language ? ' selected' : ''}>Indiferente</option>
         </select>
@@ -473,7 +472,7 @@ $('#tbody').addEventListener('click', (event) => {
     confirmDialog(
       'Eliminar documento',
       `Se borrará «${subjectByCode(item.subject)?.name ?? item.subject} · ${item.year} · ${
-        item.session === 'juny' ? 'juny' : 'setembre'
+        item.session === 'ordinaria' ? 'ordinaria' : 'extraordinaria'
       }» y su PDF del disco. Esto no se puede deshacer.`,
       async () => {
         try {

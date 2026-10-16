@@ -2,33 +2,36 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export type Phase = 'general' | 'especifica';
+/** La PAU de Andalucía se organiza en fase de acceso (obligatoria) y fase de
+ *  admisión (voluntaria). Una misma materia de modalidad puede examinarse en
+ *  ambas, de ahí que `phases` sea una lista. */
+export type Phase = 'acceso' | 'admision';
 
 export interface Subject {
   code: string;
   name: string;
   short: string;
-  phase: Phase;
+  phases: Phase[];
   aliases: string[];
 }
 
-export type DocType = 'enunciats' | 'resolucions' | 'criteris' | 'plantilla';
+export type DocType = 'enunciados' | 'soluciones' | 'criterios' | 'plantilla';
 
 export const DOC_TYPES: { id: DocType; label: string; short: string; hint: string }[] = [
   {
-    id: 'enunciats',
+    id: 'enunciados',
     label: 'Enunciados',
     short: 'Enunciado',
     hint: 'El examen que te dan en el aula',
   },
   {
-    id: 'resolucions',
-    label: 'Resoluciones',
+    id: 'soluciones',
+    label: 'Soluciones',
     short: 'Soluciones',
     hint: 'Las soluciones oficiales',
   },
   {
-    id: 'criteris',
+    id: 'criterios',
     label: 'Criterios de corrección',
     short: 'Criterios',
     hint: 'Cómo se puntúa cada pregunta',
@@ -41,28 +44,28 @@ export const DOC_TYPES: { id: DocType; label: string; short: string; hint: strin
   },
 ];
 
-export type Session = 'juny' | 'setembre';
+export type Session = 'ordinaria' | 'extraordinaria';
 
 export const SESSIONS: { id: Session; label: string; long: string }[] = [
-  { id: 'juny', label: 'Junio', long: 'Convocatoria de junio' },
-  { id: 'setembre', label: 'Septiembre', long: 'Convocatoria de septiembre' },
+  { id: 'ordinaria', label: 'Ordinaria', long: 'Convocatoria ordinaria · junio' },
+  { id: 'extraordinaria', label: 'Extraordinaria', long: 'Convocatoria extraordinaria · julio' },
 ];
 
 export interface Exam {
-  /** stable slug, e.g. "mat-2024-juny-enunciats" */
+  /** slug estable, p. ej. "mate-2025-ordinaria-enunciados" */
   id: string;
   subject: string;
   year: number;
   session: Session;
   type: DocType;
-  /** page count in the PDF, optional */
+  /** número de páginas del PDF, opcional */
   pages?: number | null;
-  /** repo-relative path, e.g. "exams/2024/juny/MAT/mat-2024-juny-enunciats.pdf" */
+  /** ruta relativa al repo, p. ej. "exams/2025/ordinaria/MAT/mate-2025-ordinaria-enunciados.pdf" */
   file: string;
   /** original file name as uploaded */
   originalName?: string;
   sizeKB?: number | null;
-  language?: 'ca' | 'es' | '';
+  language?: 'es' | '';
   official?: boolean;
   notes?: string;
   addedAt: string;
@@ -156,7 +159,7 @@ export function examTitle(
   typeLabel: string
 ): string {
   const subj = subjectLabel(subjects, exam.subject);
-  const session = exam.session === 'juny' ? 'junio' : 'septiembre';
+  const session = SESSIONS.find((s) => s.id === exam.session)?.label ?? exam.session;
   return `${subj} · ${exam.year} · ${session} · ${typeLabel}`;
 }
 

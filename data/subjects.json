@@ -1,158 +1,235 @@
 {
   "subjects": [
     {
+      "code": "LCL",
+      "name": "Lengua Castellana y Literatura II",
+      "short": "Lengua cast.",
+      "phases": ["acceso"],
+      "aliases": ["lengua castellana", "castellano", "lengua", "literatura castellana", "lcl"]
+    },
+    {
+      "code": "ING",
+      "name": "Lengua Extranjera II (Inglés)",
+      "short": "Inglés",
+      "phases": ["acceso"],
+      "aliases": ["ingles", "inglés", "english", "lengua extranjera", "idioma"]
+    },
+    {
+      "code": "FRA",
+      "name": "Lengua Extranjera II (Francés)",
+      "short": "Francés",
+      "phases": ["acceso"],
+      "aliases": ["frances", "francés", "french", "lengua extranjera"]
+    },
+    {
+      "code": "ALE",
+      "name": "Lengua Extranjera II (Alemán)",
+      "short": "Alemán",
+      "phases": ["acceso"],
+      "aliases": ["aleman", "alemán", "german", "lengua extranjera"]
+    },
+    {
+      "code": "ITA",
+      "name": "Lengua Extranjera II (Italiano)",
+      "short": "Italiano",
+      "phases": ["acceso"],
+      "aliases": ["italiano", "italian", "lengua extranjera"]
+    },
+    {
+      "code": "POR",
+      "name": "Lengua Extranjera II (Portugués)",
+      "short": "Portugués",
+      "phases": ["acceso"],
+      "aliases": ["portugues", "portugués", "portuguese", "lengua extranjera"]
+    },
+    {
+      "code": "HES",
+      "name": "Historia de España",
+      "short": "H. España",
+      "phases": ["acceso"],
+      "aliases": ["historia", "historia de espana", "historia de españa", "hes"]
+    },
+    {
+      "code": "HFI",
+      "name": "Historia de la Filosofía",
+      "short": "H. Filosofía",
+      "phases": ["acceso"],
+      "aliases": ["filosofia", "filosofía", "historia de la filosofia", "historia de la filosofía", "hfi"]
+    },
+    {
       "code": "MAT",
-      "name": "Matemáticas",
-      "short": "Mat.",
-      "phase": "general",
-      "aliases": ["matematicas", "matemáticas", "matematiques", "matemàtiques", "maths", "math", "mates"]
+      "name": "Matemáticas II",
+      "short": "Mat. II",
+      "phases": ["acceso", "admision"],
+      "aliases": ["matematicas", "matemáticas", "mates", "matematicas ii", "maths", "mat"]
     },
     {
-      "code": "HIS",
-      "name": "Historia",
-      "short": "Historia",
-      "phase": "general",
-      "aliases": ["historia", "història", "history"]
+      "code": "MCS",
+      "name": "Matemáticas Aplicadas a las Ciencias Sociales II",
+      "short": "Mat. CCSS II",
+      "phases": ["acceso", "admision"],
+      "aliases": ["matematicas aplicadas", "matemáticas aplicadas", "matematicas sociales", "ccss", "mcs"]
     },
     {
-      "code": "FIL",
-      "name": "Filosofía",
-      "short": "Fil.",
-      "phase": "general",
-      "aliases": ["filosofia", "filosofía", "philosophy"]
+      "code": "LAT",
+      "name": "Latín II",
+      "short": "Latín II",
+      "phases": ["acceso", "admision"],
+      "aliases": ["latin", "latín", "latin ii", "latín ii"]
     },
     {
-      "code": "CAT",
-      "name": "Lengua catalana y literatura",
-      "short": "Len. cat.",
-      "phase": "general",
-      "aliases": ["catalan", "catalana", "llengua catalana", "literatura catalana", "lengua catalana", "cat"]
+      "code": "CGE",
+      "name": "Ciencias Generales",
+      "short": "Ciencias Gen.",
+      "phases": ["acceso"],
+      "aliases": ["ciencias generales", "ciencias", "cge"]
     },
     {
-      "code": "CAS",
-      "name": "Lengua castellana y literatura",
-      "short": "Len. cast.",
-      "phase": "general",
-      "aliases": ["castellano", "castellana", "literatura castellana", "lengua castellana", "español", "cas"]
+      "code": "DAR",
+      "name": "Dibujo Artístico II",
+      "short": "Dibujo Art. II",
+      "phases": ["acceso", "admision"],
+      "aliases": ["dibujo artistico", "dibujo artístico", "dibujo", "dar"]
+    },
+    {
+      "code": "AMU",
+      "name": "Análisis Musical II",
+      "short": "Análisis Mus. II",
+      "phases": ["acceso", "admision"],
+      "aliases": ["analisis musical", "análisis musical", "musica", "música", "amu"]
+    },
+    {
+      "code": "AES",
+      "name": "Artes Escénicas II",
+      "short": "Artes Esc. II",
+      "phases": ["acceso", "admision"],
+      "aliases": ["artes escenicas", "artes escénicas", "teatro", "drama", "aes"]
     },
     {
       "code": "BIO",
       "name": "Biología",
       "short": "Biol.",
-      "phase": "especifica",
+      "phases": ["admision"],
       "aliases": ["biologia", "biología", "biology"]
-    },
-    {
-      "code": "FIS",
-      "name": "Física",
-      "short": "Fís.",
-      "phase": "especifica",
-      "aliases": ["fisica", "física", "physics"]
     },
     {
       "code": "QUI",
       "name": "Química",
       "short": "Quím.",
-      "phase": "especifica",
+      "phases": ["admision"],
       "aliases": ["quimica", "química", "chemistry"]
     },
     {
-      "code": "TEC",
-      "name": "Tecnología Industrial",
-      "short": "Tec. Ind.",
-      "phase": "especifica",
-      "aliases": ["tecnologia industrial", "tecnología industrial", "technology"]
-    },
-    {
-      "code": "ECO",
-      "name": "Economía de la empresa",
-      "short": "Eco. emp.",
-      "phase": "especifica",
-      "aliases": ["economia", "economía", "empresa", "business", "economia de l'empresa"]
+      "code": "FIS",
+      "name": "Física",
+      "short": "Fís.",
+      "phases": ["admision"],
+      "aliases": ["fisica", "física", "physics"]
     },
     {
       "code": "GEO",
       "name": "Geografía",
       "short": "Geogr.",
-      "phase": "especifica",
+      "phases": ["admision"],
       "aliases": ["geografia", "geografía", "geography"]
     },
     {
-      "code": "HMC",
-      "name": "Historia del mundo contemporáneo",
-      "short": "H. Mundo cont.",
-      "phase": "especifica",
-      "aliases": ["historia contemporanea", "historia del mundo contemporáneo", "història del món contemporani", "h. mon contemporani"]
+      "code": "HAR",
+      "name": "Historia del Arte",
+      "short": "H. del Arte",
+      "phases": ["admision"],
+      "aliases": ["historia del arte", "arte", "art history", "har"]
     },
     {
-      "code": "HDA",
-      "name": "Historia del arte",
-      "short": "H. del arte",
-      "phase": "especifica",
-      "aliases": ["historia del arte", "història de l'art", "art history"]
+      "code": "GRE",
+      "name": "Griego II",
+      "short": "Griego II",
+      "phases": ["admision"],
+      "aliases": ["griego", "greek", "griego ii"]
     },
     {
-      "code": "LCA",
-      "name": "Literatura catalana",
-      "short": "Lit. cat.",
-      "phase": "especifica",
-      "aliases": ["literatura catalana", "llengua i literatura"]
+      "code": "DTE",
+      "name": "Dibujo Técnico II",
+      "short": "Dibujo Téc. II",
+      "phases": ["admision"],
+      "aliases": ["dibujo tecnico", "dibujo técnico", "dte"]
     },
     {
-      "code": "LCA2",
-      "name": "Literatura castellana",
-      "short": "Lit. cast.",
-      "phase": "especifica",
-      "aliases": ["literatura castellana", "llengua y literatura"]
+      "code": "DTA",
+      "name": "Dibujo Técnico Aplicado a las Artes Plásticas y al Diseño II",
+      "short": "Dib. Téc. Artes II",
+      "phases": ["admision"],
+      "aliases": ["dibujo tecnico aplicado", "artes plasticas", "diseño", "dta"]
     },
     {
-      "code": "ESC",
-      "name": "Artes escénicas",
-      "short": "Artes esc.",
-      "phase": "especifica",
-      "aliases": ["arts esceniques", "artes escénicas", "teatre", "drama", "performing arts"]
+      "code": "TIN",
+      "name": "Tecnología e Ingeniería II",
+      "short": "Tec. e Ing. II",
+      "phases": ["admision"],
+      "aliases": ["tecnologia e ingenieria", "tecnología e ingeniería", "tecnologia", "ingenieria", "tin"]
     },
     {
-      "code": "DIB",
-      "name": "Dibujo artístico",
-      "short": "Dibujo",
-      "phase": "especifica",
-      "aliases": ["dibujo", "dibuix artistic", "dibuix", "dibujo artístico"]
+      "code": "EDM",
+      "name": "Empresa y Diseño de Modelos de Negocio",
+      "short": "Empresa y Diseño",
+      "phases": ["admision"],
+      "aliases": ["empresa", "modelos de negocio", "economia", "economía", "edm"]
     },
     {
       "code": "DIS",
       "name": "Diseño",
       "short": "Diseño",
-      "phase": "especifica",
-      "aliases": ["disseny", "diseño", "design"]
+      "phases": ["admision"],
+      "aliases": ["diseno", "diseño", "design"]
     },
     {
-      "code": "LAT",
-      "name": "Latín",
-      "short": "Latín",
-      "phase": "especifica",
-      "aliases": ["llati", "latín", "latin", "latino"]
+      "code": "FUN",
+      "name": "Fundamentos Artísticos",
+      "short": "Fund. Artísticos",
+      "phases": ["admision"],
+      "aliases": ["fundamentos artisticos", "fundamentos artísticos", "fun"]
     },
     {
-      "code": "GRE",
-      "name": "Griego clásico",
-      "short": "Griego",
-      "phase": "especifica",
-      "aliases": ["grec", "griego", "greek", "grec classic", "griego clásico"]
+      "code": "GCA",
+      "name": "Geología y Ciencias Ambientales",
+      "short": "Geol. y CC. Amb.",
+      "phases": ["admision"],
+      "aliases": ["geologia", "geología", "ciencias ambientales", "gca"]
     },
     {
-      "code": "TEC2",
-      "name": "Tecnologías digitales y programación",
-      "short": "Tec. dig.",
-      "phase": "especifica",
-      "aliases": ["informatica", "programacio", "programación", "tecnologies digitals", "tecnologías digitales"]
+      "code": "HMD",
+      "name": "Historia de la Música y de la Danza",
+      "short": "H. Música y Danza",
+      "phases": ["admision"],
+      "aliases": ["historia de la musica", "música", "danza", "hmd"]
     },
     {
-      "code": "ACT",
-      "name": "Actividades artísticas",
-      "short": "Act. art.",
-      "phase": "especifica",
-      "aliases": ["activitats artistiques", "actividades artísticas", "artes plasticas y escenicas"]
+      "code": "LID",
+      "name": "Literatura Dramática",
+      "short": "Lit. Dramática",
+      "phases": ["admision"],
+      "aliases": ["literatura dramatica", "literatura dramática", "teatro", "lid"]
+    },
+    {
+      "code": "MCA",
+      "name": "Movimientos Culturales y Artísticos",
+      "short": "Mov. Cult. y Art.",
+      "phases": ["admision"],
+      "aliases": ["movimientos culturales", "movimientos artisticos", "mca"]
+    },
+    {
+      "code": "TEG",
+      "name": "Técnicas de Expresión Gráfico-Plástica",
+      "short": "Téc. Gráf.-Plást.",
+      "phases": ["admision"],
+      "aliases": ["tecnicas de expresion", "grafico plastica", "teg"]
+    },
+    {
+      "code": "CTV",
+      "name": "Coro y Técnica Vocal II",
+      "short": "Coro y Téc. Vocal II",
+      "phases": ["admision"],
+      "aliases": ["coro", "tecnica vocal", "música", "ctv"]
     }
   ]
 }

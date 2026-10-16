@@ -926,13 +926,13 @@ main {
   background: var(--ink);
 }
 
-.tag[data-t='enunciats'] i {
+.tag[data-t='enunciados'] i {
   background: var(--ink);
 }
-.tag[data-t='resolucions'] i {
+.tag[data-t='soluciones'] i {
   background: var(--seal);
 }
-.tag[data-t='criteris'] i {
+.tag[data-t='criterios'] i {
   background: var(--stamp);
 }
 .tag[data-t='plantilla'] i {

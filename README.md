@@ -1,7 +1,7 @@
 # WebPAU
 
-Archivo público de exámenes de acceso a la universidad (PAU / PAU) y panel de
-administración para subirlos.
+Archivo público de exámenes de la PAU (Prueba de Acceso a la Universidad) en
+Andalucía, y panel de administración para subirlos.
 
 La web pública es estática y se publica en **GitHub Pages** sin coste. Los datos
 —el catálogo en JSON y los PDF— viven **dentro del propio repositorio**, así que
@@ -15,6 +15,23 @@ revertir.
 └──────────────┘               │  public/exams │                   │  (web)     │
                                └───────────────┘                   └────────────┘
 ```
+
+---
+
+## La PAU en Andalucía
+
+El catálogo sigue el modelo vigente de la **PAU** andaluza:
+
+- **Fase de acceso** (obligatoria): cuatro ejercicios —Lengua Castellana y
+  Literatura II, Lengua Extranjera II, Historia de España o Historia de la
+  Filosofía, y la materia obligatoria de la modalidad cursada.
+- **Fase de admisión** (voluntaria): hasta tres materias de 2.º de Bachillerato
+  distintas de las del acceso, más una segunda lengua extranjera, para mejorar
+  la nota.
+- **Dos convocatorias al año**: ordinaria (junio) y extraordinaria (julio).
+
+Cada asignatura de `data/subjects.json` declara en qué fases entra. Varias
+materias de modalidad cuentan en las dos, por eso `phases` es una lista.
 
 ---
 
@@ -65,18 +82,17 @@ Edita `data/subjects.json` y reinicia `npm run admin`. Cada asignatura necesita:
 ```json
 {
   "code": "GEO",
-  "name": "Geografia",
+  "name": "Geografía",
   "short": "Geogr.",
-  "phase": "especifica",
+  "phases": ["admision"],
   "aliases": ["geografia", "geografía", "geography"]
 }
 ```
 
 - `code` — 2–4 letras, único. Es el directorio donde se guarda el PDF.
 - `short` — la abreviatura que ve el público en los filtros.
-- `phase` — `general` o `especifica`.
-- `aliases` — términos de búsqueda, incluidos los que usaría alguien que busca
-  en castellano.
+- `phases` — `acceso`, `admision` o ambas (`["acceso", "admision"]`).
+- `aliases` — términos de búsqueda alternativos.
 
 ---
 
@@ -105,14 +121,14 @@ El estado vive en la URL, así que cualquier vista se puede compartir o enlazar:
 
 ```
 ?s=MAT          asignatura
-?y=2024         año
-?ss=juny        convocatoria (juny | setembre)
-?t=resolucions  tipo de documento
-?p=general      fase
+?y=2025         año
+?ss=ordinaria   convocatoria (ordinaria | extraordinaria)
+?t=enunciados   tipo de documento (enunciados | soluciones | criterios | plantilla)
+?p=acceso       fase (acceso | admision)
 ?q=filosofia    búsqueda libre
 ```
 
-Ejemplo: <https://elioxy.github.io/WebPAU/?s=FIL&y=2024&t=resolucions>
+Ejemplo: <https://elioxy.github.io/WebPAU/?s=HFI&y=2025&t=soluciones>
 
 ### Interfaz
 

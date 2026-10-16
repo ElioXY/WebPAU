@@ -7,19 +7,19 @@
 type Row = [id: string, subjectIdx: number, year: number, sessionIdx: number, typeIdx: number];
 interface Payload {
   exams: Row[];
-  subjects: [string, string, string][]; // [code, phase, name]
+  subjects: [string, string, string][]; // [code, fases, name]
   types: [string, string, string][]; // [id, etiqueta corta, etiqueta larga]
   base: string;
 }
 
-const SESSIONS = ['juny', 'setembre'];
+const SESSIONS = ['ordinaria', 'extraordinaria'];
 
 /* palabras clave para buscar sin conocer el vocabulario exacto */
 const TYPE_KEYWORDS: Record<string, string> = {
-  enunciats: 'enunciado examen enunciat',
-  resolucions: 'soluciones resoluciones solucions',
-  criteris: 'criterios correccion criteris correcció',
-  plantilla: 'plantilla hoja respuestas full respostes omr',
+  enunciados: 'enunciado examen',
+  soluciones: 'soluciones resoluciones',
+  criterios: 'criterios correccion',
+  plantilla: 'plantilla hoja respuestas omr',
 };
 
 interface State {
@@ -42,7 +42,7 @@ const payload: Payload = JSON.parse(
 );
 
 const codes = payload.subjects.map((s) => s[0]);
-const phases = payload.subjects.map((s) => s[1]);
+const phaseLists = payload.subjects.map((s) => s[1].split(',').filter(Boolean));
 const names = payload.subjects.map((s) => s[2]);
 const TYPES = payload.types.map((t) => t[0]);
 const TYPE_LABEL = new Map(payload.types.map((t) => [t[0], t[1]]));
@@ -91,7 +91,7 @@ const typeBtns = $$<HTMLButtonElement>('#segType button');
 interface Exam {
   id: string;
   code: string;
-  phase: string;
+  phases: string[];
   name: string;
   year: number;
   session: string;
@@ -107,7 +107,7 @@ const exams: Exam[] = payload.exams.map(([id, subjectIdx, year, sessionIdx, type
   return {
     id,
     code,
-    phase: phases[subjectIdx] ?? '',
+    phases: phaseLists[subjectIdx] ?? [],
     name,
     year,
     session,
@@ -144,7 +144,7 @@ const matches = (e: Exam, ignore?: 's' | 't' | 'y'): boolean => {
   if (state.ss && e.session !== state.ss) return false;
   if (ignore !== 't' && state.t && e.type !== state.t) return false;
   if (ignore !== 's' && state.s && e.code !== state.s) return false;
-  if (state.p && e.phase !== state.p) return false;
+  if (state.p && !e.phases.includes(state.p)) return false;
   for (const tok of tokens) if (!e.hay.includes(tok)) return false;
   return true;
 };
@@ -251,9 +251,11 @@ function describe(): string {
   if (state.q) bits.push(`«${state.q}»`);
   if (state.s) bits.push(names[codes.indexOf(state.s)] ?? state.s);
   if (state.y) bits.push(state.y);
-  if (state.ss) bits.push(state.ss === 'juny' ? 'convocatoria de junio' : 'convocatoria de septiembre');
+  if (state.ss) {
+    bits.push(state.ss === 'ordinaria' ? 'convocatoria ordinaria' : 'convocatoria extraordinaria');
+  }
   if (state.t) bits.push(TYPE_LABEL.get(state.t) ?? state.t);
-  if (state.p) bits.push(state.p === 'general' ? 'fase general' : 'fase específica');
+  if (state.p) bits.push(state.p === 'acceso' ? 'fase de acceso' : 'fase de admisión');
   return bits.join(' · ') || 'esos filtros';
 }
 
