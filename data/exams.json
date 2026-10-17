@@ -1,7 +1,23 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T12:02:08.558Z",
+  "updatedAt": "2026-10-17T12:03:11.350Z",
   "exams": [
+    {
+      "id": "fis-2013-ordinaria-criterios",
+      "subject": "FIS",
+      "year": 2013,
+      "session": "ordinaria",
+      "type": "criterios",
+      "pages": 1,
+      "file": "exams/2013/ordinaria/FIS/fis-2013-ordinaria-criterios.pdf",
+      "originalName": "FISICA Criterios_Andalucía_12_13.pdf",
+      "sizeKB": 18,
+      "language": "es",
+      "official": true,
+      "notes": "",
+      "addedAt": "2026-10-17T12:03:11.350Z",
+      "updatedAt": "2026-10-17T12:03:11.350Z"
+    },
     {
       "id": "fis-2013-ordinaria-enunciados",
       "subject": "FIS",
