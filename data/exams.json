@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T14:39:14.426Z",
+  "updatedAt": "2026-10-17T16:22:23.608Z",
   "exams": [
     {
       "id": "fis-2026-extraordinaria-criterios",
@@ -49,22 +49,6 @@
       "notes": "",
       "addedAt": "2026-10-17T14:15:41.887Z",
       "updatedAt": "2026-10-17T14:15:41.887Z"
-    },
-    {
-      "id": "lcl-2026-ordinaria-criterios",
-      "subject": "LCL",
-      "year": 2026,
-      "session": "ordinaria",
-      "type": "criterios",
-      "pages": 2,
-      "file": "exams/2026/ordinaria/LCL/lcl-2026-ordinaria-criterios.pdf",
-      "originalName": "Criterios Titular_Lengua Castellana y Literatura_Ex.pdf",
-      "sizeKB": 136,
-      "language": "es",
-      "official": true,
-      "notes": "",
-      "addedAt": "2026-10-17T14:39:14.426Z",
-      "updatedAt": "2026-10-17T14:39:14.426Z"
     },
     {
       "id": "fis-2013-extraordinaria-criterios",
