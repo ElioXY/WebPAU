@@ -1,22 +1,22 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T14:16:52.480Z",
+  "updatedAt": "2026-10-17T14:37:14.629Z",
   "exams": [
     {
-      "id": "fis-2026-extraordinaria-enunciados",
+      "id": "fis-2026-extraordinaria-criterios",
       "subject": "FIS",
       "year": 2026,
       "session": "extraordinaria",
-      "type": "enunciados",
-      "pages": 2,
-      "file": "exams/2026/extraordinaria/FIS/fis-2026-extraordinaria-enunciados.pdf",
-      "originalName": "Examen Titular Física_Ex.pdf",
-      "sizeKB": 226,
+      "type": "criterios",
+      "pages": 3,
+      "file": "exams/2026/extraordinaria/FIS/fis-2026-extraordinaria-criterios.pdf",
+      "originalName": "Criterios Titular Física.pdf",
+      "sizeKB": 88,
       "language": "es",
       "official": true,
       "notes": "",
-      "addedAt": "2026-10-17T14:16:52.480Z",
-      "updatedAt": "2026-10-17T14:16:52.480Z"
+      "addedAt": "2026-10-17T14:37:14.629Z",
+      "updatedAt": "2026-10-17T14:37:14.629Z"
     },
     {
       "id": "fis-2026-ordinaria-enunciados",
