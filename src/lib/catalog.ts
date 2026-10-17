@@ -78,6 +78,26 @@ export interface CatalogFile {
   exams: Exam[];
 }
 
+/** Una convocatoria del curso: con fecha exacta o solo el mes, si aún no se ha
+ *  publicado el calendario oficial. */
+export interface ExamEvent {
+  id: string;
+  label: string;
+  /** `YYYY-MM-DD`, o `null` si todavía no hay fecha. */
+  start: string | null;
+  end?: string | null;
+  /** `YYYY-MM`, para las que solo se sabe el mes. */
+  month?: string | null;
+  provisional?: boolean;
+}
+
+export interface DatesFile {
+  updatedAt: string;
+  course: string;
+  source?: string;
+  events: ExamEvent[];
+}
+
 /**
  * Find the repository root by walking up until we see package.json + data/.
  * Robust for both the source file and Astro's bundled prerender chunks
@@ -107,6 +127,18 @@ export const EXAMS_DIR = path.join(REPO_ROOT, 'public', 'exams');
 export function loadSubjects(): Subject[] {
   const raw = JSON.parse(fs.readFileSync(SUBJECTS_FILE, 'utf8')) as { subjects: Subject[] };
   return raw.subjects;
+}
+
+/* El calendario es opcional: sin él la portada simplemente no enseña la cuenta
+   atrás, en vez de romper el build. */
+export const DATES_FILE = path.join(REPO_ROOT, 'data', 'dates.json');
+
+export function loadDates(): DatesFile | null {
+  try {
+    return JSON.parse(fs.readFileSync(DATES_FILE, 'utf8')) as DatesFile;
+  } catch {
+    return null;
+  }
 }
 
 export function loadCatalog(): CatalogFile {

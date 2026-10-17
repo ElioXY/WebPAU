@@ -11,6 +11,7 @@ import {
 import SearchIcon from '../components/icons/Search.astro';
 import OpenIcon from '../components/icons/Open.astro';
 import GitHubIcon from '../components/icons/GitHub.astro';
+import NextExam from '../components/NextExam.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const pdfUrl = (file: string) => `${base}/${file.replace(/^\//, '')}`;
@@ -120,6 +121,7 @@ const footSubjects = docSubjects.slice(0, 8);
         {/* el mosaico solo existe si hay documentos que enseñar */}
         {exams.length > 0 && <a href="#asignaturas">Asignaturas</a>}
         <a href="#archivo">Archivo</a>
+        <a href={`${base}/practica`}>Practicar</a>
       </nav>
       <p class="head-meta mono">
         <span class="hide-s">{statDocs} documentos</span>
@@ -145,6 +147,8 @@ const footSubjects = docSubjects.slice(0, 8);
           reunidos por asignatura, año y convocatoria. Elige una materia y abre sus
           PDFs en el navegador.
         </p>
+
+        <NextExam />
 
         {exams.length > 0 && (
           <form class="filters" id="filters" role="search" autocomplete="off">
@@ -431,6 +435,7 @@ const footSubjects = docSubjects.slice(0, 8);
         <div>
           <h3>El proyecto</h3>
           <ul>
+            <li><a href={`${base}/practica`}>Practicar un examen</a></li>
             <li><a href="https://github.com/ElioXY/WebPAU" target="_blank" rel="noreferrer">Código en GitHub</a></li>
             <li><a href="https://github.com/ElioXY/WebPAU/issues" target="_blank" rel="noreferrer">Falta un examen</a></li>
             <li><a href={`${base}/404`}>Página no encontrada</a></li>

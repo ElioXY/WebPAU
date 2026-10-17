@@ -1,0 +1,110 @@
+---
+/* =========================================================================
+   Modo práctica (índice): qué exámenes se pueden hacer a tiempo.
+
+   Cada examen tiene su propia página estática (`/practica/fis-2026-ordinaria`),
+   así el cronómetro funciona sin servidor y el enlace se puede compartir.
+   ========================================================================= */
+import Base from '../layouts/Base.astro';
+import { DOC_TYPES, SESSIONS, loadSubjects, type DocType } from '../lib/catalog';
+import { practiceSets } from '../lib/practice';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const subjects = loadSubjects();
+const sets = practiceSets();
+
+const subjectName = (code: string) => subjects.find((s) => s.code === code)?.name ?? code;
+const sessionLong = (id: string) => SESSIONS.find((s) => s.id === id)?.long ?? id;
+const typeLabel = (id: string) => DOC_TYPES.find((t) => t.id === id)?.label ?? id;
+---
+
+<Base
+  title="Practicar un examen de la PAU — WebPAU"
+  description="Haz un examen de la PAU como en el aula: elige asignatura y convocatoria, pon el cronómetro y descubre las soluciones y los criterios al terminar."
+>
+  <header class="site-head">
+    <div class="wrap head-bar">
+      <a class="brand" href={`${base}/`}>
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        WebPAU
+      </a>
+      <nav class="head-nav" aria-label="Secciones">
+        <a href={`${base}/#asignaturas`}>Asignaturas</a>
+        <a href={`${base}/#archivo`}>Archivo</a>
+        <a href={`${base}/practica`} aria-current="page">Practicar</a>
+      </nav>
+      <a class="cta" href={`${base}/`}>Volver al archivo</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero practice-hero">
+      <div class="wrap">
+        <p class="kicker">Práctica</p>
+        <h1>Haz el examen <em>a tiempo</em>.</h1>
+        <p class="lede">
+          Elige un examen del archivo, pon el cronómetro y trabaja con el enunciado delante. Las
+          soluciones y los criterios quedan tapados hasta que termines.
+        </p>
+      </div>
+    </section>
+
+    {sets.length === 0 ? (
+      <section class="archive">
+        <div class="wrap">
+          <div class="empty">
+            <p class="badge" aria-hidden="true">0</p>
+            <h2>Todavía no hay exámenes que practicar</h2>
+            <p>
+              En cuanto haya un enunciado en el archivo, aparecerá aquí con su cronómetro. Mientras
+              tanto, puedes <a class="link" href={`${base}/#archivo`}>ver el archivo completo</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+    ) : (
+      <section class="archive">
+        <div class="wrap">
+          <div class="results-head">
+            <h2>Exámenes listos para practicar</h2>
+            <p class="count">
+              {sets.length} {sets.length === 1 ? 'examen' : 'exámenes'}
+            </p>
+          </div>
+
+          <ul class="practice-list">
+            {sets.map((set) => {
+              const docs = (['enunciados', 'soluciones', 'criterios', 'plantilla'] as DocType[]).filter(
+                (type) => set.docs[type]
+              );
+              return (
+                <li class="practice-set">
+                  <div class="practice-set-main">
+                    <h3>{subjectName(set.subject)}</h3>
+                    <p class="row-meta">
+                      {set.year} · {sessionLong(set.session)} · {docs.length}{' '}
+                      {docs.length === 1 ? 'documento' : 'documentos'}
+                    </p>
+                  </div>
+                  <ul class="practice-docs" aria-label="Documentos disponibles">
+                    {docs.map((type) => (
+                      <li data-t={type}>{typeLabel(type)}</li>
+                    ))}
+                  </ul>
+                  <a class="dl" href={`${base}/practica/${set.slug}`}>
+                    Practicar
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p class="practice-note">
+            Sin cronómetro también sirve: en el <a class="link" href={`${base}/#archivo`}>archivo</a>{' '}
+            están todos los documentos, con sus enunciados y correcciones.
+          </p>
+        </div>
+      </section>
+    )}
+  </main>
+</Base>

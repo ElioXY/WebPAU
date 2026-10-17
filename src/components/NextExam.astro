@@ -1,0 +1,32 @@
+---
+/* =========================================================================
+   «Próxima PAU»: el calendario del curso en una línea, con la cuenta atrás
+   que se refresca en el navegador (el build no puede saber qué día es hoy
+   cuando alguien abre la página).
+   ========================================================================= */
+import { loadDates } from '../lib/catalog';
+import { humanDate, nextEvent } from '../lib/dates';
+
+const dates = loadDates();
+const events = dates?.events ?? [];
+const next = nextEvent(events);
+---
+
+{next && (
+  <p class="next-exam" id="nextExam">
+    <span class="next-exam-tag">Próxima PAU</span>
+    <span id="nextExamLabel">
+      {next.label} · {humanDate(next)}{next.provisional ? ' (provisional)' : ''}
+    </span>
+    <span class="next-exam-days" id="nextExamDays"></span>
+  </p>
+)}
+
+{events.length > 0 && (
+  <>
+    <script type="application/json" id="dates-data" set:html={JSON.stringify(events)} />
+    <script>
+      import '../scripts/dates.ts';
+    </script>
+  </>
+)}

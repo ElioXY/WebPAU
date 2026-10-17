@@ -8,7 +8,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "import": "node scripts/import.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

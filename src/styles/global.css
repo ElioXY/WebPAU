@@ -374,6 +374,39 @@ main {
   margin-top: 0.9rem;
 }
 
+/* ------------------------------------------------------------ próxima pau */
+/* El estado del curso en una línea: convocatoria, fechas y lo que falta. */
+
+.next-exam {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  margin-top: 1.15rem;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  padding: 0.45rem 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+
+.next-exam-tag {
+  color: var(--acceso);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.next-exam-days {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.next-exam-days:empty {
+  display: none;
+}
+
 /* ---------------------------------------------------------------- filtros */
 /* una sola tarjeta: barra de búsqueda arriba, herramientas debajo */
 
@@ -1139,6 +1172,285 @@ button.dl:hover {
 
 .notfound .owner-note a:hover {
   color: var(--ink);
+}
+
+/* --------------------------------------------------------------- práctica */
+/* La sala de práctica es una tarjeta de reloj y el visor del enunciado: dos
+   columnas en escritorio, una en móvil, con el cronómetro pegado arriba. */
+
+.practice-hero {
+  padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(0.5rem, 2vw, 0.75rem);
+}
+
+.practice-back {
+  margin-top: 1.2rem;
+}
+
+.practice-back a {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--rule);
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+
+.practice-back a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.practice-run {
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.practice-grid {
+  display: grid;
+  grid-template-columns: minmax(230px, 310px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.practice-sub {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.timer,
+.reader,
+.correccion {
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+}
+
+.timer {
+  position: sticky;
+  top: calc(var(--header-h) + 1rem);
+  padding: 1rem 1.1rem 1.1rem;
+}
+
+.clock {
+  margin-top: 0.7rem;
+  font-family: var(--mono);
+  font-size: clamp(2.75rem, 2rem + 3vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock[data-state='done'] {
+  color: var(--acceso);
+}
+
+.clock[data-state='paused'] {
+  color: var(--ink-3);
+}
+
+.timer-state {
+  margin-top: 0.6rem;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  min-height: 2.5em;
+}
+
+.timer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+
+.timer-controls .select {
+  flex: 1 1 6rem;
+  font-size: 0.8125rem;
+  padding-block: 0.45rem;
+}
+
+.timer-controls .btn-primary,
+.timer-controls .btn-ghost {
+  flex: 1 1 auto;
+  margin-left: 0;
+}
+
+.timer-hint {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.reader {
+  overflow: hidden;
+}
+
+.reader-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--rule);
+  background: var(--sheet-2);
+}
+
+.reader-frame {
+  display: block;
+  width: 100%;
+  height: clamp(420px, 72vh, 900px);
+  border: 0;
+  background: var(--stock-deep);
+}
+
+.reader-note {
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.correccion {
+  margin-top: 1rem;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+}
+
+.correccion:focus {
+  outline: none;
+}
+
+.correccion h2 {
+  font-size: 1.15rem;
+}
+
+.correccion p {
+  margin-top: 0.5rem;
+  color: var(--ink-2);
+  max-width: 60ch;
+}
+
+.doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+.practice-run .note {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--ink-3);
+}
+
+/* la lista de exámenes disponibles */
+.practice-list {
+  list-style: none;
+  padding: 0;
+  border: 1px solid var(--rule);
+  background: var(--sheet);
+}
+
+.practice-set {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--rule-2);
+  transition: background-color var(--dur-1) var(--ease);
+}
+
+.practice-set:last-child {
+  border-bottom: 0;
+}
+
+.practice-set:hover {
+  background: var(--sheet-2);
+}
+
+.practice-set-main {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.practice-set-main h3 {
+  font-size: 1rem;
+}
+
+.practice-docs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  padding: 0;
+}
+
+.practice-docs li {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 0.1rem 0.35rem;
+}
+
+.practice-docs li[data-t='soluciones'] {
+  color: var(--acceso);
+  border-color: color-mix(in srgb, var(--acceso) 35%, transparent);
+}
+
+.practice-docs li[data-t='criterios'] {
+  color: var(--stamp);
+  border-color: color-mix(in srgb, var(--stamp) 35%, transparent);
+}
+
+.practice-note {
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+
+.empty .link,
+.practice-note .link {
+  border-bottom: 1px solid var(--rule);
+}
+
+.empty .link:hover {
+  border-color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .practice-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .timer {
+    position: static;
+  }
+}
+
+@media (max-width: 700px) {
+  /* en el móvil la etiqueta es un adorno: la línea ya empieza por las fechas */
+  .next-exam-tag {
+    display: none;
+  }
+
+  .reader-frame {
+    height: 62vh;
+    min-height: 360px;
+  }
+
+  .practice-set .dl {
+    margin-left: auto;
+  }
+
+  .timer-controls .btn-primary,
+  .timer-controls .btn-ghost {
+    flex: 1 1 100%;
+  }
 }
 
 /* --------------------------------------------------------------- movimiento */

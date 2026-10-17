@@ -1,0 +1,22 @@
+{
+  "updatedAt": "2026-10-17",
+  "course": "2026/2027",
+  "source": "https://www.diariodesevilla.es/andalucia/andalucia-confirma-prueba-acceso-universidad_0_2008266958.html",
+  "events": [
+    {
+      "id": "ordinaria",
+      "label": "Convocatoria ordinaria",
+      "start": "2027-06-01",
+      "end": "2027-06-03",
+      "provisional": false
+    },
+    {
+      "id": "extraordinaria",
+      "label": "Convocatoria extraordinaria",
+      "month": "2027-07",
+      "start": null,
+      "end": null,
+      "provisional": true
+    }
+  ]
+}

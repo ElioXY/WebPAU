@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WebPAU · tres propuestas de interfaz</title>
+<style>
+  /* =====================================================================
+     Índice de este archivo
+       1. Andamio (barra superior, etiquetas de propuesta)
+       2. Propuesta A — «Índice»   · editorial / boletín impreso
+       3. Propuesta B — «Buscador» · aplicación oscura, búsqueda primero
+       4. Propuesta C — «Tablero»  · por asignatura, cálida y táctil
+     ===================================================================== */
+
+  *,*::before,*::after { box-sizing: border-box; }
+  * { margin: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: #101216;
+    color: #e7e9ee;
+    font: 400 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: 4rem;
+  }
+  img, svg { display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; }
+
+  /* --------------------------------------------------------- andamio ---- */
+  .jump {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;
+    padding: 0.75rem clamp(1rem, 4vw, 2.5rem);
+    background: rgba(16,18,22,.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #22262e;
+  }
+  .jump b { font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase; color: #8d95a3; }
+  .jump a {
+    color: #e7e9ee; text-decoration: none; font-size: .8125rem;
+    border: 1px solid #2c313b; border-radius: 999px; padding: .3rem .7rem;
+  }
+  .jump a:hover { background: #1b1f26; }
+  .jump span { margin-left: auto; font-size: .75rem; color: #767f8d; font-family: ui-monospace, Consolas, monospace; }
+
+  .p { padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2.5rem) 0; }
+  .p-badge {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem;
+    margin-bottom: .9rem; font-size: .8125rem; color: #98a1af;
+  }
+  .p-badge b { color: #fff; font-size: 1.0625rem; letter-spacing: -.01em; }
+  .p-badge em { font-style: normal; color: #6f7885; font-family: ui-monospace, Consolas, monospace; font-size: .75rem; }
+  .p .page { border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(0,0,0,.9); }
+
+  /* =====================================================================
+     A · «ÍNDICE» — editorial, papel, serif, reglas finas
+     ===================================================================== */
+  .a {
+    --paper: #f7f5ef;
+    --paper-2: #efece3;
+    --ink: #17171a;
+    --ink-2: #565349;
+    --ink-3: #86816f;
+    --rule: #d9d4c5;
+    --rule-2: #e7e3d8;
+    --accent: #8a2b20;
+
+    background: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .a .serif { font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; }
+  .a .mono { font-family: ui-monospace, Consolas, monospace; }
+  .a .wrap { max-width: 1180px; margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 4rem); }
+
+  /* cabecera */
+  .a .head { border-bottom: 1px solid var(--rule); }
+  .a .head .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding-block: 1.1rem;
+  }
+  .a .wordmark {
+    font-family: Georgia, serif; font-weight: 700; font-size: 1.35rem;
+    letter-spacing: -.02em;
+  }
+  .a .wordmark i { color: var(--accent); font-style: normal; }
+  .a .head .meta {
+    display: flex; align-items: center; gap: 1.25rem;
+    font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .a .head .meta a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--rule); }
+
+  /* hero */
+  .a .hero { padding-block: clamp(2.5rem, 6vw, 4.5rem); border-bottom: 1px solid var(--rule); }
+  .a .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .65fr); gap: clamp(1.5rem, 5vw, 4rem); align-items: end; }
+  .a .kicker {
+    font-size: .6875rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.1rem;
+  }
+  .a h1 {
+    font-family: Georgia, serif; font-weight: 400;
+    font-size: clamp(2.4rem, 1rem + 4.6vw, 4.2rem); line-height: 1.02;
+    letter-spacing: -.028em;
+  }
+  .a h1 em { font-style: italic; color: var(--accent); }
+  .a .hero p.lede { margin-top: 1.4rem; max-width: 52ch; color: var(--ink-2); font-size: 1.0625rem; }
+  .a .ficha { border: 1px solid var(--rule); background: #fff; padding: 1.25rem 1.35rem; }
+  .a .ficha h2 { font-size: .6875rem; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin-bottom: .9rem; }
+  .a .ficha dl { display: grid; grid-template-columns: 1fr auto; gap: .45rem 1rem; font-size: .875rem; }
+  .a .ficha dt { color: var(--ink-2); }
+  .a .ficha dd { font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  .a .ficha .sep { grid-column: 1 / -1; border-top: 1px dotted var(--rule); }
+
+  /* filtros */
+  .a .tools { border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+  .a .tools > .wrap { display: grid; gap: 1.15rem; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); padding-block: 1.5rem; }
+  .a .f label { display: block; font-size: .6875rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .5rem; }
+  .a .f input, .a .f select {
+    width: 100%; appearance: none; background: transparent; border: 0;
+    border-bottom: 1px solid var(--rule); padding: .35rem 0; font: inherit; color: var(--ink);
+    border-radius: 0;
+  }
+  .a .f input::placeholder { color: var(--ink-3); font-style: italic; }
+  .a .f input:focus, .a .f select:focus { outline: 0; border-bottom-color: var(--accent); }
+  .a .f select { background-image: none; }
+  .a .temas { font-size: .8125rem; border-top: 1px solid var(--rule-2); padding-block: .9rem 1.2rem; }
+  .a .temas .wrap { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; }
+  .a .temas button {
+    border: 0; background: none; padding: 0; font: inherit; cursor: pointer;
+    color: var(--ink-2); border-bottom: 1px solid transparent;
+  }
+  .a .temas button:hover { color: var(--ink); border-bottom-color: var(--rule); }
+  .a .temas button[aria-pressed="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .a .temas button em { font-style: normal; font-family: ui-monospace, Consolas, monospace; font-size: .6875rem; color: var(--ink-3); }
+
+  /* listado */
+  .a .archive { padding-block: clamp(2rem, 4vw, 3.25rem) 3rem; }
+  .a .archive-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: .6rem; }
+  .a .archive-head h2 { font-family: Georgia, serif; font-weight: 400; font-size: 1.5rem; letter-spacing: -.01em; }
+  .a .archive-head span { font-family: ui-monospace, Consolas, monospace; font-size: .75rem; color: var(--ink-3); }
+
+  .a .group { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0 2rem; padding-block: 1.6rem; border-bottom: 1px solid var(--rule); }
+  .a .group > .g-head { text-align: right; }
+  .a .g-year { font-family: Georgia, serif; font-size: 2rem; line-height: 1; letter-spacing: -.03em; }
+  .a .g-session { display: block; margin-top: .3rem; font-size: .75rem; font-style: italic; color: var(--ink-3); }
+  .a .g-list { display: grid; }
+  .a .r {
+    display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) auto; gap: 0 1rem;
+    align-items: baseline; padding: .6rem 0; border-top: 1px dotted var(--rule);
+  }
+  .a .r:first-child { border-top: 0; }
+  .a .r:hover { background: #fff; }
+  .a .r .code { font-family: ui-monospace, Consolas, monospace; font-size: .75rem; letter-spacing: .06em; color: var(--ink-3); }
+  .a .r .t { font-family: Georgia, serif; font-size: 1.125rem; letter-spacing: -.005em; }
+  .a .r .t a { color: inherit; text-decoration: none; }
+  .a .r:hover .t a { text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 4px; }
+  .a .r .t .tag { font-family: system-ui, sans-serif; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-left: .6rem; }
+  .a .r .t .tag[data-t="resolucions"] { color: var(--accent); }
+  .a .r .side { display: flex; align-items: baseline; gap: 1rem; font-family: ui-monospace, Consolas, monospace; font-size: .75rem; color: var(--ink-3); }
+  .a .r .side a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+  .a .r .side a:hover { border-bottom-color: var(--ink); }
+
+  /* pie */
+  .a .foot { background: var(--paper-2); border-top: 1px solid var(--rule); padding-block: 2.5rem 3rem; }
+  .a .foot .wrap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+  .a .foot h3 { font-size: .6875rem; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin-bottom: .8rem; }
+  .a .foot p, .a .foot li { font-size: .875rem; color: var(--ink-2); }
+  .a .foot ul { list-style: none; padding: 0; display: grid; gap: .35rem; }
+  .a .foot a { text-decoration: none; border-bottom: 1px solid transparent; }
+  .a .foot a:hover { border-bottom-color: var(--rule); }
+
+  /* =====================================================================
+     B · «BUSCADOR» — app oscura, la búsqueda es la interfaz
+     ===================================================================== */
+  .b {
+    --bg: #0b0c0f;
+    --panel: #14171c;
+    --panel-2: #1b1f26;
+    --line: #262b34;
+    --txt: #e9ebef;
+    --txt-2: #99a1ad;
+    --txt-3: #6b7280;
+    --acc: #5eead4;
+    --acc-2: #34d399;
+
+    background: var(--bg); color: var(--txt);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .b .mono { font-family: ui-monospace, Consolas, monospace; }
+  .b .wrap { max-width: 900px; margin-inline: auto; padding-inline: clamp(1rem, 4vw, 2rem); }
+
+  .b .head { border-bottom: 1px solid var(--line); }
+  .b .head .wrap { display: flex; align-items: center; gap: 1rem; padding-block: .8rem; }
+  .b .brand { display: flex; align-items: center; gap: .55rem; font-weight: 640; letter-spacing: -.01em; }
+  .b .brand .dot { width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(140deg, var(--acc), #3b82f6); }
+  .b .head .right { margin-left: auto; display: flex; align-items: center; gap: .5rem; }
+  .b .pill {
+    border: 1px solid var(--line); background: var(--panel); color: var(--txt-2);
+    border-radius: 999px; padding: .32rem .7rem; font-size: .8125rem; cursor: pointer;
+  }
+  .b .pill:hover { color: var(--txt); }
+  .b .pill[aria-pressed="true"] { background: #0f2a26; border-color: #1e5c52; color: var(--acc); }
+  .b .ghost { border: 1px solid var(--line); background: none; color: var(--txt-2); border-radius: 8px; padding: .32rem .6rem; font-size: .8125rem; }
+
+  .b .hero { padding-block: clamp(2rem, 5vw, 3.25rem) 1.5rem; text-align: center; }
+  .b h1 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.05rem); font-weight: 620; letter-spacing: -.025em; }
+  .b .hero p { color: var(--txt-2); margin-top: .6rem; font-size: .9375rem; }
+
+  .b .searchbox {
+    display: flex; align-items: center; gap: .8rem;
+    margin: 1.6rem auto 0; max-width: 680px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: .9rem 1rem; box-shadow: 0 0 0 4px rgba(94,234,212,.06), 0 20px 40px -30px #000;
+  }
+  .b .searchbox svg { flex: none; color: var(--txt-3); }
+  .b .searchbox input {
+    flex: 1; background: none; border: 0; outline: 0; font: inherit; font-size: 1.0625rem; color: var(--txt);
+  }
+  .b .searchbox input::placeholder { color: var(--txt-3); }
+  .b kbd {
+    font-family: ui-monospace, Consolas, monospace; font-size: .6875rem; color: var(--txt-3);
+    white-space: nowrap;
+    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: .15rem .35rem;
+  }
+
+  .b .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1.5rem; padding-bottom: 1.25rem; }
+  .b .toolbar .sp { flex: 1; }
+  .b .count { font-size: .8125rem; color: var(--txt-3); }
+
+  .b .list { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .b .g-head {
+    display: flex; align-items: center; gap: .7rem; padding: .7rem 1rem;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-family: ui-monospace, Consolas, monospace; font-size: .6875rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--txt-3);
+  }
+  .b .g-head b { color: var(--txt-2); font-weight: 500; }
+  .b .r {
+    display: flex; align-items: center; gap: .9rem; padding: .8rem 1rem;
+    border-bottom: 1px solid var(--line); border-left: 2px solid transparent; cursor: pointer;
+  }
+  .b .r:last-child { border-bottom: 0; }
+  .b .r:hover { background: #181c22; border-left-color: var(--acc); }
+  .b .r .code {
+    flex: none; width: 46px; text-align: center; font-family: ui-monospace, Consolas, monospace;
+    font-size: .6875rem; letter-spacing: .06em; padding: .35rem 0; border-radius: 7px;
+    background: #10201e; color: var(--acc); border: 1px solid #1c3a36;
+  }
+  .b .r .t { min-width: 0; }
+  .b .r .t a { color: var(--txt); text-decoration: none; font-size: .9375rem; }
+  .b .r:hover .t a { text-decoration: underline; text-underline-offset: 3px; }
+  .b .r .t span { display: block; color: var(--txt-3); font-size: .75rem; margin-top: .1rem; }
+  .b .r .tag {
+    margin-left: auto; flex: none; font-size: .75rem; color: var(--txt-2);
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: .2rem .6rem;
+  }
+  .b .r .dl {
+    flex: none; color: var(--txt-3); border: 1px solid var(--line); border-radius: 8px;
+    padding: .3rem .55rem; font-size: .75rem; text-decoration: none;
+  }
+  .b .r:hover .dl { color: var(--acc); border-color: #1e5c52; }
+
+  .b .foot { border-top: 1px solid var(--line); margin-top: 2rem; padding-block: 1.5rem 2rem; }
+  .b .hints {
+    display: flex; flex-wrap: wrap; gap: 1.25rem; padding: .8rem 1rem; margin-bottom: 1.75rem;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+    font-family: ui-monospace, Consolas, monospace; font-size: .75rem; color: var(--txt-3);
+  }
+  .b .hints kbd { margin-right: .35rem; }
+  .b .foot .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; color: var(--txt-3); font-size: .8125rem; }
+  .b .foot h3 { font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase; color: var(--txt-3); margin-bottom: .6rem; font-weight: 600; }
+  .b .foot ul { list-style: none; padding: 0; display: grid; gap: .3rem; }
+  .b .foot a { color: var(--txt-2); text-decoration: none; }
+  .b .foot a:hover { color: var(--txt); }
+
+  /* =====================================================================
+     C · «TABLERO» — por asignatura, cálida, tarjetas redondeadas
+     ===================================================================== */
+  .c {
+    --bg: #fdf8f1;
+    --card: #fff;
+    --ink: #2a2118;
+    --ink-2: #6b5d4d;
+    --ink-3: #9c8b76;
+    --line: #ece1d0;
+    --terr: #c2410c;
+    --terr-w: #fdeee4;
+    --teal: #0f766e;
+    --teal-w: #e3f2f0;
+    --sun: #f59e0b;
+
+    background: var(--bg); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .c .mono { font-family: ui-monospace, Consolas, monospace; }
+  .c .wrap { max-width: 1120px; margin-inline: auto; padding-inline: clamp(1rem, 4vw, 2.5rem); }
+
+  .c .head { padding-block: 1rem; }
+  .c .head .wrap {
+    display: flex; align-items: center; gap: 1rem;
+    background: #fff; border: 1px solid var(--line); border-radius: 999px;
+    padding: .55rem .6rem .55rem 1rem;
+    box-shadow: 0 10px 24px -22px rgba(42,33,24,.6);
+  }
+  .c .brand { display: flex; align-items: center; gap: .5rem; font-weight: 680; letter-spacing: -.02em; }
+  .c .brand .mark { width: 22px; height: 22px; border-radius: 7px; background: var(--terr); }
+  .c .head nav { display: flex; gap: 1rem; font-size: .875rem; color: var(--ink-2); }
+  .c .head nav a { text-decoration: none; }
+  .c .head .cta {
+    margin-left: auto; background: var(--ink); color: #fff; text-decoration: none;
+    border-radius: 999px; padding: .45rem 1rem; font-size: .875rem; font-weight: 550;
+  }
+
+  .c .hero { padding-block: clamp(2rem, 5vw, 3.5rem) 2rem; }
+  .c .kicker {
+    display: inline-flex; align-items: center; gap: .4rem; background: var(--terr-w); color: var(--terr);
+    border-radius: 999px; padding: .28rem .7rem; font-size: .75rem; font-weight: 600; letter-spacing: .02em;
+  }
+  .c h1 { font-size: clamp(2.1rem, 1rem + 3.4vw, 3.4rem); line-height: 1.02; letter-spacing: -.035em; margin-top: 1rem; font-weight: 700; }
+  .c h1 em { font-style: normal; color: var(--terr); }
+  .c .hero p { margin-top: .9rem; max-width: 54ch; color: var(--ink-2); font-size: 1.0625rem; }
+
+  .c .findbar {
+    display: flex; gap: .5rem; margin-top: 1.75rem; background: #fff; border: 1px solid var(--line);
+    border-radius: 18px; padding: .5rem; box-shadow: 0 16px 32px -28px rgba(42,33,24,.7);
+  }
+  .c .findbar .fld { flex: 1; display: flex; align-items: center; gap: .6rem; padding-inline: .75rem; }
+  .c .findbar svg { color: var(--ink-3); flex: none; }
+  .c .findbar input { flex: 1; border: 0; outline: 0; background: none; font: inherit; font-size: 1rem; }
+  .c .findbar input::placeholder { color: var(--ink-3); }
+  .c .findbar select { border: 0; background: none; font: inherit; color: var(--ink-2); border-left: 1px solid var(--line); padding-left: .9rem; }
+  .c .findbar .go {
+    border: 0; background: var(--terr); color: #fff; border-radius: 13px; padding: .7rem 1.2rem;
+    font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .c .findbar .go:hover { background: #9a3412; }
+  .c .quick { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; font-size: .8125rem; }
+  .c .quick span { color: var(--ink-3); }
+  .c .quick button {
+    border: 1px solid var(--line); background: #fff; color: var(--ink-2); border-radius: 999px;
+    padding: .25rem .7rem; font: inherit; font-size: .8125rem; cursor: pointer;
+  }
+  .c .quick button:hover { border-color: var(--ink-3); color: var(--ink); }
+
+  .c .sec { padding-block: 1.5rem; }
+  .c .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+  .c .sec-head h2 { font-size: 1.25rem; letter-spacing: -.02em; }
+  .c .sec-head span { font-size: .8125rem; color: var(--ink-3); }
+
+  .c .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: .75rem; }
+  .c .tile {
+    text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: .9rem 1rem 1rem; cursor: pointer; font: inherit; color: inherit;
+    display: grid; gap: .35rem; transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .c .tile:hover { transform: translateY(-2px); box-shadow: 0 14px 26px -20px rgba(42,33,24,.8); }
+  .c .tile[aria-pressed="true"] { border-color: var(--terr); background: var(--terr-w); }
+  .c .tile .nm { font-weight: 600; letter-spacing: -.01em; line-height: 1.25; }
+  .c .tile .ct { font-size: .75rem; color: var(--ink-3); }
+  .c .tile .bar { display: flex; gap: 3px; margin-top: .35rem; }
+  .c .tile .bar i { height: 5px; border-radius: 2px; background: var(--line); flex: 1; }
+  .c .tile[data-phase="acceso"] .bar i.on { background: var(--terr); }
+  .c .tile[data-phase="admision"] .bar i.on { background: var(--teal); }
+
+  .c .panel { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 18px 40px -34px rgba(42,33,24,.9); }
+  .c .g-head {
+    display: flex; align-items: center; gap: .75rem; padding: .85rem 1.15rem; background: #fffaf3;
+    border-bottom: 1px solid var(--line);
+  }
+  .c .g-head b { font-size: 1.0625rem; letter-spacing: -.02em; }
+  .c .g-head .ss { font-size: .8125rem; color: var(--ink-2); }
+  .c .g-head .n { margin-left: auto; font-size: .75rem; color: var(--ink-3); }
+  .c .r { display: flex; align-items: center; gap: .9rem; padding: .85rem 1.15rem; border-bottom: 1px solid var(--line); }
+  .c .r:last-child { border-bottom: 0; }
+  .c .r:hover { background: #fffcf7; }
+  .c .r .stripe { width: 4px; align-self: stretch; border-radius: 3px; background: var(--terr); }
+  .c .r[data-phase="admision"] .stripe { background: var(--teal); }
+  .c .r .t { min-width: 0; }
+  .c .r .t a { color: var(--ink); text-decoration: none; font-weight: 550; letter-spacing: -.01em; }
+  .c .r .t small { display: block; color: var(--ink-3); font-size: .75rem; margin-top: .15rem; }
+  .c .r .chip {
+    margin-left: auto; flex: none; border-radius: 999px; padding: .2rem .6rem; font-size: .75rem;
+    background: var(--terr-w); color: var(--terr); font-weight: 550;
+  }
+  .c .r .chip[data-t="resolucions"] { background: var(--teal-w); color: var(--teal); }
+  .c .r .pdf {
+    flex: none; border: 1px solid var(--line); background: #fff; border-radius: 10px;
+    padding: .35rem .7rem; font-size: .8125rem; text-decoration: none; color: var(--ink);
+  }
+  .c .r .pdf:hover { border-color: var(--ink-3); }
+
+  .c .foot { margin-top: 2rem; background: #fff; border-top: 1px solid var(--line); padding-block: 2.25rem; }
+  .c .foot .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.75rem; }
+  .c .foot h3 { font-size: .8125rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .7rem; }
+  .c .foot p, .c .foot li { font-size: .875rem; color: var(--ink-2); }
+  .c .foot ul { list-style: none; padding: 0; display: grid; gap: .35rem; }
+  .c .foot a { text-decoration: none; }
+  .c .foot a:hover { color: var(--ink); text-decoration: underline; }
+  .c .foot .note { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .75rem; color: var(--ink-3); }
+
+  /* móvil: nada debe desbordar en horizontal */
+  @media (max-width: 700px) {
+    .a .head .meta span:first-child { display: none; }
+    .a .head .meta { flex-wrap: wrap; gap: .35rem .8rem; font-size: .6875rem; }
+    .a .r { grid-template-columns: 2.75rem minmax(0, 1fr); row-gap: .3rem; }
+    .a .r .side { grid-column: 2; }
+
+    .b .head .right .pill { display: none; }
+    .b .r { flex-wrap: wrap; row-gap: .5rem; }
+    .b .r .dl { margin-left: auto; }
+
+    .c .findbar { flex-wrap: wrap; }
+    .c .findbar .fld { flex: 1 1 100%; }
+    .c .findbar .go { width: 100%; border-radius: 13px; }
+    .c .r { flex-wrap: wrap; row-gap: .5rem; }
+    .c .r .pdf { margin-left: auto; }
+  }
+
+  @media (max-width: 860px) {
+    .a .hero .wrap, .a .tools .wrap, .a .foot .wrap, .b .foot .cols, .c .foot .cols { grid-template-columns: 1fr; }
+    .a .group { grid-template-columns: 1fr; gap: .6rem; }
+    .a .group > .g-head { text-align: left; }
+    .c .head nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="jump">
+  <b>Propuestas</b>
+  <a href="#a">A · Índice</a>
+  <a href="#b">B · Buscador</a>
+  <a href="#c">C · Tablero</a>
+  <span>mismo contenido, tres lenguajes</span>
+</nav>
+
+<!-- =====================================================================
+     A · ÍNDICE
+     ===================================================================== -->
+<article class="p" id="a">
+  <div class="p-badge">
+    <b>A · «Índice»</b>
+    <span>Editorial y tipográfico: papel, serif, reglas finas. Se lee como el índice de un boletín oficial. Cero tarjetas, cero casillas.</span>
+    <em>papel claro · serif · densidad alta</em>
+  </div>
+
+  <div class="page a">
+    <header class="head">
+      <div class="wrap">
+        <a class="wordmark" href="#">Web<i>PAU</i></a>
+        <div class="meta">
+          <span>Andalucía</span>
+          <span>10 documentos</span>
+          <a href="#">GitHub</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <p class="kicker">Prueba de Acceso a la Universidad</p>
+          <h1>El archivo de exámenes, <em>ordenado como un libro</em>.</h1>
+          <p class="lede">
+            Enunciados, soluciones y criterios de corrección de la PAU en Andalucía. Diez
+            documentos por ahora, cada uno con su año, su convocatoria y su fase.
+          </p>
+        </div>
+        <aside class="ficha">
+          <h2>Ficha del archivo</h2>
+          <dl>
+            <dt>Documentos</dt><dd>10</dd>
+            <div class="sep"></div>
+            <dt>Asignaturas</dt><dd>9</dd>
+            <div class="sep"></div>
+            <dt>Años</dt><dd>2024–2025</dd>
+            <div class="sep"></div>
+            <dt>Convocatorias</dt><dd>jun · sep</dd>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tools">
+      <div class="wrap mock">
+        <div class="f">
+          <label for="a-q">Buscar</label>
+          <input id="a-q" data-search type="search" placeholder="matemáticas, filosofía, 2024…" />
+        </div>
+        <div class="f">
+          <label for="a-y">Año</label>
+          <select id="a-y"><option>Todos</option><option>2025</option><option>2024</option></select>
+        </div>
+        <div class="f">
+          <label for="a-p">Fase</label>
+          <select id="a-p"><option>Todas</option><option>Acceso</option><option>Admisión</option></select>
+        </div>
+      </div>
+      <div class="temas">
+        <div class="wrap">
+          <button data-tg aria-pressed="true">Todas <em>10</em></button>
+          <button data-tg>Lengua cast. <em>3</em></button>
+          <button data-tg>Matemáticas <em>2</em></button>
+          <button data-tg>Historia <em>1</em></button>
+          <button data-tg>Filosofía <em>1</em></button>
+          <button data-tg>Inglés <em>1</em></button>
+          <button data-tg>Biología <em>1</em></button>
+          <button data-tg>Física <em>1</em></button>
+          <button data-tg>Química <em>1</em></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="archive">
+      <div class="wrap">
+        <div class="archive-head">
+          <h2>Archivo</h2>
+          <span><b data-count>10</b> documentos</span>
+        </div>
+
+        <div class="group">
+          <div class="g-head">
+            <span class="g-year">2025</span>
+            <span class="g-session">Junio</span>
+          </div>
+          <div class="g-list">
+            <div class="r" data-s="lcl lengua castellana literatura junio 2025">
+              <span class="code">LCL</span>
+              <span class="t"><a href="#">Lengua Castellana y Literatura II</a><span class="tag" data-t="enunciats">Enunciado</span></span>
+              <span class="side"><span>3 p.</span><span>421 KB</span><a href="#">PDF</a></span>
+            </div>
+            <div class="r" data-s="mat matematicas junio 2025">
+              <span class="code">MAT</span>
+              <span class="t"><a href="#">Matemáticas II</a><span class="tag" data-t="enunciats">Enunciado</span></span>
+              <span class="side"><span>4 p.</span><span>512 KB</span><a href="#">PDF</a></span>
+            </div>
+            <div class="r" data-s="his historia espana junio 2025">
+              <span class="code">HIS</span>
+              <span class="t"><a href="#">Historia de España</a><span class="tag" data-t="resolucions">Soluciones</span></span>
+              <span class="side"><span>3 p.</span><span>398 KB</span><a href="#">PDF</a></span>
+            </div>
+            <div class="r" data-s="ing ingles junio 2025">
+              <span class="code">ING</span>
+              <span class="t"><a href="#">Lengua Extranjera II (Inglés)</a><span class="tag" data-t="criteris">Criterios</span></span>
+              <span class="side"><span>4 p.</span><span>610 KB</span><a href="#">PDF</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="g-head">
+            <span class="g-year">2025</span>
+            <span class="g-session">Septiembre</span>
+          </div>
+          <div class="g-list">
+            <div class="r" data-s="fil filosofia septiembre 2025">
+              <span class="code">FIL</span>
+              <span class="t"><a href="#">Historia de la Filosofía</a><span class="tag" data-t="enunciats">Enunciado</span></span>
+              <span class="side"><span>3 p.</span><span>355 KB</span><a href="#">PDF</a></span>
+            </div>
+            <div class="r" data-s="bio biologia septiembre 2025">
+              <span class="code">BIO</span>
+              <span class="t"><a href="#">Biología</a><span class="tag" data-t="resolucions">Soluciones</span></span>
+              <span class="side"><span>5 p.</span><span>702 KB</span><a href="#">PDF</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="g-head">
+            <span class="g-year">2024</span>
+            <span class="g-session">Junio</span>
+          </div>
+          <div class="g-list">
+            <div class="r" data-s="lcl lengua castellana literatura junio 2024">
+              <span class="code">LCL</span>
+              <span class="t"><a href="#">Lengua Castellana y Literatura II</a><span class="tag" data-t="enunciats">Enunciado</span></span>
+              <span class="side"><span>3 p.</span><span>415 KB</span><a href="#">PDF</a></span>
+            </div>
+            <div class="r" data-s="fis fisica junio 2024">
+              <span class="code">FIS</span>
+              <span class="t"><a href="#">Física</a><span class="tag" data-t="enunciats">Enunciado</span></span>
+              <span class="side"><span>4 p.</span><span>588 KB</span><a href="#">PDF</a></span>
+            </div>
+            <div class="r" data-s="qui quimica junio 2024">
+              <span class="code">QUI</span>
+              <span class="t"><a href="#">Química</a><span class="tag" data-t="criteris">Criterios</span></span>
+              <span class="side"><span>4 p.</span><span>601 KB</span><a href="#">PDF</a></span>
+            </div>
+            <div class="r" data-s="eco empresa junio 2024">
+              <span class="code">ECO</span>
+              <span class="t"><a href="#">Empresa y Diseño de Modelos de Negocio</a><span class="tag" data-t="enunciats">Enunciado</span></span>
+              <span class="side"><span>3 p.</span><span>344 KB</span><a href="#">PDF</a></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <div class="wrap">
+        <div>
+          <h3>Sobre WebPAU</h3>
+          <p>Archivo abierto de exámenes de acceso a la universidad en Andalucía. Cada documento se guarda con su asignatura, año, convocatoria y tipo.</p>
+        </div>
+        <div>
+          <h3>Asignaturas</h3>
+          <ul>
+            <li><a href="#">Lengua Castellana y Literatura II</a></li>
+            <li><a href="#">Matemáticas II</a></li>
+            <li><a href="#">Historia de España</a></li>
+            <li><a href="#">Historia de la Filosofía</a></li>
+            <li><a href="#">Física</a></li>
+            <li><a href="#">Química</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>El proyecto</h3>
+          <ul>
+            <li><a href="#">Código en GitHub</a></li>
+            <li><a href="#">Falta un examen</a></li>
+            <li><a href="#">Página no encontrada</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </div>
+</article>
+
+<!-- =====================================================================
+     B · BUSCADOR
+     ===================================================================== -->
+<article class="p" id="b">
+  <div class="p-badge">
+    <b>B · «Buscador»</b>
+    <span>Oscuro y de aplicación: la caja de búsqueda es el héroe, los filtros son una barra de herramientas y los resultados una lista navegable con teclado.</span>
+    <em>oscuro · compacto · teclado primero</em>
+  </div>
+
+  <div class="page b">
+    <header class="head">
+      <div class="wrap">
+        <span class="brand"><span class="dot"></span>WebPAU</span>
+        <div class="right">
+          <button class="pill" data-tg aria-pressed="true">Todos</button>
+          <button class="pill" data-tg>Enunciados</button>
+          <button class="pill" data-tg>Soluciones</button>
+          <button class="pill" data-tg>Criterios</button>
+          <span class="ghost">GitHub</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="wrap mock">
+        <h1>Encuentra el examen en un segundo</h1>
+        <p>10 documentos · 9 asignaturas · convocatorias de junio y septiembre</p>
+
+        <div class="searchbox">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input data-search type="search" placeholder="Busca por asignatura, año o convocatoria…" />
+          <kbd>⌘K</kbd>
+        </div>
+
+        <div class="toolbar">
+          <button class="pill" data-tg aria-pressed="true">2024–2025</button>
+          <button class="pill" data-tg>2025</button>
+          <button class="pill" data-tg>2024</button>
+          <button class="pill" data-tg>Junio</button>
+          <button class="pill" data-tg>Septiembre</button>
+          <span class="sp"></span>
+          <span class="count"><b data-count>10</b> resultados</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div class="list">
+        <div class="g-head"><b>2025</b> · Junio · 4 documentos</div>
+        <div class="r" data-s="lcl lengua castellana junio 2025">
+          <span class="code">LCL</span>
+          <span class="t"><a href="#">Lengua Castellana y Literatura II</a><span>2025 · junio · 3 p. · 421 KB</span></span>
+          <span class="tag">Enunciado</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+        <div class="r" data-s="mat matematicas junio 2025">
+          <span class="code">MAT</span>
+          <span class="t"><a href="#">Matemáticas II</a><span>2025 · junio · 4 p. · 512 KB</span></span>
+          <span class="tag">Enunciado</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+        <div class="r" data-s="his historia espana junio 2025">
+          <span class="code">HIS</span>
+          <span class="t"><a href="#">Historia de España</a><span>2025 · junio · 3 p. · 398 KB</span></span>
+          <span class="tag">Soluciones</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+        <div class="r" data-s="ing ingles junio 2025">
+          <span class="code">ING</span>
+          <span class="t"><a href="#">Lengua Extranjera II (Inglés)</a><span>2025 · junio · 4 p. · 610 KB</span></span>
+          <span class="tag">Criterios</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+
+        <div class="g-head"><b>2025</b> · Septiembre · 2 documentos</div>
+        <div class="r" data-s="fil filosofia septiembre 2025">
+          <span class="code">FIL</span>
+          <span class="t"><a href="#">Historia de la Filosofía</a><span>2025 · septiembre · 3 p. · 355 KB</span></span>
+          <span class="tag">Enunciado</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+        <div class="r" data-s="bio biologia septiembre 2025">
+          <span class="code">BIO</span>
+          <span class="t"><a href="#">Biología</a><span>2025 · septiembre · 5 p. · 702 KB</span></span>
+          <span class="tag">Soluciones</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+
+        <div class="g-head"><b>2024</b> · Junio · 4 documentos</div>
+        <div class="r" data-s="lcl lengua castellana junio 2024">
+          <span class="code">LCL</span>
+          <span class="t"><a href="#">Lengua Castellana y Literatura II</a><span>2024 · junio · 3 p. · 415 KB</span></span>
+          <span class="tag">Enunciado</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+        <div class="r" data-s="fis fisica junio 2024">
+          <span class="code">FIS</span>
+          <span class="t"><a href="#">Física</a><span>2024 · junio · 4 p. · 588 KB</span></span>
+          <span class="tag">Enunciado</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+        <div class="r" data-s="qui quimica junio 2024">
+          <span class="code">QUI</span>
+          <span class="t"><a href="#">Química</a><span>2024 · junio · 4 p. · 601 KB</span></span>
+          <span class="tag">Criterios</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+        <div class="r" data-s="eco empresa junio 2024">
+          <span class="code">ECO</span>
+          <span class="t"><a href="#">Empresa y Diseño de Modelos de Negocio</a><span>2024 · junio · 3 p. · 344 KB</span></span>
+          <span class="tag">Enunciado</span>
+          <a class="dl" href="#">PDF</a>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <div class="wrap">
+        <div class="hints">
+          <span><kbd>↑</kbd><kbd>↓</kbd> navegar</span>
+          <span><kbd>⏎</kbd> abrir PDF</span>
+          <span><kbd>/</kbd> buscar</span>
+          <span><kbd>Esc</kbd> limpiar</span>
+        </div>
+        <div class="cols">
+          <div>
+            <h3>Sobre WebPAU</h3>
+            <p>Archivo abierto de exámenes de acceso a la universidad en Andalucía.</p>
+          </div>
+          <div>
+            <h3>Asignaturas</h3>
+            <ul>
+              <li><a href="#">Lengua Castellana y Literatura II</a></li>
+              <li><a href="#">Matemáticas II</a></li>
+              <li><a href="#">Historia de España</a></li>
+              <li><a href="#">Física</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>El proyecto</h3>
+            <ul>
+              <li><a href="#">Código en GitHub</a></li>
+              <li><a href="#">Falta un examen</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</article>
+
+<!-- =====================================================================
+     C · TABLERO
+     ===================================================================== -->
+<article class="p" id="c">
+  <div class="p-badge">
+    <b>C · «Tablero»</b>
+    <span>Cálida y táctil: primero eliges asignatura en un mosaico de tarjetas con su recuento, y solo después aparecen los documentos. Color por fase, esquinas redondeadas.</span>
+    <em>crema · tarjetas · asignatura primero</em>
+  </div>
+
+  <div class="page c">
+    <header class="head">
+      <div class="wrap">
+        <span class="brand"><span class="mark"></span>WebPAU</span>
+        <nav>
+          <a href="#">Archivo</a>
+          <a href="#">Asignaturas</a>
+          <a href="#">Ayuda</a>
+        </nav>
+        <a class="cta" href="#">GitHub</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="wrap mock">
+        <span class="kicker">PAU · Andalucía</span>
+        <h1>Todo lo que cae en la PAU, <em>en un sitio</em>.</h1>
+        <p>
+          Elige tu asignatura y encuentra el enunciado, las soluciones y los criterios de
+          corrección de cada convocatoria.
+        </p>
+
+        <div class="findbar">
+          <div class="fld">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input data-search type="search" placeholder="Buscar asignatura o documento…" />
+          </div>
+          <select><option>2025</option><option>2024</option><option>Todos los años</option></select>
+          <button class="go">Buscar</button>
+        </div>
+
+        <div class="quick">
+          <span>Lo más buscado:</span>
+          <button data-tg>Matemáticas</button>
+          <button data-tg>Lengua cast.</button>
+          <button data-tg>Historia</button>
+          <button data-tg>Física</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Explora por asignatura</h2>
+          <span>9 asignaturas con documentos</span>
+        </div>
+        <div class="tiles">
+          <button class="tile" data-phase="acceso" data-tg>
+            <span class="nm">Lengua Castellana y Literatura II</span>
+            <span class="ct">3 documentos · 2024, 2025</span>
+            <span class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="acceso" data-tg>
+            <span class="nm">Matemáticas II</span>
+            <span class="ct">2 documentos · 2024, 2025</span>
+            <span class="bar"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="acceso" data-tg>
+            <span class="nm">Historia de España</span>
+            <span class="ct">1 documento · 2025</span>
+            <span class="bar"><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="acceso" data-tg>
+            <span class="nm">Lengua Extranjera II (Inglés)</span>
+            <span class="ct">1 documento · 2025</span>
+            <span class="bar"><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="admision" data-tg>
+            <span class="nm">Historia de la Filosofía</span>
+            <span class="ct">1 documento · 2025</span>
+            <span class="bar"><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="admision" data-tg>
+            <span class="nm">Biología</span>
+            <span class="ct">1 documento · 2025</span>
+            <span class="bar"><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="admision" data-tg>
+            <span class="nm">Física</span>
+            <span class="ct">1 documento · 2024</span>
+            <span class="bar"><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="admision" data-tg>
+            <span class="nm">Química</span>
+            <span class="ct">1 documento · 2024</span>
+            <span class="bar"><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="tile" data-phase="admision" data-tg>
+            <span class="nm">Empresa y Diseño de Modelos de Negocio</span>
+            <span class="ct">1 documento · 2024</span>
+            <span class="bar"><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Archivo</h2>
+          <span><b data-count>10</b> documentos</span>
+        </div>
+
+        <div class="panel">
+          <div class="g-head">
+            <b>2025</b><span class="ss">Convocatoria de junio</span><span class="n">4 documentos</span>
+          </div>
+          <div class="r" data-phase="acceso" data-s="lcl lengua castellana junio 2025">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Lengua Castellana y Literatura II</a><small>Enunciado · 3 p. · 421 KB</small></span>
+            <span class="chip">Enunciado</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+          <div class="r" data-phase="acceso" data-s="mat matematicas junio 2025">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Matemáticas II</a><small>Enunciado · 4 p. · 512 KB</small></span>
+            <span class="chip">Enunciado</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+          <div class="r" data-phase="admision" data-s="his historia espana junio 2025">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Historia de España</a><small>Soluciones · 3 p. · 398 KB</small></span>
+            <span class="chip" data-t="resolucions">Soluciones</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+          <div class="r" data-phase="acceso" data-s="ing ingles junio 2025">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Lengua Extranjera II (Inglés)</a><small>Criterios · 4 p. · 610 KB</small></span>
+            <span class="chip">Criterios</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+
+          <div class="g-head">
+            <b>2025</b><span class="ss">Convocatoria de septiembre</span><span class="n">2 documentos</span>
+          </div>
+          <div class="r" data-phase="admision" data-s="fil filosofia septiembre 2025">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Historia de la Filosofía</a><small>Enunciado · 3 p. · 355 KB</small></span>
+            <span class="chip">Enunciado</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+          <div class="r" data-phase="admision" data-s="bio biologia septiembre 2025">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Biología</a><small>Soluciones · 5 p. · 702 KB</small></span>
+            <span class="chip" data-t="resolucions">Soluciones</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+
+          <div class="g-head">
+            <b>2024</b><span class="ss">Convocatoria de junio</span><span class="n">4 documentos</span>
+          </div>
+          <div class="r" data-phase="acceso" data-s="lcl lengua castellana junio 2024">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Lengua Castellana y Literatura II</a><small>Enunciado · 3 p. · 415 KB</small></span>
+            <span class="chip">Enunciado</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+          <div class="r" data-phase="admision" data-s="fis fisica junio 2024">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Física</a><small>Enunciado · 4 p. · 588 KB</small></span>
+            <span class="chip">Enunciado</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+          <div class="r" data-phase="admision" data-s="qui quimica junio 2024">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Química</a><small>Criterios · 4 p. · 601 KB</small></span>
+            <span class="chip">Criterios</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+          <div class="r" data-phase="admision" data-s="eco empresa junio 2024">
+            <span class="stripe"></span>
+            <span class="t"><a href="#">Empresa y Diseño de Modelos de Negocio</a><small>Enunciado · 3 p. · 344 KB</small></span>
+            <span class="chip">Enunciado</span>
+            <a class="pdf" href="#">Descargar</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <div class="wrap">
+        <div class="cols">
+          <div>
+            <h3>Sobre WebPAU</h3>
+            <p>Archivo abierto de exámenes de acceso a la universidad en Andalucía. Cada documento se guarda con su asignatura, año, convocatoria y tipo.</p>
+          </div>
+          <div>
+            <h3>Asignaturas</h3>
+            <ul>
+              <li><a href="#">Lengua Castellana y Literatura II</a></li>
+              <li><a href="#">Matemáticas II</a></li>
+              <li><a href="#">Historia de España</a></li>
+              <li><a href="#">Física</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>El proyecto</h3>
+            <ul>
+              <li><a href="#">Código en GitHub</a></li>
+              <li><a href="#">Falta un examen</a></li>
+            </ul>
+          </div>
+        </div>
+        <p class="note">Los documentos son propiedad de los organismos que los emiten. WebPAU solo los reúne.</p>
+      </div>
+    </footer>
+  </div>
+</article>
+
+<script>
+  /* Interacciones mínimas para que las tres se puedan "tocar":
+     - [data-tg]  alterna estado activo (chips, píldoras, tarjetas)
+     - [data-search] filtra las filas .r de su propia propuesta (sin acentos)
+     - [data-count] refleja las filas visibles
+     - los encabezados de grupo se ocultan si su grupo se queda sin filas */
+  var norm = function (s) {
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  };
+
+  document.querySelectorAll('.mock').forEach(function (scope) {
+    var input = scope.querySelector('[data-search]');
+    if (!input) return;
+    var page = scope.closest('.page');
+    var list = page.querySelector('.list') || page.querySelector('.panel') || page.querySelector('.archive .wrap');
+
+    function apply() {
+      var q = norm(input.value);
+      var shown = 0;
+      page.querySelectorAll('.r').forEach(function (row) {
+        var hit = !q || norm(row.dataset.s || '').indexOf(q) !== -1;
+        row.style.display = hit ? '' : 'none';
+        if (hit) shown++;
+      });
+      page.querySelectorAll('[data-count]').forEach(function (el) { el.textContent = shown; });
+
+      /* oculta los encabezados cuyo grupo quedo vacio */
+      [page.querySelector('.g-list'), page.querySelector('.list'), page.querySelector('.panel')]
+        .filter(Boolean)
+        .forEach(function (box) {
+          var head = null, any = false;
+          Array.prototype.slice.call(box.children).forEach(function (child) {
+            if (child.classList.contains('r')) {
+              if (child.style.display !== 'none') any = true;
+            } else {
+              if (head) head.style.display = any ? '' : 'none';
+              head = child;
+              any = false;
+            }
+          });
+          if (head) head.style.display = any ? '' : 'none';
+        });
+
+      /* en A cada año es un bloque .group: se oculta si se queda sin filas */
+      page.querySelectorAll('.group').forEach(function (grp) {
+        var any = Array.prototype.some.call(grp.querySelectorAll('.r'), function (r) {
+          return r.style.display !== 'none';
+        });
+        grp.style.display = any ? '' : 'none';
+      });
+
+      if (list) {
+        var note = list.querySelector('.mock-empty');
+        if (!note) {
+          note = document.createElement('p');
+          note.className = 'mock-empty';
+          note.style.cssText = 'padding:1.5rem 1.15rem;color:inherit;opacity:.6;font-size:.9375rem';
+          note.textContent = 'Ningún documento coincide con la búsqueda.';
+          list.appendChild(note);
+        }
+        note.style.display = shown ? 'none' : '';
+      }
+    }
+    input.addEventListener('input', apply);
+
+    scope.addEventListener('keydown', function (e) {
+      if (e.key === '/' && document.activeElement !== input) { e.preventDefault(); input.focus(); }
+      if (e.key === 'Escape') { input.value = ''; apply(); input.blur(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === '/' && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+        e.preventDefault();
+        input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        input.focus();
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-tg]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    });
+  });
+</script>
+</body>
+</html>

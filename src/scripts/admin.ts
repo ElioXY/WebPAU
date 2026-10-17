@@ -17,6 +17,8 @@ import {
   type FileChange,
 } from '../lib/github';
 import { estimatePdfPages, slugify } from '../lib/slug';
+import { parseExamName } from '../lib/exam-name.js';
+import type { ParsedName } from '../lib/exam-name.js';
 
 /* ---------------------------------------------------------------- tipos */
 
@@ -65,6 +67,8 @@ interface Config {
 interface PendingFile {
   file: File;
   error?: string;
+  /** Lo que se ha podido leer del nombre del archivo. */
+  meta?: ParsedName;
 }
 
 /* ------------------------------------------------------------ config DOM */
@@ -262,6 +266,10 @@ async function refresh(): Promise<void> {
     catalog = catalogFile?.data ?? { version: 1, updatedAt: null, exams: [] };
     filesOnDisk = tree.paths;
 
+    /* Si alguien soltó PDFs mientras se conectaba, se leyeron sin la lista de
+       asignaturas (que llega con el catálogo): se vuelven a leer ahora. */
+    for (const entry of pending) entry.meta = parseExamName(entry.file.name, subjects);
+
     if (subjects.length === 0) {
       toast(`No he podido leer ${SUBJECTS_PATH}: el desplegable de asignaturas queda vacío.`, 'error', 9000);
     }
@@ -270,6 +278,7 @@ async function refresh(): Promise<void> {
     paintSessions();
     paintTypes();
     paintFilters();
+    autofill();
     paintFiles();
     renderTable();
     prefill();
@@ -452,6 +461,7 @@ fileInput.addEventListener('change', () => {
 
 function addFiles(list: FileList | File[] | null): void {
   if (!list) return;
+  const added: PendingFile[] = [];
   for (const file of Array.from(list)) {
     if (pending.some((p) => p.file.name === file.name && p.file.size === file.size)) continue;
 
@@ -461,15 +471,143 @@ function addFiles(list: FileList | File[] | null): void {
     } else if (file.size > config.maxMb * 1024 * 1024) {
       error = `pasa de ${config.maxMb} MB`;
     }
-    pending.push({ file, error });
+    const entry: PendingFile = { file, error, meta: parseExamName(file.name, subjects) };
+    pending.push(entry);
+    added.push(entry);
   }
+
+  autofill(added);
   paintFiles();
+}
+
+/**
+ * Si el nombre ya lo dice todo, el formulario se rellena solo: sigue siendo
+ * editable, pero deja de ser un formulario que hay que rellenar a mano.
+ *
+ * Manda el último archivo con metadatos de los que se acaban de añadir —los
+ * cuatro documentos de un examen comparten nombre— y, si el lote nuevo no dice
+ * nada, el último que quede en la lista.
+ */
+function autofill(added: PendingFile[] = pending): void {
+  const guess = [...added].reverse().find((p) => p.meta?.subject) ??
+    [...pending].reverse().find((p) => p.meta?.subject);
+  if (!guess?.meta) return;
+
+  setSubject(guess.meta.subject);
+  if (guess.meta.year) setYear(guess.meta.year);
+  if (guess.meta.session) setSession(guess.meta.session);
+  if (guess.meta.type) setType(guess.meta.type);
+}
+
+/* ------------------------------------------------- metadatos del nombre */
+
+const setSubject = (code: string | null): void => {
+  if (!code) return;
+  const select = $<HTMLSelectElement>('#subject');
+  if (Array.from(select.options).some((option) => option.value === code)) select.value = code;
+};
+
+const setYear = (year: number): void => {
+  $<HTMLInputElement>('#year').value = String(year);
+};
+
+const setSession = (id: string | null): void => {
+  if (!id) return;
+  for (const button of $$<HTMLButtonElement>('#sessionSeg button')) {
+    button.setAttribute('aria-pressed', String(button.dataset.v === id));
+  }
+};
+
+const setType = (id: string | null): void => {
+  if (!id) return;
+  for (const button of $$<HTMLButtonElement>('#typeGroup button')) {
+    button.setAttribute('aria-pressed', String(button.dataset.v === id));
+  }
+};
+
+const subjectShort = (code: string) => subjectByCode(code)?.short ?? code;
+
+/** Lo que se ha leído del nombre, en corto: «Fís. 2026 · ordinaria · Enunciado». */
+function describeMeta(meta: ParsedName): string {
+  const bits: string[] = [];
+  const head = [meta.subject ? subjectShort(meta.subject) : null, meta.year ? String(meta.year) : null]
+    .filter(Boolean)
+    .join(' ');
+  if (head) bits.push(head);
+  if (meta.session) bits.push(meta.session);
+  if (meta.type) bits.push(typeShort(meta.type));
+  return bits.join(' · ');
+}
+
+/** Qué le falta al nombre para no tener que tocar el formulario. */
+function missingMeta(meta: ParsedName | undefined): string[] {
+  const missing: string[] = [];
+  if (!meta?.subject) missing.push('asignatura');
+  if (!meta?.year) missing.push('año');
+  if (!meta?.session) missing.push('convocatoria');
+  if (!meta?.type) missing.push('tipo');
+  return missing;
+}
+
+/**
+ * Un documento ya publicado con la misma asignatura, año, convocatoria y tipo:
+ * volver a subirlo crearía un duplicado, así que se avisa antes de publicar.
+ */
+function duplicateOf(job: Job): Exam | undefined {
+  return catalog.exams.find(
+    (exam) =>
+      exam.subject === job.subject &&
+      exam.year === job.year &&
+      exam.session === job.session &&
+      exam.type === job.type
+  );
+}
+
+/** Lo que se va a publicar por cada archivo: nombre leído + formulario. */
+interface Job {
+  file: File;
+  subject: string;
+  year: number;
+  session: string;
+  type: string;
+}
+
+/**
+ * Cada archivo se publica con lo que dice su nombre y, para lo que no diga, con
+ * lo que haya en el formulario. Es lo que permite soltar los cuatro PDF de un
+ * examen y publicarlos juntos, cada uno con su tipo.
+ */
+function plannedJobs(form: FormSnapshot): { jobs: Job[]; problems: string[] } {
+  const jobs: Job[] = [];
+  const problems: string[] = [];
+
+  for (const entry of pending.filter((p) => !p.error)) {
+    const job = jobFor(entry, form);
+
+    const missing: string[] = [];
+    if (!job.subject || !subjectByCode(job.subject)) missing.push('asignatura');
+    if (!Number.isFinite(job.year) || job.year < 1980 || job.year > 2100) missing.push('año');
+    if (!job.session) missing.push('convocatoria');
+    if (!job.type) missing.push('tipo');
+
+    if (missing.length) {
+      problems.push(`${entry.file.name}: falta ${missing.join(', ')}`);
+      continue;
+    }
+    jobs.push(job);
+  }
+
+  return { jobs, problems };
 }
 
 function paintFiles(): void {
   const list = $('#fileList');
   const good = pending.filter((p) => !p.error);
   const has = pending.length > 0;
+  const form = formSnapshot();
+  const { jobs } = plannedJobs(form);
+  const duplicates = jobs.filter((job) => duplicateOf(job)).length;
+  const incomplete = good.filter((entry) => missingMeta(entry.meta).length > 0).length;
 
   drop.classList.toggle('is-compact', has);
   $('#dropIdle').hidden = false;
@@ -477,13 +615,40 @@ function paintFiles(): void {
   list.innerHTML = '';
 
   for (const [index, entry] of pending.entries()) {
+    const missing = entry.error ? [] : missingMeta(entry.meta);
+    const job = missing.length === 0 && !entry.error ? jobFor(entry, form) : null;
+    const duplicate = job ? duplicateOf(job) : undefined;
+
     const item = document.createElement('li');
     item.classList.toggle('is-bad', Boolean(entry.error));
+    item.classList.toggle('is-partial', !entry.error && missing.length > 0);
+    item.classList.toggle('is-dup', Boolean(duplicate));
 
     const name = document.createElement('b');
     name.textContent = entry.file.name;
+    name.title = entry.file.name;
+
     const size = document.createElement('span');
-    size.textContent = entry.error ?? fmtBytes(Math.round(entry.file.size / 1024));
+    size.className = 'meta';
+    if (entry.error) {
+      size.textContent = entry.error;
+    } else {
+      const read = entry.meta ? describeMeta(entry.meta) : '';
+      const bits = [read || 'sin datos en el nombre'];
+      if (missing.length) bits.push(`falta ${missing.join(', ')}`);
+      bits.push(fmtBytes(Math.round(entry.file.size / 1024)));
+      size.textContent = bits.join(' · ');
+    }
+
+    item.append(name);
+    if (duplicate) {
+      const flag = document.createElement('span');
+      flag.className = 'flag';
+      flag.textContent = 'ya está';
+      flag.title = `Ya hay un documento igual: ${duplicate.id}`;
+      item.append(flag);
+    }
+    item.append(size);
 
     const remove = document.createElement('button');
     remove.type = 'button';
@@ -495,21 +660,67 @@ function paintFiles(): void {
       paintFiles();
     });
 
-    item.append(name, size, remove);
+    item.append(remove);
     list.append(item);
   }
 
   $('#dropFoot').hidden = !has;
   if (has) {
     const total = good.reduce((sum, p) => sum + p.file.size, 0);
-    $('#dropTotal').textContent = `${good.length} de ${pending.length} listos · ${fmtBytes(
-      Math.round(total / 1024)
-    )}`;
+    const notes = [
+      `${good.length} de ${pending.length} listos`,
+      fmtBytes(Math.round(total / 1024)),
+    ];
+    if (duplicates > 0) notes.push(`${duplicates} ${duplicates === 1 ? 'duplicado' : 'duplicados'}`);
+    if (incomplete > 0) notes.push(`${incomplete} sin datos completos`);
+    $('#dropTotal').textContent = notes.join(' · ');
   }
 
-  $('#uploadCount').textContent = good.length ? `(${good.length})` : '';
-  $<HTMLButtonElement>('#btnUpload').disabled = busy || good.length === 0;
+  /* El botón dice si lo que va a publicarse es un examen entero: los cuatro
+     PDFs de una convocatoria viajan juntos en un solo commit. */
+  const types = new Set(jobs.map((job) => job.type));
+  const wholeExam =
+    types.size > 1 &&
+    new Set(jobs.map((job) => job.subject)).size === 1 &&
+    new Set(jobs.map((job) => `${job.year}-${job.session}`)).size === 1;
+
+  const upload = $<HTMLButtonElement>('#btnUpload');
+  $('#uploadVerb').textContent = wholeExam ? 'Publicar el examen' : 'Publicar';
+  $('#uploadCount').textContent = good.length
+    ? wholeExam
+      ? `(${good.length} documentos)`
+      : `(${good.length})`
+    : '';
+  upload.title = wholeExam
+    ? `${good.length} documentos del mismo examen viajan en un solo commit`
+    : '';
+  upload.disabled = busy || good.length === 0;
 }
+
+/** El mismo reparto de metadatos que usa la publicación, para poder avisar. */
+function jobFor(entry: PendingFile, form: FormSnapshot): Job {
+  return {
+    file: entry.file,
+    subject: entry.meta?.subject ?? form.subject,
+    year: entry.meta?.year ?? form.year,
+    session: entry.meta?.session ?? form.session,
+    type: entry.meta?.type ?? form.type,
+  };
+}
+
+interface FormSnapshot {
+  subject: string;
+  year: number;
+  session: string;
+  type: string;
+}
+
+const formSnapshot = (): FormSnapshot => ({
+  subject: $<HTMLSelectElement>('#subject').value,
+  year: Number.parseInt($<HTMLInputElement>('#year').value, 10),
+  session: sessionValue(),
+  type: typeValue(),
+});
 
 $('#btnClearFiles').addEventListener('click', () => {
   pending = [];
@@ -589,14 +800,10 @@ $('#uploadForm').addEventListener('submit', async (event) => {
   const error = $('#uploadError');
   error.hidden = true;
 
-  const subject = $<HTMLSelectElement>('#subject').value;
-  const year = Number.parseInt($<HTMLInputElement>('#year').value, 10);
-  const session = sessionValue();
-  const type = typeValue();
   const language = $<HTMLSelectElement>('#language').value;
   const official = $<HTMLInputElement>('#official').checked;
   const notes = $<HTMLTextAreaElement>('#notes').value.trim();
-  const files = pending.filter((p) => !p.error).map((p) => p.file);
+  const { jobs, problems } = plannedJobs(formSnapshot());
 
   const fail = (message: string) => {
     error.textContent = message;
@@ -604,64 +811,107 @@ $('#uploadForm').addEventListener('submit', async (event) => {
     error.scrollIntoView({ block: 'nearest' });
   };
 
-  if (!subject || !subjectByCode(subject)) return fail('Elige una asignatura.');
-  if (!Number.isFinite(year) || year < 1980 || year > 2100) return fail('Escribe un año válido.');
-  if (!session) return fail('Elige la convocatoria.');
-  if (!type) return fail('Elige el tipo de documento.');
-  if (files.length === 0) return fail('Añade al menos un PDF.');
-
-  const taken = new Set(catalog.exams.map((e) => e.id));
-  const now = new Date().toISOString();
-  const changes: FileChange[] = [];
-  const created: Exam[] = [];
-
-  try {
-    for (const file of files) {
-      const id = buildId(subject, year, session, type, taken);
-      taken.add(id);
-      const relative = `exams/${year}/${session}/${subject}/${id}.pdf`;
-      const bytes = new Uint8Array(await file.arrayBuffer());
-
-      changes.push({ path: `public/${relative}`, base64: bytesToBase64(bytes) });
-
-      created.push({
-        id,
-        subject,
-        year,
-        session,
-        type,
-        pages: estimatePdfPages(bytes),
-        file: relative,
-        originalName: file.name,
-        sizeKB: Math.round(file.size / 1024),
-        language: language === 'es' ? 'es' : '',
-        official,
-        notes,
-        addedAt: now,
-        updatedAt: now,
-      });
-    }
-
-    changes.push({
-      path: CATALOG_PATH,
-      base64: textToBase64(
-        serialize({ ...catalog, exams: [...catalog.exams, ...created], updatedAt: now })
-      ),
-    });
-
-    const count = created.length;
-    const message = `archivo: añade ${count} ${count === 1 ? 'documento' : 'documentos'} · ${subjectName(
-      subject
-    )} ${year} · ${sessionLabel(session)} · ${typeLabel(type)}`;
-
-    pending = [];
-    paintFiles();
-    $<HTMLTextAreaElement>('#notes').value = '';
-    await publish(changes, message, 'Preparando la subida…');
-  } catch (err) {
-    reportError(err);
+  if (problems.length) {
+    return fail(
+      `Faltan datos en ${problems.length === 1 ? 'un archivo' : 'varios archivos'}: ${problems
+        .slice(0, 3)
+        .join(' · ')}. Rellena el formulario o renómbralos con asignatura, año, convocatoria y tipo.`
+    );
   }
+  if (jobs.length === 0) return fail('Añade al menos un PDF.');
+
+  /* Un examen suele venir en varios PDFs (enunciado, soluciones, criterios,
+     hoja): si el lote los cubre, el commit lo dice así. */
+  const types = new Set(jobs.map((job) => job.type));
+  const subjectsInBatch = new Set(jobs.map((job) => job.subject));
+  const sessionsInBatch = new Set(jobs.map((job) => `${job.year}-${job.session}`));
+  const wholeExam = types.size > 1 && subjectsInBatch.size === 1 && sessionsInBatch.size === 1;
+
+  const duplicates = jobs.filter((job) => duplicateOf(job));
+
+  const run = async () => {
+    const taken = new Set(catalog.exams.map((e) => e.id));
+    const now = new Date().toISOString();
+    const changes: FileChange[] = [];
+    const created: Exam[] = [];
+
+    try {
+      for (const job of jobs) {
+        const { file } = job;
+        const id = buildId(job.subject, job.year, job.session, job.type, taken);
+        taken.add(id);
+        const relative = `exams/${job.year}/${job.session}/${job.subject}/${id}.pdf`;
+        const bytes = new Uint8Array(await file.arrayBuffer());
+
+        changes.push({ path: `public/${relative}`, base64: bytesToBase64(bytes) });
+
+        created.push({
+          id,
+          subject: job.subject,
+          year: job.year,
+          session: job.session,
+          type: job.type,
+          pages: estimatePdfPages(bytes),
+          file: relative,
+          originalName: file.name,
+          sizeKB: Math.round(file.size / 1024),
+          language: language === 'es' ? 'es' : '',
+          official,
+          notes,
+          addedAt: now,
+          updatedAt: now,
+        });
+      }
+
+      changes.push({
+        path: CATALOG_PATH,
+        base64: textToBase64(
+          serialize({ ...catalog, exams: [...catalog.exams, ...created], updatedAt: now })
+        ),
+      });
+
+      const count = created.length;
+      const [first] = jobs;
+      const message = wholeExam
+        ? `archivo: añade el examen de ${subjectName(first.subject)} ${first.year} · ${sessionLabel(
+            first.session
+          )} (${count} documentos)`
+        : `archivo: añade ${count} ${count === 1 ? 'documento' : 'documentos'} · ${subjectName(
+            first.subject
+          )} ${first.year} · ${sessionLabel(first.session)} · ${typeLabel(first.type)}`;
+
+      pending = [];
+      paintFiles();
+      $<HTMLTextAreaElement>('#notes').value = '';
+      await publish(changes, message, 'Preparando la subida…');
+    } catch (err) {
+      reportError(err);
+    }
+  };
+
+  if (duplicates.length === 0) {
+    await run();
+    return;
+  }
+
+  confirmDialog(
+    'Documentos repetidos',
+    `Ya hay ${duplicates.length} ${duplicates.length === 1 ? 'documento' : 'documentos'} con la misma asignatura, año, convocatoria y tipo (${duplicates
+      .map((job) => job.file.name)
+      .slice(0, 3)
+      .join(', ')}). Si continúas se publicarán de nuevo y habrá dos fichas iguales.`,
+    run,
+    'Publicar igualmente'
+  );
 });
+
+/* Si cambia el formulario, los avisos de duplicado que dependen de él se
+   vuelven a pintar. */
+for (const selector of ['#subject', '#year', '#sessionSeg', '#typeGroup']) {
+  const node = $(selector);
+  node.addEventListener('change', paintFiles);
+  node.addEventListener('click', paintFiles);
+}
 
 /* ------------------------------------------------------------------ tabla */
 
@@ -943,9 +1193,15 @@ $('#tbody').addEventListener('click', (event) => {
 const dialog = $<HTMLDialogElement>('#confirmDlg');
 let pendingAction: (() => void | Promise<void>) | null = null;
 
-function confirmDialog(title: string, text: string, action: () => void | Promise<void>): void {
+function confirmDialog(
+  title: string,
+  text: string,
+  action: () => void | Promise<void>,
+  confirmLabel = 'Eliminar'
+): void {
   $('#confirmTitle').textContent = title;
   $('#confirmText').textContent = text;
+  $<HTMLButtonElement>('#confirmYes').textContent = confirmLabel;
   pendingAction = action;
   dialog.showModal();
 }

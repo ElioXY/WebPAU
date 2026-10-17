@@ -557,6 +557,26 @@ textarea {
   color: var(--stamp);
 }
 
+/* leído del nombre: el filete se rompe cuando faltan datos y se marca en rojo
+   cuando ese documento ya está publicado */
+.drop-list li.is-partial {
+  border-style: dashed;
+}
+
+.drop-list li.is-dup {
+  border-color: color-mix(in srgb, var(--stamp) 45%, transparent);
+}
+
+.drop-list li .flag {
+  flex: none;
+  color: var(--stamp);
+  border: 1px solid var(--stamp);
+  padding: 0 0.25rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .drop-foot {
   display: flex;
   align-items: center;

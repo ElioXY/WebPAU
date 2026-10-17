@@ -1,0 +1,156 @@
+---
+/* =========================================================================
+   Sala de práctica de un examen concreto.
+
+   Página estática por examen: el cronómetro es del navegador y el estado vive
+   en sessionStorage, así que no hay servidor que sostener ni cuenta que crear.
+   ========================================================================= */
+import Base from '../../layouts/Base.astro';
+import { DOC_TYPES, SESSIONS, loadSubjects, type DocType } from '../../lib/catalog';
+import { practiceSets, type PracticeSet } from '../../lib/practice';
+
+type Props = { set: PracticeSet };
+
+export function getStaticPaths() {
+  return practiceSets().map((set) => ({ params: { set: set.slug }, props: { set } }));
+}
+
+const { set } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pdfUrl = (file: string) => `${base}/${file.replace(/^\//, '')}`;
+
+const subjects = loadSubjects();
+const subjectName = subjects.find((s) => s.code === set.subject)?.name ?? set.subject;
+const sessionLong = SESSIONS.find((s) => s.id === set.session)?.long ?? set.session;
+const sessionShort = SESSIONS.find((s) => s.id === set.session)?.label ?? set.session;
+const typeLabel = (id: string) => DOC_TYPES.find((t) => t.id === id)?.label ?? id;
+
+const DURATIONS = [60, 90, 120, 180];
+const DEFAULT_MINUTES = 90;
+const corrections = (['soluciones', 'criterios', 'plantilla'] as DocType[]).filter(
+  (type) => set.docs[type]
+);
+---
+
+<Base
+  title={`Practicar ${subjectName} · ${set.year} · ${sessionShort} — WebPAU`}
+  description={`Haz el examen de ${subjectName} de la convocatoria ${sessionShort.toLowerCase()} de ${set.year} a tiempo y comprueba tus respuestas con sus soluciones y criterios.`}
+>
+  <header class="site-head">
+    <div class="wrap head-bar">
+      <a class="brand" href={`${base}/`}>
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        WebPAU
+      </a>
+      <nav class="head-nav" aria-label="Secciones">
+        <a href={`${base}/#asignaturas`}>Asignaturas</a>
+        <a href={`${base}/#archivo`}>Archivo</a>
+        <a href={`${base}/practica`} aria-current="page">Practicar</a>
+      </nav>
+      <a class="cta" href={`${base}/`}>Volver al archivo</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero practice-hero">
+      <div class="wrap">
+        <p class="kicker">Práctica · {set.year}</p>
+        <h1>{subjectName}</h1>
+        <p class="lede">
+          {sessionLong} de {set.year}. Elige cuánto tiempo quieres darte, haz el examen con el
+          enunciado delante y, al terminar, se abre la corrección.
+        </p>
+        <p class="practice-back">
+          <a href={`${base}/practica`}>← Elegir otro examen</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="practice-run">
+      <div class="wrap practice-grid">
+        <section class="timer" aria-labelledby="timerTitle">
+          <h2 class="practice-sub" id="timerTitle">Cronómetro</h2>
+          <p class="clock" id="clock" role="timer" data-state="idle">{DEFAULT_MINUTES}:00</p>
+          <p class="timer-state" id="clockState" aria-live="polite">
+            Sin empezar. Elige la duración y pulsa «Empezar».
+          </p>
+
+          <div class="timer-controls">
+            <label class="visually-hidden" for="duration">Duración del examen</label>
+            <select class="select" id="duration">
+              {DURATIONS.map((minutes) => (
+                <option value={minutes} selected={minutes === DEFAULT_MINUTES}>
+                  {minutes} min
+                </option>
+              ))}
+            </select>
+            <button class="btn-primary" id="btnStart" type="button">Empezar</button>
+            <button class="btn-ghost" id="btnPause" type="button" hidden>Pausar</button>
+            <button class="btn-ghost" id="btnFinish" type="button" hidden>Terminar</button>
+            <button class="btn-ghost" id="btnReset" type="button" hidden>Reiniciar</button>
+          </div>
+
+          <p class="timer-hint">
+            El tiempo se guarda en esta pestaña: si refrescas, el cronómetro sigue donde estaba.
+          </p>
+        </section>
+
+        <section class="reader" aria-labelledby="readerTitle">
+          <div class="reader-head">
+            <h2 class="practice-sub" id="readerTitle">Enunciado</h2>
+            <a class="dl" href={pdfUrl(set.docs.enunciados!.file)} target="_blank" rel="noreferrer">
+              Abrir en una pestaña
+            </a>
+          </div>
+          <iframe
+            class="reader-frame"
+            src={pdfUrl(set.docs.enunciados!.file)}
+            title={`Enunciado de ${subjectName} · ${set.year} · ${sessionShort}`}
+            loading="lazy"
+          ></iframe>
+          <p class="reader-note">
+            Si el visor no carga en el móvil, usa «Abrir en una pestaña»: el cronómetro sigue
+            corriendo aquí.
+          </p>
+        </section>
+      </div>
+
+      <div class="wrap">
+        <section class="correccion" id="correccion" tabindex="-1" hidden aria-labelledby="correccionTitle">
+          <h2 id="correccionTitle">Corrección</h2>
+          <p id="correccionIntro">
+            Ya puedes comprobar tus respuestas con los documentos oficiales de este examen.
+          </p>
+          {corrections.length > 0 ? (
+            <ul class="doc-links">
+              {corrections.map((type) => (
+                <li>
+                  <a class="dl" href={pdfUrl(set.docs[type]!.file)} target="_blank" rel="noreferrer">
+                    {typeLabel(type)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="note">
+              Este examen todavía no tiene soluciones ni criterios en el archivo.
+            </p>
+          )}
+        </section>
+
+        <noscript>
+          <style>{`#correccion{display:block!important}`}</style>
+        </noscript>
+      </div>
+    </section>
+  </main>
+
+  <script
+    type="application/json"
+    id="practice-data"
+    set:html={JSON.stringify({ key: set.key, minutes: DEFAULT_MINUTES })}
+  />
+  <script>
+    import '../../scripts/practice.ts';
+  </script>
+</Base>
