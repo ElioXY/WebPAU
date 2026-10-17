@@ -7,6 +7,7 @@ import {
   loadSubjects,
   subjectLabel,
   type Session,
+  type Subject,
 } from '../lib/catalog';
 import SearchIcon from '../components/icons/Search.astro';
 import OpenIcon from '../components/icons/Open.astro';
@@ -49,12 +50,18 @@ for (const e of exams) {
 }
 for (const list of subjectYears.values()) list.sort((a, b) => b - a);
 
-/* las asignaturas que enseña el sitio: las que tienen documentos o son de acceso */
+/* El sitio enseña solo las asignaturas que ya tienen documentos: una materia
+   aparece en el mosaico en cuanto se publica su primer PDF, no antes. Las que
+   aún no tienen nada siguen en data/subjects.json para poder subirles algo.
+   Si un examen trae una asignatura que no está en la lista, se añade igual:
+   el payload del cliente viaja por índice y perderla descuadraría las filas. */
 const usedCodes = new Set(exams.map((e) => e.subject));
-const accesoCodes = new Set(
-  subjects.filter((s) => s.phases.includes('acceso')).map((s) => s.code)
-);
-const visibleSubjects = subjects.filter((s) => usedCodes.has(s.code) || accesoCodes.has(s.code));
+const visibleSubjects: Subject[] = subjects.filter((s) => usedCodes.has(s.code));
+for (const code of usedCodes) {
+  if (!visibleSubjects.some((s) => s.code === code)) {
+    visibleSubjects.push({ code, name: code, short: code, phases: [], aliases: [] });
+  }
+}
 
 /* el payload del cliente debe usar el MISMO orden que las tarjetas:
    si no, el índice de asignatura que viaja en cada fila apunta a otra materia */
@@ -98,13 +105,8 @@ const yearLabel = (list: number[]) =>
 const phaseLabel = (phases: string[]) =>
   phases.map((p) => (p === 'acceso' ? 'Fase de acceso' : 'Fase de admisión')).join(' · ');
 
-/* el mosaico separa lo que ya está de lo que aún no: las materias sin
-   documentos quedan al final, con un trazo discontinuo */
-const docSubjects = visibleSubjects.filter((s) => usedCodes.has(s.code));
-const pendingSubjects = visibleSubjects.filter((s) => !usedCodes.has(s.code));
-
 /* el pie enlaza solo lo que existe: nada de anunciar asignaturas vacías */
-const footSubjects = docSubjects.slice(0, 8);
+const footSubjects = visibleSubjects.slice(0, 8);
 ---
 
 <Base
@@ -235,7 +237,7 @@ const footSubjects = docSubjects.slice(0, 8);
               </span>
             </button>
 
-            {docSubjects.map((s) => {
+            {visibleSubjects.map((s) => {
               const list = subjectYears.get(s.code) ?? [];
               return (
                 <button
@@ -257,30 +259,6 @@ const footSubjects = docSubjects.slice(0, 8);
               );
             })}
           </div>
-
-          {pendingSubjects.length > 0 && (
-            <>
-              <p class="chips-label">Aún sin documentos</p>
-              <div class="chips chips-pending">
-                {pendingSubjects.map((s) => (
-                  <button
-                    class="chip"
-                    type="button"
-                    data-s={s.code}
-                    data-phases={s.phases.join(',')}
-                    aria-pressed="false"
-                    title={`${s.name} · ${phaseLabel(s.phases)}`}
-                  >
-                    <span class="nm">{s.name}</span>
-                    <span class="ct"><em>0</em> docs.</span>
-                    <span class="bar" aria-hidden="true">
-                      {recentYears.map(() => <i data-on="0" />)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
         </div>
       </section>
     )}
