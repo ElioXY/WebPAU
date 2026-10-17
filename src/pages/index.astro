@@ -6,6 +6,7 @@ import {
   loadCatalog,
   loadSubjects,
   subjectLabel,
+  subjectRoutes,
   type Session,
   type Subject,
 } from '../lib/catalog';
@@ -107,6 +108,13 @@ const phaseLabel = (phases: string[]) =>
 
 /* el pie enlaza solo lo que existe: nada de anunciar asignaturas vacías */
 const footSubjects = visibleSubjects.slice(0, 8);
+
+/* código → URL de la página de la asignatura; la misma que genera
+   `asignatura/[slug].astro` */
+const subjectLinks = subjectRoutes(
+  visibleSubjects.map((s) => s.code),
+  subjects
+);
 ---
 
 <Base
@@ -231,7 +239,9 @@ const footSubjects = visibleSubjects.slice(0, 8);
               aria-pressed="true"
             >
               <span class="nm">Todas las asignaturas</span>
-              <span class="ct"><em>{statDocs}</em> docs. · {range}</span>
+              <span class="ct">
+                <em>{statDocs}</em> <span class="unit">{statDocs === 1 ? 'doc.' : 'docs.'}</span> · {range}
+              </span>
               <span class="bar" aria-hidden="true">
                 {recentYears.map((y) => <i data-on={yearCounts.has(y) ? '1' : '0'} />)}
               </span>
@@ -239,23 +249,25 @@ const footSubjects = visibleSubjects.slice(0, 8);
 
             {visibleSubjects.map((s) => {
               const list = subjectYears.get(s.code) ?? [];
+              const count = subjectCounts.get(s.code) ?? 0;
               return (
-                <button
+                <a
                   class="chip"
-                  type="button"
+                  href={`${base}/asignatura/${subjectLinks.get(s.code)}`}
                   data-s={s.code}
                   data-phases={s.phases.join(',')}
-                  aria-pressed="false"
                   title={`${s.name} · ${phaseLabel(s.phases)}`}
                 >
                   <span class="nm">{s.name}</span>
                   <span class="ct">
-                    <em>{subjectCounts.get(s.code) ?? 0}</em> docs. · {yearLabel(list)}
+                    <em>{count}</em> <span class="unit">{count === 1 ? 'doc.' : 'docs.'}</span> · {yearLabel(
+                      list
+                    )}
                   </span>
                   <span class="bar" aria-hidden="true">
                     {recentYears.map((y) => <i data-on={list.includes(y) ? '1' : '0'} />)}
                   </span>
-                </button>
+                </a>
               );
             })}
           </div>
@@ -267,8 +279,10 @@ const footSubjects = visibleSubjects.slice(0, 8);
       <div class="wrap">
         <div class="results-head">
           <h2>Archivo</h2>
-          <p class="count">
-            <span id="resultCount">{statDocs}</span>&nbsp;{statDocs === 1 ? 'documento' : 'documentos'}
+          <p class="count" aria-live="polite" aria-atomic="true">
+            <span id="resultCount">{statDocs}</span>&nbsp;<span id="resultWord">{statDocs === 1
+              ? 'documento'
+              : 'documentos'}</span>
           </p>
         </div>
 
@@ -370,7 +384,7 @@ const footSubjects = visibleSubjects.slice(0, 8);
             </div>
           )}
 
-          <div class="empty" id="noMatches" hidden>
+          <div class="empty" id="noMatches" role="status" hidden>
             <p class="badge" aria-hidden="true">?</p>
             <h2>Ningún documento coincide</h2>
             <p id="noMatchesText"></p>
@@ -400,7 +414,7 @@ const footSubjects = visibleSubjects.slice(0, 8);
             <ul>
               {footSubjects.map((s) => (
                 <li>
-                  <a href={`?s=${s.code}#archivo`}>
+                  <a href={`${base}/asignatura/${subjectLinks.get(s.code)}`}>
                     {s.name} <span class="mono">{subjectCounts.get(s.code) ?? 0}</span>
                   </a>
                 </li>
@@ -430,7 +444,12 @@ const footSubjects = visibleSubjects.slice(0, 8);
 
   <script type="application/json" id="catalog-data" set:html={JSON.stringify({
     exams: compact,
-    subjects: visibleSubjects.map((s) => [s.code, s.phases.join(','), s.name]),
+    subjects: visibleSubjects.map((s) => [
+      s.code,
+      s.phases.join(','),
+      s.name,
+      s.aliases.join(' '),
+    ]),
     types: DOC_TYPES.map((t) => [t.id, t.short, t.label]),
     sessions: SESSIONS.map((s) => [s.id, s.long]),
     base,

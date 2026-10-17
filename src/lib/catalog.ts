@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { slugify } from './slug';
 
 /** La PAU de Andalucía se organiza en fase de acceso (obligatoria) y fase de
  *  admisión (voluntaria). Una misma materia de modalidad puede examinarse en
@@ -164,6 +165,51 @@ export function sortExams(a: Exam, b: Exam): number {
 
 export function subjectLabel(subjects: Subject[], code: string): string {
   return subjects.find((s) => s.code === code)?.name ?? code;
+}
+
+/**
+ * URL pública de una asignatura: `/asignatura/fisica`. Se construye con el
+ * nombre —legible y estable— y cae al código si la materia no tiene ficha.
+ */
+export function subjectSlug(code: string, subjects: Subject[]): string {
+  const name = subjects.find((s) => s.code === code)?.name ?? code;
+  return slugify(name) || slugify(code);
+}
+
+/**
+ * Materias que enseña el sitio: las que tienen documentos. Un examen con una
+ * asignatura sin ficha también entra, con su código como nombre, para que su
+ * tarjeta no enlace a una página inexistente.
+ */
+export function publishedSubjects(catalog: CatalogFile, subjects: Subject[]): Subject[] {
+  const codes = [...new Set(catalog.exams.map((e) => e.subject))];
+  return codes.map(
+    (code) =>
+      subjects.find((s) => s.code === code) ?? {
+        code,
+        name: code,
+        short: code,
+        phases: [],
+        aliases: [],
+      }
+  );
+}
+
+/**
+ * Rutas de las asignaturas publicadas: código → slug. Las calcula un único
+ * sitio para que las tarjetas de la portada y `getStaticPaths` no puedan
+ * discrepar; si dos materias compartieran nombre, la segunda lleva su código.
+ */
+export function subjectRoutes(codes: string[], subjects: Subject[]): Map<string, string> {
+  const routes = new Map<string, string>();
+  const used = new Set<string>();
+  for (const code of codes) {
+    let slug = subjectSlug(code, subjects);
+    if (used.has(slug)) slug = `${slug}-${slugify(code)}`;
+    used.add(slug);
+    routes.set(code, slug);
+  }
+  return routes;
 }
 
 /* El slug y el recuento de páginas viven en un módulo sin `node:` porque los

@@ -7,7 +7,7 @@
 type Row = [id: string, subjectIdx: number, year: number, sessionIdx: number, typeIdx: number];
 interface Payload {
   exams: Row[];
-  subjects: [string, string, string][]; // [code, fases, name]
+  subjects: [string, string, string, string][]; // [code, fases, name, alias]
   types: [string, string, string][]; // [id, etiqueta corta, etiqueta larga]
   sessions: [string, string][]; // [id, etiqueta]
   base: string;
@@ -48,6 +48,10 @@ const SESSION_LABEL = new Map(payload.sessions.map((s) => [s[0], s[1]]));
 const codes = payload.subjects.map((s) => s[0]);
 const phaseLists = payload.subjects.map((s) => s[1].split(',').filter(Boolean));
 const names = payload.subjects.map((s) => s[2]);
+/* los alias («mates», «filosofía», «historia del arte») son una columna del
+   catálogo que antes se quedaba en el servidor: sin ellos, buscar la materia
+   como la llama la gente no encontraba nada */
+const aliasLists = payload.subjects.map((s) => s[3] ?? '');
 const TYPES = payload.types.map((t) => t[0]);
 const TYPE_LABEL = new Map(payload.types.map((t) => [t[0], t[1]]));
 
@@ -76,7 +80,11 @@ const groups = $$<HTMLElement>('.year-group').map((el) => ({
   rows: $$<HTMLElement>('.row[data-id]').filter((r) => r.closest('.year-group') === el),
 }));
 
-const chips = $$<HTMLButtonElement>('.chip');
+/* Solo los botones filtran: las tarjetas de asignatura son enlaces a su
+   propia página. Su recuento, en cambio, sigue respondiendo a los filtros
+   como antes, para que todas las cifras del mosaico hablen del mismo estado. */
+const chips = $$<HTMLButtonElement>('button.chip');
+const countedChips = [...chips, ...$$<HTMLAnchorElement>('a.chip')] as HTMLElement[];
 const sessionBtns = $$<HTMLButtonElement>('#segSession button');
 const typeBtns = $$<HTMLButtonElement>('#segType button');
 
@@ -107,9 +115,9 @@ const exams: Exam[] = payload.exams.map(([id, subjectIdx, year, sessionIdx, type
     session,
     type,
     hay: fold(
-      `${code} ${name} ${year} ${session} ${type} ${TYPE_LABEL.get(type) ?? ''} ${
-        TYPE_KEYWORDS[type] ?? ''
-      }`
+      `${code} ${name} ${aliasLists[subjectIdx] ?? ''} ${year} ${session} ${type} ${
+        TYPE_LABEL.get(type) ?? ''
+      } ${TYPE_KEYWORDS[type] ?? ''}`
     ),
   };
 });
@@ -194,18 +202,25 @@ function apply(): void {
   if (allChip) {
     const em = allChip.querySelector('em');
     if (em) em.textContent = String(perYearTotal);
+    const unit = allChip.querySelector('.unit');
+    if (unit) unit.textContent = perYearTotal === 1 ? 'doc.' : 'docs.';
   }
 
-  for (const chip of chips) {
+  for (const chip of countedChips) {
     const code = chip.dataset.s ?? '';
     /* el chip «Todas» también se marca o se desmarca: si no, sigue encendido
        cuando hay una asignatura elegida (y también al abrir un enlace ?s=) */
-    chip.setAttribute('aria-pressed', String(state.s === code));
+    if (chip instanceof HTMLButtonElement) {
+      chip.setAttribute('aria-pressed', String(state.s === code));
+    }
     if (code === '') continue;
     const n = perCode.get(code) ?? 0;
     chip.classList.toggle('is-dim', n === 0 && state.s !== code);
     const em = chip.querySelector('em');
     if (em) em.textContent = String(n);
+    /* el recuento de las tarjetas es vivo: también el plural */
+    const unit = chip.querySelector('.unit');
+    if (unit) unit.textContent = n === 1 ? 'doc.' : 'docs.';
   }
 
   /* los segmentos de tipo también muestran qué habría */
@@ -222,6 +237,9 @@ function apply(): void {
     const next = String(total);
     if (countEl.textContent !== next) {
       countEl.textContent = next;
+      /* el sustantivo acompaña a la cifra: «1 documento», no «1 documentos» */
+      const word = document.getElementById('resultWord');
+      if (word) word.textContent = total === 1 ? 'documento' : 'documentos';
       const line = countEl.parentElement;
       if (line) {
         line.classList.remove('is-bump');

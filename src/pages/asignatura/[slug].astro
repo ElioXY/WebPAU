@@ -1,0 +1,246 @@
+---
+/* =========================================================================
+   Una página por asignatura: /asignatura/fisica
+
+   Enseña todo lo que el archivo tiene de esa materia, agrupado por año y
+   convocatoria igual que la portada, para que quien llega desde una tarjeta
+   del mosaico no tenga que volver a filtrar. Es estática: una URL por materia.
+   ========================================================================= */
+import Base from '../../layouts/Base.astro';
+import OpenIcon from '../../components/icons/Open.astro';
+import {
+  DOC_TYPES,
+  SESSIONS,
+  loadCatalog,
+  loadSubjects,
+  publishedSubjects,
+  subjectRoutes,
+  type Exam,
+  type Session,
+  type Subject,
+} from '../../lib/catalog';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pdfUrl = (file: string) => `${base}/${file.replace(/^\//, '')}`;
+
+const catalog = loadCatalog();
+const subjects = loadSubjects();
+const published: Subject[] = publishedSubjects(catalog, subjects);
+
+/* `getStaticPaths` se extrae del archivo, así que no ve las variables de
+   arriba: recalcula las rutas con las mismas funciones. El mapa es el mismo
+   que usan las tarjetas de la portada, para que enlace y página no discrepen. */
+export function getStaticPaths() {
+  const routes = subjectRoutes(
+    publishedSubjects(loadCatalog(), loadSubjects()).map((s) => s.code),
+    loadSubjects()
+  );
+  return [...routes.entries()].map(([code, slug]) => ({ params: { slug }, props: { code } }));
+}
+
+const { code } = Astro.props as { code: string };
+const subject = published.find((s) => s.code === code)!;
+
+/* la dirección «bonita» (sin .html), que es la que se comparte */
+const slug = subjectRoutes(
+  published.map((s) => s.code),
+  subjects
+).get(code)!;
+const canonical = new URL(`${base}/asignatura/${slug}`, Astro.site ?? 'https://elioxy.github.io')
+  .href;
+
+const exams = catalog.exams.filter((e) => e.subject === code);
+const years = [...new Set(exams.map((e) => e.year))].sort((a, b) => b - a);
+const range =
+  years.length === 0
+    ? ''
+    : years.length === 1
+      ? String(years[0])
+      : `${years[years.length - 1]}–${years[0]}`;
+
+const typeById = new Map(DOC_TYPES.map((t) => [t.id, t]));
+const sessionLong = new Map(SESSIONS.map((s) => [s.id, s.long]));
+const phases = subject.phases
+  .map((p) => (p === 'acceso' ? 'Fase de acceso' : 'Fase de admisión'))
+  .join(' · ');
+
+/* el catálogo llega ordenado por año y convocatoria: basta con agrupar lo
+   contiguo, igual que la portada */
+interface Group {
+  year: number;
+  session: Session;
+  items: Exam[];
+}
+const groups: Group[] = [];
+for (const exam of exams) {
+  const last = groups[groups.length - 1];
+  if (last && last.year === exam.year && last.session === exam.session) last.items.push(exam);
+  else groups.push({ year: exam.year, session: exam.session, items: [exam] });
+}
+
+const fmtSize = (kb?: number | null) => {
+  if (!kb) return '';
+  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`;
+};
+
+const count = exams.length;
+const title = `${subject.name} · exámenes de la PAU en Andalucía — WebPAU`;
+const description = `${count} ${count === 1 ? 'documento' : 'documentos'} de ${subject.name} en la PAU de Andalucía${
+  range ? ` (${range})` : ''
+}: enunciados, soluciones y criterios para abrir en el navegador.`;
+---
+
+<Base title={title} description={description} canonical={canonical}>
+  <header class="site-head">
+    <div class="wrap head-bar">
+      <a class="brand" href={`${base}/`}>
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        WebPAU
+      </a>
+      <nav class="head-nav" aria-label="Secciones">
+        <a href={`${base}/#asignaturas`}>Asignaturas</a>
+        <a href={`${base}/#archivo`}>Archivo</a>
+        <a href={`${base}/practica`}>Practicar</a>
+      </nav>
+      <a class="cta" href={`${base}/#archivo`}>Volver al archivo</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero subject-hero">
+      <div class="wrap">
+        <p class="kicker">Asignatura</p>
+        <h1>{subject.name}</h1>
+        <p class="lede">
+          Todos los documentos de {subject.name} que hay en el archivo, del más reciente al más
+          antiguo. Cada enunciado lleva al lado su convocatoria y su tipo para que sepas qué
+          estás abriendo.
+        </p>
+        <p class="subject-facts mono">
+          <span>{count} {count === 1 ? 'documento' : 'documentos'}</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span>{range}</span>
+          {phases && (
+            <>
+              <span class="sep" aria-hidden="true">·</span>
+              <span>{phases}</span>
+            </>
+          )}
+        </p>
+        <p class="subject-back">
+          <a href={`${base}/#asignaturas`}>← Todas las asignaturas</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="archive subject-archive">
+      <div class="wrap">
+        {groups.map((group) => (
+          <div class="year-group">
+            <div class="year-head">
+              <h3>{group.year}</h3>
+              <span class="session">{sessionLong.get(group.session) ?? group.session}</span>
+              <span class="n">
+                {group.items.length} {group.items.length === 1 ? 'documento' : 'documentos'}
+              </span>
+            </div>
+            {group.items.map((exam) => {
+              /* un tipo desconocido no debe tumbar el build: se muestra tal cual */
+              const type = typeById.get(exam.type) ?? {
+                id: exam.type,
+                short: exam.type,
+                label: exam.type,
+                hint: 'Tipo de documento no reconocido',
+              };
+              const meta = [exam.pages ? `${exam.pages} p.` : null, fmtSize(exam.sizeKB)]
+                .filter(Boolean)
+                .join('  ·  ');
+              /* dos documentos del mismo tipo se llaman igual: el nombre
+                 accesible añade páginas, tamaño y convocatoria para que no
+                 haya dos enlaces con el mismo nombre */
+              const accessibleName = [type.label, meta.replace(/\s+/g, ' '), `${exam.year} ${exam.session}`]
+                .filter(Boolean)
+                .join(' · ');
+              return (
+                <div class="row" data-t={exam.type} data-p={subject.phases.join(',')}>
+                  <span class="stripe" aria-hidden="true" />
+                  <div class="row-title">
+                    {/* el tipo ya está en el título, así que la etiqueta de la
+                        derecha sobraba */}
+                    <a
+                      href={pdfUrl(exam.file)}
+                      title={exam.notes || undefined}
+                      aria-label={accessibleName}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {type.label}
+                    </a>
+                    <p class="row-meta">{meta}</p>
+                  </div>
+                  {exam.official === false && (
+                    <span class="unofficial" title="Documento no oficial">no oficial</span>
+                  )}
+                  <div class="row-actions">
+                    <a class="dl" href={pdfUrl(exam.file)} target="_blank" rel="noreferrer">
+                      <OpenIcon /><span>Ver</span>
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <p class="foot-note">
+        Esta página reúne lo que hay publicado de {subject.name}. El{' '}
+        <a href={`${base}/#archivo`}>archivo completo</a> tiene el resto de materias, y en{' '}
+        <a href={`${base}/practica`}>práctica</a> puedes hacer un examen con cronómetro.
+        Los documentos pertenecen a los organismos que los emiten.
+      </p>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  .subject-hero {
+    padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(0.75rem, 2vw, 1.25rem);
+  }
+
+  .subject-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 0.55rem;
+    margin-top: 1rem;
+    color: var(--ink-2);
+  }
+
+  .subject-facts .sep {
+    color: var(--rule);
+  }
+
+  .subject-back {
+    margin-top: 1.1rem;
+  }
+
+  .subject-back a,
+  .foot-note a {
+    border-bottom: 1px solid var(--rule);
+    transition: border-color var(--dur-1) var(--ease);
+  }
+
+  .subject-back a:hover,
+  .foot-note a:hover {
+    border-color: var(--ink);
+  }
+
+  .subject-archive {
+    padding-top: clamp(1rem, 2vw, 1.5rem);
+  }
+</style>
