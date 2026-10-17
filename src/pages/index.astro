@@ -9,7 +9,7 @@ import {
   type Session,
 } from '../lib/catalog';
 import SearchIcon from '../components/icons/Search.astro';
-import DownloadIcon from '../components/icons/Download.astro';
+import OpenIcon from '../components/icons/Open.astro';
 import GitHubIcon from '../components/icons/GitHub.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -108,7 +108,7 @@ const footSubjects = docSubjects.slice(0, 8);
 
 <Base
   title="WebPAU · Todos los exámenes de la PAU en Andalucía"
-  description="Archivo de enunciados, soluciones y criterios de corrección de la PAU en Andalucía. Filtra por asignatura, año, convocatoria y fase, y descarga el PDF."
+  description="Archivo de enunciados, soluciones y criterios de corrección de la PAU en Andalucía. Filtra por asignatura, año, convocatoria y fase y ábrelos en el navegador."
 >
   <header class="site-head">
     <div class="wrap head-bar">
@@ -142,8 +142,8 @@ const footSubjects = docSubjects.slice(0, 8);
         <h1>Encuentra el ejercicio que <em>te toca</em>.</h1>
         <p class="lede">
           Enunciados, soluciones y criterios de corrección de la PAU en Andalucía,
-          reunidos por asignatura, año y convocatoria. Elige una materia y descarga
-          el PDF.
+          reunidos por asignatura, año y convocatoria. Elige una materia y abre sus
+          PDFs en el navegador.
         </p>
 
         {exams.length > 0 && (
@@ -187,7 +187,7 @@ const footSubjects = docSubjects.slice(0, 8);
                   <button type="button" data-ss={s.id} aria-pressed="false">{s.label}</button>
                 ))}
               </div>
-              <div class="seg" role="group" aria-label="Tipo de documento" id="segType">
+              <div class="seg seg-type" role="group" aria-label="Tipo de documento" id="segType">
                 <button type="button" data-t="" aria-pressed="true">Todos</button>
                 {DOC_TYPES.map((t) => (
                   <button type="button" data-t={t.id} aria-pressed="false">{t.short}</button>
@@ -329,7 +329,12 @@ const footSubjects = docSubjects.slice(0, 8);
                     >
                       <span class="stripe" aria-hidden="true"></span>
                       <div class="row-title">
-                        <a href={pdfUrl(exam.file)} title={exam.notes || undefined}>
+                        <a
+                          href={pdfUrl(exam.file)}
+                          title={exam.notes || undefined}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           {subjectLabel(subjects, exam.subject)}
                         </a>
                         <p class="row-meta">{meta}</p>
@@ -342,8 +347,15 @@ const footSubjects = docSubjects.slice(0, 8);
                         {type.short}
                       </span>
                       <div class="row-actions">
-                        <a class="dl" href={pdfUrl(exam.file)} download>
-                          <DownloadIcon /><span>PDF</span>
+                        {/* el PDF se abre en el visor del navegador: sin `download`,
+                            que obligaba a guardarlo antes de poder leerlo */}
+                        <a
+                          class="dl"
+                          href={pdfUrl(exam.file)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <OpenIcon /><span>Ver</span>
                         </a>
                       </div>
                     </div>
@@ -357,7 +369,7 @@ const footSubjects = docSubjects.slice(0, 8);
               <h2>Aún no hay nada en el archivo</h2>
               <p>
                 Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán aquí
-                ordenados por asignatura, año y convocatoria, listos para descargar.
+                ordenados por asignatura, año y convocatoria, listos para consultar.
               </p>
               <p class="empty-cta">
                 <a

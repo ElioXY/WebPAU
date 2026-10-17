@@ -1160,7 +1160,7 @@ button.dl:hover {
   }
 
   /* en el móvil el grupo ocupa la fila entera y reparte el ancho entre sus
-     segmentos, así ninguna línea parte a media anchura ni deja huecos */
+     segmentos: la tira de convocatoria cabe en una línea */
   .seg {
     width: 100%;
   }
@@ -1168,6 +1168,47 @@ button.dl:hover {
   .seg button {
     flex: 1 1 auto;
     padding-inline: 0.45rem;
+  }
+
+  /* Los cinco tipos no caben en una tira estrecha y partían dejando una fila
+     coja a media anchura. En el móvil se rehacen como la rejilla de dos
+     columnas del panel, con «Todos» de reinicio a ancho completo, y los filetes
+     pasan a la rejilla para que cada fila quede cerrada. */
+  .seg-type {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--rule);
+    background: var(--sheet);
+  }
+
+  .seg-type button {
+    margin: 0;
+    padding: 0.5rem 0.45rem;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+  }
+
+  .seg-type button:first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* sobra el filete derecho en la columna derecha y el de abajo en la última
+     fila: el marco ya lo pone la rejilla */
+  .seg-type button:first-child,
+  .seg-type button:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .seg-type button:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  /* el segmento activo se funde con su filete en vez de dibujar un marco claro
+     sobre la tinta */
+  .seg-type button[aria-pressed='true'] {
+    border-color: var(--ink);
   }
 
   .select {
