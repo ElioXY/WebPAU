@@ -53,7 +53,11 @@
   --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo,
     Consolas, monospace;
 
+  /* movimiento: breve y mecánico, como pasar hojas de un archivador */
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-1: 120ms; /* respuesta al puntero */
+  --dur-2: 200ms; /* piezas que se posan */
+  --dur-3: 420ms; /* cambios de tema y de página */
 }
 
 /* --------------------------------------------------------------- tema oscuro */
@@ -160,8 +164,10 @@ a {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0.01ms !important;
   }
 }
 
@@ -295,6 +301,7 @@ main {
   text-decoration: none;
   border-bottom: 1px solid transparent;
   padding-block: 0.15rem;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
 
 .head-nav a:hover {
@@ -325,7 +332,8 @@ main {
   font-size: 0.75rem;
   padding: 0.5rem 0.85rem;
   white-space: nowrap;
-  transition: background-color 0.14s var(--ease), border-color 0.14s var(--ease);
+  transition: background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
 
 .cta:hover {
@@ -476,7 +484,8 @@ main {
   padding: 0.65rem 1rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.14s var(--ease), border-color 0.14s var(--ease);
+  transition: background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
 
 .btn-primary:hover {
@@ -501,8 +510,8 @@ main {
   font-size: 0.6875rem;
   padding: 0.4rem 0.6rem;
   cursor: pointer;
-  transition: background-color 0.14s var(--ease), color 0.14s var(--ease),
-    opacity 0.15s var(--ease);
+  transition: background-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease),
+    opacity var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
 
 .seg button:hover {
@@ -528,7 +537,8 @@ main {
   font-size: 0.6875rem;
   padding: 0.4rem 0.7rem;
   cursor: pointer;
-  transition: border-color 0.14s var(--ease), color 0.14s var(--ease);
+  transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease),
+    transform var(--dur-1) var(--ease);
 }
 
 .btn-ghost:hover {
@@ -626,8 +636,9 @@ main {
   padding: 0.9rem 1rem 1rem;
   cursor: pointer;
   color: inherit;
-  transition: border-color 0.12s var(--ease), background-color 0.12s var(--ease),
-    opacity 0.15s var(--ease);
+  transition: border-color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease), opacity var(--dur-1) var(--ease),
+    transform var(--dur-1) var(--ease);
 }
 
 .chip:hover {
@@ -763,6 +774,7 @@ main {
   font-weight: 550;
   letter-spacing: -0.01em;
   border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-1) var(--ease);
 }
 
 .row-title a:hover {
@@ -838,12 +850,19 @@ main {
   font-size: 0.6875rem;
   color: var(--ink);
   white-space: nowrap;
-  transition: border-color 0.14s var(--ease), background-color 0.14s var(--ease);
+  transition: border-color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
 
 .dl svg {
   width: 14px;
   height: 14px;
+  transition: transform var(--dur-1) var(--ease);
+}
+
+/* el icono de abrir fuera apunta hacia donde va el PDF */
+.dl:hover svg {
+  transform: translate(1px, -1px);
 }
 
 .dl:hover {
@@ -1020,15 +1039,19 @@ button.dl:hover {
   height: 16px;
 }
 
+/* los dos iconos comparten celda y se relevan girando, en vez de cambiar de
+   golpe: el icono mostrado describe el modo al que cambiarás */
 .ctrl-ico {
+  grid-area: 1 / 1;
   display: grid;
   place-items: center;
+  transition: opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
 }
 
-/* el icono mostrado describe el modo al que cambiarás */
 :root[data-theme='light'] .ctrl-ico[data-theme-ico='dark'],
 :root[data-theme='dark'] .ctrl-ico[data-theme-ico='light'] {
-  display: none;
+  opacity: 0;
+  transform: rotate(-40deg) scale(0.75);
 }
 
 @keyframes ctrl-in {
@@ -1116,6 +1139,121 @@ button.dl:hover {
 
 .notfound .owner-note a:hover {
   color: var(--ink);
+}
+
+/* --------------------------------------------------------------- movimiento */
+/* Las piezas entran como se ordena un archivador: la barra se pega, el titular
+   se posa y los filtros llegan en cadencia. Solo se animan opacidad y
+   transformación —nunca alturas ni márgenes— y todo cabe en medio segundo,
+   para que leer siga siendo más rápido que mirar. */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+@keyframes bar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* el contador late cuando cambia la cuenta */
+@keyframes count-bump {
+  40% {
+    opacity: 0.4;
+    transform: translateY(-1px);
+  }
+}
+
+.site-head {
+  animation: bar-in var(--dur-2) var(--ease) backwards;
+}
+
+.hero .wrap > * {
+  animation: rise-in var(--dur-3) var(--ease) backwards;
+}
+
+.hero .wrap > :nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.hero .wrap > :nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.hero .wrap > :nth-child(4) {
+  animation-delay: 180ms;
+}
+
+.results-head,
+.legend,
+.chips-label,
+.chips {
+  animation: rise-in var(--dur-3) var(--ease) backwards;
+}
+
+.results-head {
+  animation-delay: 80ms;
+}
+
+.legend,
+.chips-label {
+  animation-delay: 140ms;
+}
+
+.chips {
+  animation-delay: 180ms;
+}
+
+/* Encabezado y filas se posan juntos. La animación se cancela mientras el
+   elemento está en `display:none`, así que al volver de un filtro vuelve a
+   empezar: el archivo se reordena a la vista sin tocar el script. */
+.year-head,
+.row {
+  animation: row-in var(--dur-2) var(--ease) backwards;
+}
+
+.empty,
+.notfound {
+  animation: rise-in var(--dur-3) var(--ease) backwards;
+}
+
+.count.is-bump {
+  animation: count-bump var(--dur-2) var(--ease);
+}
+
+/* la pulsación baja un píxel: el gesto del sello al apoyarse */
+.cta:active,
+.btn-primary:active,
+.btn-ghost:active,
+.dl:active,
+.chip:active,
+.seg button:active {
+  transform: translateY(1px);
+}
+
+/* El cambio de tema se funde con la página; la clase la pone el conmutador y
+   dura algo más que la transición. Solo si no se ha pedido menos movimiento. */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-fade,
+  .theme-fade *,
+  .theme-fade *::before,
+  .theme-fade *::after {
+    transition: background-color var(--dur-3) var(--ease),
+      border-color var(--dur-3) var(--ease), color var(--dur-3) var(--ease),
+      fill var(--dur-3) var(--ease) !important;
+  }
 }
 
 /* --------------------------------------------------------------- responsive */

@@ -217,7 +217,19 @@ function apply(): void {
     btn.classList.toggle('is-dim', n === 0 && state.t !== t);
   }
 
-  if (countEl) countEl.textContent = String(total);
+  /* el contador late cuando cambia: la cifra acompaña al filtrado */
+  if (countEl) {
+    const next = String(total);
+    if (countEl.textContent !== next) {
+      countEl.textContent = next;
+      const line = countEl.parentElement;
+      if (line) {
+        line.classList.remove('is-bump');
+        void line.offsetWidth; /* reinicia la animación */
+        line.classList.add('is-bump');
+      }
+    }
+  }
 
   const catalogEmpty = exams.length === 0;
   if (emptyEl) emptyEl.hidden = !catalogEmpty;

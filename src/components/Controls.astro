@@ -22,7 +22,13 @@ import ArrowUpIcon from './icons/ArrowUp.astro';
   const label = document.getElementById('themeToggleLabel');
   const toTop = document.getElementById('toTop');
 
+  /* el cambio de tema se funde: la clase vive lo que dura la transición */
+  let fadeTimer: number | undefined;
+
   const apply = (theme: 'light' | 'dark') => {
+    root.classList.add('theme-fade');
+    window.clearTimeout(fadeTimer);
+    fadeTimer = window.setTimeout(() => root.classList.remove('theme-fade'), 480);
     root.dataset.theme = theme;
     try {
       localStorage.setItem('theme', theme);

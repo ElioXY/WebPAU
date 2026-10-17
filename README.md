@@ -1,16 +1,41 @@
 # WebPAU
 
-Archivo público de exámenes de la PAU (Prueba de Acceso a la Universidad) en
-Andalucía, y panel de administración para subirlos.
+**Un archivo público de los exámenes de la PAU de Andalucía** (Prueba de Acceso
+a la Universidad): los enunciados que se reparten en el aula, sus soluciones,
+los criterios con que se corrigen y la hoja de respuestas en blanco, de las
+convocatorias ordinaria y extraordinaria, ordenados por asignatura y año.
 
-La web pública es estática y se publica en **GitHub Pages** sin coste. Los datos
-—el catálogo en JSON y los PDF— viven **dentro del propio repositorio**, así que
-GitHub hace de base de datos y de histórico: cada cambio es un commit y se puede
-revertir.
+La web está en **<https://elioxy.github.io/WebPAU>**.
 
-El **panel de administración es una página más del sitio**: no hay servidor
-que mantener ni PC encendido. Habla directamente con la API de GitHub, así que
-puedes subir exámenes desde el móvil.
+Es estática y gratuita, sin cuentas ni registro: se entra, se filtra por
+asignatura, año, convocatoria, fase o tipo de documento, y el PDF **se abre en
+el visor del navegador** en vez de empezar a descargarse. Y cualquier vista se
+puede compartir: el estado de los filtros vive en la URL.
+
+Detrás no hay base de datos ni servidor que mantener. El catálogo (un JSON) y
+los PDF viven **dentro de este repositorio**, así que GitHub hace de base de
+datos y de histórico —cada publicación es un commit y se puede revertir—, y el
+panel de administración es **una página más del propio sitio**, que habla con la
+API de GitHub desde el navegador. Por eso se puede subir un examen desde el
+móvil, sin instalar nada.
+
+## Para qué sirve
+
+- **Estudiar con exámenes reales.** Repetir los ejercicios que ya han caído, por
+  asignatura y por año, en lugar de con modelos inventados.
+- **Entender cómo se puntúa.** Cada enunciado tiene al lado sus soluciones y sus
+  criterios de corrección, que es lo que de verdad cambia la nota.
+- **Preparar la convocatoria que toca.** Separar lo que es fase de acceso de lo
+  que es fase de admisión, y lo ordinario de lo extraordinario.
+- **Compartir exactamente lo que buscas.** Cualquier vista filtrada tiene su
+  URL: se pega en un grupo de clase y el otro ve lo mismo.
+- **Publicar sin montar nada.** Quien mantiene el archivo sube los PDF desde el
+  panel y la web se reconstruye sola; no hay servidor ni base de datos que
+  administrar.
+- **No perder el archivo.** Al ser commits, un borrado accidental se deshace con
+  `git revert`, y queda constancia de cuándo entró cada documento.
+
+## Cómo se publica
 
 ```
 ┌────────────────────┐   un commit con   ┌───────────────┐   recompila   ┌──────────┐
@@ -19,6 +44,10 @@ puedes subir exámenes desde el móvil.
 └────────────────────┘                   │  public/exams │               │  (web)   │
                                          └───────────────┘               └──────────┘
 ```
+
+La web se publica en **GitHub Pages** sin coste: el workflow
+`.github/workflows/deploy.yml` reconstruye el sitio en cada push que toque
+`src/`, `data/` o `public/` (1–2 minutos).
 
 ---
 
@@ -36,6 +65,18 @@ El catálogo sigue el modelo vigente de la **PAU** andaluza:
 
 Cada asignatura de `data/subjects.json` declara en qué fases entra. Varias
 materias de modalidad cuentan en las dos, por eso `phases` es una lista.
+
+### Qué documentos guarda
+
+| Tipo | Qué es |
+| --- | --- |
+| **Enunciado** | El examen que se reparte en el aula. |
+| **Soluciones** | Las respuestas oficiales del tribunal. |
+| **Criterios** | Cómo se puntúa cada pregunta, con la rúbrica. |
+| **Hoja** | La plantilla de respuestas (OMR) en blanco. |
+
+Los documentos oficiales se marcan como tales; si algo está reconstruido o
+procede de otra fuente, la fila lo advierte con **no oficial** en rojo.
 
 ---
 
@@ -160,10 +201,19 @@ Ejemplo: <https://elioxy.github.io/WebPAU/?s=HFI&y=2025&t=soluciones>
 
 ### Interfaz
 
+- **El PDF se abre, no se descarga.** El botón «Ver» de cada fila (y el título)
+  abren el documento en el visor del navegador, en otra pestaña, para poder
+  leerlo sin pasar por la carpeta de descargas.
 - **Tema claro / oscuro.** Se elige automáticamente según el sistema y puedes
-  cambiarlo con el botón flotante; la preferencia se guarda en el navegador.
+  cambiarlo con el botón flotante; la preferencia se guarda en el navegador, y
+  el cambio se funde en vez de dar un salto.
 - **Atajo `/`.** Enfoca el buscador al instante. `Esc` lo desenfoca.
 - **Volver arriba.** Aparece un botón flotante al bajar por la página.
+- **Móvil.** Las filas se apilan y los cinco tipos de documento pasan a una
+  rejilla de dos columnas, sin nada que se salga de la pantalla.
+- **Movimiento discreto.** Cada pieza entra o se reordena en menos de medio
+  segundo, con opacidad y desplazamiento; con «reducir movimiento» del sistema
+  no se anima nada.
 - Cuando el archivo está vacío, la web oculta los filtros y muestra un estado
   de bienvenida con acceso al repositorio.
 
@@ -183,7 +233,7 @@ Ejemplo: <https://elioxy.github.io/WebPAU/?s=HFI&y=2025&t=soluciones>
   sin aire. Para escaneos enormes, súbelos por `git` a mano y añade la entrada
   a `data/exams.json`.
 - **Primera publicación.** En GitHub: *Settings → Pages → Source → GitHub
-  Actions*. Las ejecuciones siguientes ya se solas.
+  Actions*. Las ejecuciones siguientes ya se lanzan solas.
 - **Dominio propio.** Si lo añades, define `SITE_URL` y `SITE_BASE=/` en el
   workflow y ajusta `site` en `astro.config.mjs`.
 
