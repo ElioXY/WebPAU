@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T12:06:16.525Z",
+  "updatedAt": "2026-10-17T14:06:38.929Z",
   "exams": [
     {
       "id": "fis-2013-ordinaria-criterios",
@@ -32,7 +32,7 @@
       "official": true,
       "notes": "",
       "addedAt": "2026-10-17T12:02:08.558Z",
-      "updatedAt": "2026-10-17T12:06:16.525Z"
+      "updatedAt": "2026-10-17T14:06:38.929Z"
     },
     {
       "id": "fis-2013-ordinaria-enunciados-2",
