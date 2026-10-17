@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T16:22:23.608Z",
+  "updatedAt": "2026-10-17T16:24:16.622Z",
   "exams": [
     {
       "id": "fis-2026-extraordinaria-criterios",
@@ -17,6 +17,22 @@
       "notes": "",
       "addedAt": "2026-10-17T14:37:14.629Z",
       "updatedAt": "2026-10-17T14:37:14.629Z"
+    },
+    {
+      "id": "fis-2026-ordinaria-criterios",
+      "subject": "FIS",
+      "year": 2026,
+      "session": "ordinaria",
+      "type": "criterios",
+      "pages": 3,
+      "file": "exams/2026/ordinaria/FIS/fis-2026-ordinaria-criterios.pdf",
+      "originalName": "Criterios Titular Física.pdf",
+      "sizeKB": 88,
+      "language": "es",
+      "official": true,
+      "notes": "",
+      "addedAt": "2026-10-17T16:24:16.622Z",
+      "updatedAt": "2026-10-17T16:24:16.622Z"
     },
     {
       "id": "fis-2026-ordinaria-enunciados",
