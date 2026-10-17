@@ -1,5 +1,54 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T11:52:16.329Z",
-  "exams": []
+  "updatedAt": "2026-10-17T12:02:08.558Z",
+  "exams": [
+    {
+      "id": "fis-2013-ordinaria-enunciados",
+      "subject": "FIS",
+      "year": 2013,
+      "session": "ordinaria",
+      "type": "enunciados",
+      "pages": 2,
+      "file": "exams/2013/ordinaria/FIS/fis-2013-ordinaria-enunciados.pdf",
+      "originalName": "Examen_Andalucía_Física_12_13_6.pdf",
+      "sizeKB": 33,
+      "language": "es",
+      "official": true,
+      "notes": "",
+      "addedAt": "2026-10-17T12:02:08.558Z",
+      "updatedAt": "2026-10-17T12:02:08.558Z"
+    },
+    {
+      "id": "fis-2013-ordinaria-enunciados-2",
+      "subject": "FIS",
+      "year": 2013,
+      "session": "ordinaria",
+      "type": "enunciados",
+      "pages": 2,
+      "file": "exams/2013/ordinaria/FIS/fis-2013-ordinaria-enunciados-2.pdf",
+      "originalName": "Examen_Andalucía_Física_12_13_5.pdf",
+      "sizeKB": 55,
+      "language": "es",
+      "official": true,
+      "notes": "",
+      "addedAt": "2026-10-17T12:02:08.558Z",
+      "updatedAt": "2026-10-17T12:02:08.558Z"
+    },
+    {
+      "id": "fis-2013-ordinaria-enunciados-3",
+      "subject": "FIS",
+      "year": 2013,
+      "session": "ordinaria",
+      "type": "enunciados",
+      "pages": 2,
+      "file": "exams/2013/ordinaria/FIS/fis-2013-ordinaria-enunciados-3.pdf",
+      "originalName": "Examen_Andalucía_Física_12_13_4.pdf",
+      "sizeKB": 66,
+      "language": "es",
+      "official": true,
+      "notes": "",
+      "addedAt": "2026-10-17T12:02:08.558Z",
+      "updatedAt": "2026-10-17T12:02:08.558Z"
+    }
+  ]
 }
