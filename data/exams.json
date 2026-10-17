@@ -1,7 +1,23 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-17T14:08:50.593Z",
+  "updatedAt": "2026-10-17T14:13:36.104Z",
   "exams": [
+    {
+      "id": "fis-2013-extraordinaria-criterios",
+      "subject": "FIS",
+      "year": 2013,
+      "session": "extraordinaria",
+      "type": "criterios",
+      "pages": 1,
+      "file": "exams/2013/extraordinaria/FIS/fis-2013-extraordinaria-criterios.pdf",
+      "originalName": "FISICA Criterios_Andalucía_12_13.pdf",
+      "sizeKB": 18,
+      "language": "es",
+      "official": true,
+      "notes": "",
+      "addedAt": "2026-10-17T14:13:36.104Z",
+      "updatedAt": "2026-10-17T14:13:36.104Z"
+    },
     {
       "id": "fis-2013-extraordinaria-enunciados",
       "subject": "FIS",
