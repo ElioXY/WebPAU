@@ -1,9 +1,12 @@
 /* =========================================================================
-   WebPAU — sistema visual
-   Concepto: la hoja de respuestas (OMR) con el lenguaje del panel. Papel
-   gris, hoja casi blanca, tinta y filetes de 1 px: la misma paleta, las
-   mismas formas y las mismas esquinas rectas que src/styles/admin.css,
-   para que el sitio y el panel se lean como una sola herramienta.
+   WebPAU — sistema visual «Índice»
+
+   El archivo se lee como el índice de un boletín oficial: papel cálido,
+   titulares en serif, filetes de un píxel, versalitas mono para los datos y
+   un único acento de tinta roja. Nada de tarjetas de aplicación: la
+   jerarquía la hacen el tamaño, la alineación y la regla.
+
+   El panel (/admin) conserva su propia hoja, src/styles/admin.css.
    ========================================================================= */
 
 @import '@fontsource-variable/archivo/wdth.css';
@@ -13,79 +16,88 @@
 :root {
   color-scheme: light;
 
-  /* superficies */
-  --stock: #ddded7;
-  --stock-deep: #cbcdc2;
-  --sheet: #fbfbf9;
-  --sheet-2: #f3f3ee;
+  /* papel */
+  --paper: #f6f2e9;
+  --paper-2: #efe9dc;
+  --card: #fffdf9;
 
   /* tinta */
-  --ink: #15181d;
-  --ink-2: #4b5158;
-  --ink-3: #6b7178;
+  --ink: #191713;
+  --ink-2: #55504a;
+  --ink-3: #8a8172;
 
   /* filetes */
-  --rule: #c6c8bc;
-  --rule-2: #dcddd4;
+  --rule: #d8d1c0;
+  --rule-2: #e7e1d3;
 
-  /* acentos: sello institucional y bolígrafo del corrector */
-  --seal: #1b3a8f;
-  --seal-wash: #e6e9f5;
-  --stamp: #b0372a;
-  --stamp-wash: #f7e8e5;
-  --ok: #2f6b4f;
-  --ok-wash: #e4efe8;
+  /* acentos: tinta roja del índice, verde de la fase de admisión,
+     ocre de los criterios */
+  --accent: #8f2f22;
+  --accent-wash: #f3e5df;
+  --teal: #0f5f56;
+  --teal-wash: #e2eeea;
+  --ochre: #8a5a12;
+  --ochre-wash: #f4ead7;
 
-  /* las dos fases, con los colores del panel */
-  --acceso: var(--seal);
-  --acceso-wash: var(--seal-wash);
-  --admision: var(--ok);
-  --admision-wash: var(--ok-wash);
+  /* alias heredados */
+  --stock: var(--paper);
+  --stock-deep: var(--paper-2);
+  --sheet: var(--card);
+  --sheet-2: var(--paper-2);
+  --seal: var(--accent);
+  --seal-wash: var(--accent-wash);
+  --stamp: var(--ochre);
+  --stamp-wash: var(--ochre-wash);
+  --ok: var(--teal);
+  --ok-wash: var(--teal-wash);
+  --acceso: var(--accent);
+  --acceso-wash: var(--accent-wash);
+  --admision: var(--teal);
+  --admision-wash: var(--teal-wash);
+  --focus: var(--accent);
 
-  --focus: var(--seal);
+  --wrap: 1180px;
+  --gut: clamp(1.15rem, 5vw, 4rem);
+  --header-h: 64px;
 
-  --wrap: 1120px;
-  --gut: clamp(1rem, 4vw, 2.5rem);
-  --header-h: 58px;
-
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman',
+    serif;
   --sans: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, -apple-system,
     'Segoe UI', Roboto, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo,
-    Consolas, monospace;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas,
+    monospace;
 
-  /* movimiento: breve y mecánico, como pasar hojas de un archivador */
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --dur-1: 120ms; /* respuesta al puntero */
-  --dur-2: 200ms; /* piezas que se posan */
-  --dur-3: 420ms; /* cambios de tema y de página */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 420ms;
 }
 
-/* --------------------------------------------------------------- tema oscuro */
-/* la hoja de respuestas en negativo: pizarra, tinta clara, mismos acentos */
+/* --------------------------------------------------------------- noche */
+/* el mismo índice impreso en papel ahumado */
 
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --stock: #14161a;
-  --stock-deep: #0d0f12;
-  --sheet: #1b1e23;
-  --sheet-2: #23272e;
+  --paper: #14120f;
+  --paper-2: #1b1814;
+  --card: #201c17;
 
-  --ink: #eceef2;
-  --ink-2: #b6bcc5;
-  --ink-3: #868d97;
+  --ink: #efe9dc;
+  --ink-2: #c3bba9;
+  --ink-3: #8f8778;
 
-  --rule: #363b43;
-  --rule-2: #2a2e35;
+  --rule: #3a342b;
+  --rule-2: #2a251f;
 
-  --seal: #8aa2f7;
-  --seal-wash: #1d2436;
-  --stamp: #e2907f;
-  --stamp-wash: #34231f;
-  --ok: #7fc4a2;
-  --ok-wash: #16281f;
+  --accent: #e2907c;
+  --accent-wash: #2e1f1a;
+  --teal: #82c3b3;
+  --teal-wash: #17251f;
+  --ochre: #d8ab63;
+  --ochre-wash: #2a2318;
 
-  --focus: var(--seal);
+  --focus: var(--accent);
 }
 
 /* ------------------------------------------------------------------ reset */
@@ -107,13 +119,11 @@ html {
 }
 
 body {
-  background: var(--stock);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: clamp(0.975rem, 0.93rem + 0.22vw, 1.0625rem);
-  line-height: 1.55;
-  font-weight: 400;
-  font-variation-settings: 'wdth' 98;
+  font-size: clamp(0.975rem, 0.94rem + 0.18vw, 1.0625rem);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   min-height: 100dvh;
@@ -143,13 +153,13 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--seal);
-  outline-offset: 2px;
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--acceso);
-  color: #fff;
+  background: var(--accent);
+  color: var(--card);
 }
 
 [hidden] {
@@ -171,33 +181,36 @@ a {
   }
 }
 
-/* ------------------------------------------------------------- tipografia */
+/* ------------------------------------------------------------- tipografía */
 
 h1,
 h2,
 h3 {
-  font-weight: 680;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.15;
   text-wrap: balance;
-  font-variation-settings: 'wdth' 96;
 }
 
 h1 {
-  font-size: clamp(2.1rem, 1rem + 3.4vw, 3.4rem);
+  font-size: clamp(2.3rem, 1rem + 4.2vw, 3.9rem);
   line-height: 1.02;
-  letter-spacing: -0.035em;
-  font-weight: 700;
+  letter-spacing: -0.028em;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--accent);
 }
 
 h2 {
-  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.45rem);
-  line-height: 1.2;
+  font-size: clamp(1.25rem, 1.05rem + 0.7vw, 1.6rem);
+  letter-spacing: -0.015em;
 }
 
 h3 {
   font-size: 1.0625rem;
-  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 p {
@@ -208,15 +221,15 @@ p {
   font-family: var(--mono);
   font-weight: 400;
   font-size: 0.75rem;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   font-feature-settings: 'zero' 1;
 }
 
 .lede {
-  font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.1875rem);
-  line-height: 1.55;
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
+  line-height: 1.6;
   color: var(--ink-2);
-  max-width: 56ch;
+  max-width: 54ch;
 }
 
 /* ----------------------------------------------------------------- layout */
@@ -244,41 +257,41 @@ main {
 }
 
 /* --------------------------------------------------------------- cabecera */
-/* una barra plana pegada arriba y con filete inferior, como la del panel */
 
 .site-head {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--stock) 90%, transparent);
-  backdrop-filter: blur(12px) saturate(1.3);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
   border-bottom: 1px solid var(--rule);
 }
 
 .head-bar {
   display: flex;
   align-items: center;
-  gap: 0.75rem 1.25rem;
+  gap: 0.75rem 1.35rem;
   min-height: var(--header-h);
 }
 
 .brand {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.5rem;
-  font-weight: 680;
-  letter-spacing: -0.02em;
-  font-size: 1.0625rem;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.025em;
 }
 
-/* la marca es la del panel: cuatro cuadrados, dos de ellos en sello */
 .brand .mark {
   display: grid;
-  grid-template-columns: repeat(2, 5px);
+  grid-template-columns: repeat(2, 4px);
   gap: 2px;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   flex: none;
+  align-self: center;
 }
 
 .brand .mark i {
@@ -287,18 +300,19 @@ main {
 
 .brand .mark i:nth-child(2),
 .brand .mark i:nth-child(3) {
-  background: var(--seal);
+  background: var(--accent);
 }
 
 .head-nav {
   display: flex;
-  gap: 1.1rem;
-  font-size: 0.875rem;
-  color: var(--ink-2);
+  gap: 1.15rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
 .head-nav a {
-  text-decoration: none;
   border-bottom: 1px solid transparent;
   padding-block: 0.15rem;
   transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
@@ -314,6 +328,9 @@ main {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--ink-3);
 }
 
@@ -323,78 +340,144 @@ main {
 
 .cta {
   flex: none;
-  /* en páginas sin contadores (404) la llamada a la acción va a la derecha */
-  margin-left: auto;
-  background: var(--ink);
-  border: 1px solid var(--ink);
-  color: var(--sheet);
+  margin-left: 0;
+  border-bottom: 1px solid var(--rule);
+  padding: 0.2rem 0;
   font-family: var(--mono);
-  font-size: 0.75rem;
-  padding: 0.5rem 0.85rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
   white-space: nowrap;
-  transition: background-color var(--dur-1) var(--ease),
-    border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+
+/* el primero que no sea contador se va a la derecha; los siguientes, en fila */
+.head-bar > :not(.cta) + .cta {
+  margin-left: auto;
+}
+
+.cta + .cta {
+  margin-left: 0;
 }
 
 .cta:hover {
-  background: var(--seal);
-  border-color: var(--seal);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.cta-practice {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.cta-practice:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
 }
 
 /* ------------------------------------------------------------------ hero */
 
 .hero {
-  padding-block: clamp(2rem, 5vw, 3.5rem) clamp(0.5rem, 2vw, 1rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: end;
+  padding-block: clamp(2.25rem, 5vw, 4rem) clamp(1.5rem, 3vw, 2.5rem);
 }
 
 .kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--acceso-wash);
-  color: var(--acceso);
-  border: 1px solid color-mix(in srgb, var(--seal) 35%, transparent);
-  padding: 0.25rem 0.5rem;
+  display: inline-block;
   font-family: var(--mono);
   font-size: 0.6875rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.1rem;
 }
 
 .hero h1 {
-  margin-top: 1rem;
-}
-
-.hero h1 em {
-  font-style: normal;
-  color: var(--acceso);
+  max-width: 18ch;
 }
 
 .hero .lede {
-  margin-top: 0.9rem;
+  margin-top: 1.25rem;
+}
+
+/* ficha del archivo: la ficha de catálogo de una biblioteca */
+.ficha {
+  border: 1px solid var(--rule);
+  background: var(--card);
+  padding: 1.1rem 1.25rem 1.15rem;
+}
+
+.ficha h2 {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.7rem;
+}
+
+.ficha dl {
+  display: grid;
+  gap: 0;
+}
+
+.ficha dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.42rem 0;
+  border-top: 1px dotted var(--rule);
+}
+
+.ficha dl > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ficha dl > div:last-child {
+  padding-bottom: 0;
+}
+
+.ficha dt {
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+
+.ficha dd {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ------------------------------------------------------------ próxima pau */
-/* El estado del curso en una línea: convocatoria, fechas y lo que falta. */
 
 .next-exam {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem 0.6rem;
-  margin-top: 1.15rem;
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  padding: 0.45rem 0.7rem;
+  gap: 0.3rem 0.55rem;
+  margin-top: 1.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--rule);
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--ink-2);
 }
 
 .next-exam-tag {
-  color: var(--acceso);
+  color: var(--accent);
   font-size: 0.625rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -408,50 +491,53 @@ main {
 }
 
 /* ---------------------------------------------------------------- filtros */
-/* una sola tarjeta: barra de búsqueda arriba, herramientas debajo */
 
 .filters {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.85rem;
   margin-top: clamp(1.5rem, 3vw, 2rem);
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  padding: 0.5rem;
+  border-top: 1px solid var(--ink);
+  padding-block: 0.9rem 0;
 }
 
 .filter-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-end;
+  gap: 0.75rem 1.35rem;
 }
 
 .filter-row.tools {
-  gap: 0.4rem 0.6rem;
-  padding: 0.35rem 0.25rem 0.25rem;
+  align-items: center;
+  padding-top: 0.65rem;
   border-top: 1px solid var(--rule-2);
 }
 
 .field {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   position: relative;
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  padding-inline: 0.6rem;
+  flex: 1 1 15rem;
+  min-width: 0;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.3rem;
+  transition: border-color var(--dur-1) var(--ease);
+}
+
+.field:focus-within {
+  border-bottom-color: var(--accent);
 }
 
 .field > svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   color: var(--ink-3);
   flex: none;
 }
 
 .field.grow {
-  flex: 1 1 16rem;
-  min-width: 0;
+  flex: 2 1 18rem;
 }
 
 .field .input {
@@ -461,12 +547,12 @@ main {
   background: none;
   outline: 0;
   font-size: 1rem;
-  padding-block: 0.55rem;
-  padding-right: 2.4rem;
+  padding: 0 2.2rem 0 0;
 }
 
 .field .input::placeholder {
   color: var(--ink-3);
+  font-style: italic;
 }
 
 .field .input::-webkit-search-cancel-button {
@@ -475,46 +561,52 @@ main {
 
 .kbd {
   position: absolute;
-  right: 0.6rem;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
   font-family: var(--mono);
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   line-height: 1;
   color: var(--ink-3);
-  background: var(--stock-deep);
   border: 1px solid var(--rule);
-  padding: 0.2rem 0.4rem;
+  border-bottom-width: 2px;
+  padding: 0.15rem 0.35rem;
   pointer-events: none;
 }
 
 .select {
   appearance: none;
-  border: 1px solid var(--rule);
-  background: var(--sheet);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background-color: transparent;
   color: var(--ink-2);
   font-size: 0.9375rem;
-  padding: 0.6rem 1.6rem 0.6rem 0.9rem;
+  padding: 0.2rem 1.5rem 0.3rem 0;
   background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%),
     linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
-  background-position: calc(100% - 0.95rem) 55%, calc(100% - 0.6rem) 55%;
-  background-size: 6px 6px, 6px 6px;
+  background-position: calc(100% - 0.85rem) 58%, calc(100% - 0.5rem) 58%;
+  background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
   cursor: pointer;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
 
-.select:hover {
+.select:hover,
+.select:focus {
   color: var(--ink);
+  border-bottom-color: var(--ink-3);
 }
 
 .btn-primary {
   flex: none;
   border: 1px solid var(--ink);
   background: var(--ink);
-  color: var(--sheet);
+  color: var(--paper);
   font-family: var(--mono);
-  font-size: 0.75rem;
-  padding: 0.65rem 1rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.1rem;
   cursor: pointer;
   white-space: nowrap;
   transition: background-color var(--dur-1) var(--ease),
@@ -522,61 +614,67 @@ main {
 }
 
 .btn-primary:hover {
-  background: var(--seal);
-  border-color: var(--seal);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
-/* el mismo grupo de botones del panel: cada segmento trae su filete de 1 px y
-   los contiguos se solapan, así al partirse la fila no asoma ningún relleno */
+/* segmentos: texto con subrayado, no botones en caja */
 .seg {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0;
+  gap: 0.1rem;
 }
 
 .seg button {
-  border: 1px solid var(--rule);
-  margin: -1px 0 0 -1px;
-  background: var(--sheet);
-  color: var(--ink-2);
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+  color: var(--ink-3);
   font-family: var(--mono);
-  font-size: 0.6875rem;
-  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  padding: 0.25rem 0.45rem;
   cursor: pointer;
-  transition: background-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease),
-    opacity var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
+    opacity var(--dur-1) var(--ease);
 }
 
 .seg button:hover {
   color: var(--ink);
-  background: var(--sheet-2);
+  border-bottom-color: var(--rule);
 }
 
 .seg button[aria-pressed='true'] {
-  background: var(--ink);
-  color: var(--sheet);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 .seg button.is-dim {
   opacity: 0.45;
 }
 
+.seg-type {
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--rule-2);
+}
+
 .btn-ghost {
   margin-left: auto;
-  border: 1px solid var(--rule);
-  background: var(--sheet);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
   color: var(--ink-2);
   font-family: var(--mono);
   font-size: 0.6875rem;
-  padding: 0.4rem 0.7rem;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0;
   cursor: pointer;
-  transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease),
-    transform var(--dur-1) var(--ease);
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
 
 .btn-ghost:hover {
-  border-color: var(--ink);
   color: var(--ink);
+  border-bottom-color: var(--ink);
 }
 
 /* --------------------------------------------------------------- secciones */
@@ -586,8 +684,14 @@ main {
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
-  margin-bottom: 1rem;
+  gap: 0.4rem 1rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 1.1rem;
+}
+
+.results-head h2 {
+  font-size: 1.5rem;
 }
 
 .results-head .count,
@@ -601,14 +705,15 @@ main {
 /* ---------------------------------------------------- mosaico asignaturas */
 
 .subjects {
-  padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(0.5rem, 2vw, 1rem);
+  padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(0.75rem, 2vw, 1.25rem);
+  border-bottom: 1px solid var(--rule);
 }
 
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  margin: -0.4rem 0 1.1rem;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 1rem;
   font-family: var(--mono);
   font-size: 0.6875rem;
   color: var(--ink-3);
@@ -621,59 +726,51 @@ main {
 }
 
 .legend i {
-  width: 9px;
-  height: 9px;
-  background: var(--acceso);
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
 }
 
 .legend i[data-phase='admision'] {
-  background: var(--admision);
+  background: var(--teal);
 }
 
+/* las asignaturas se leen como los epígrafes de un índice */
 .chips {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.4rem;
 }
 
-/* las tarjetas del mosaico: una por asignatura con documentos */
 .chip {
   appearance: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  color: var(--ink);
   text-align: left;
-  display: grid;
-  gap: 0.3rem;
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  padding: 0.9rem 1rem 1rem;
   cursor: pointer;
-  color: inherit;
-  transition: border-color var(--dur-1) var(--ease),
-    background-color var(--dur-1) var(--ease), opacity var(--dur-1) var(--ease),
-    transform var(--dur-1) var(--ease);
-}
-
-.chip:hover {
-  border-color: var(--ink-3);
-  background: var(--sheet-2);
-}
-
-.chip[aria-pressed='true'] {
-  border-color: var(--acceso);
-  background: var(--acceso-wash);
-}
-
-.chip.is-dim {
-  opacity: 0.5;
+  transition: opacity var(--dur-1) var(--ease);
 }
 
 .chip .nm {
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}
+
+.chip:hover .nm {
+  border-bottom-color: var(--rule);
+}
+
+.chip[aria-pressed='true'] .nm {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 .chip .ct {
@@ -684,63 +781,50 @@ main {
 }
 
 .chip .bar {
-  display: flex;
-  gap: 3px;
-  margin-top: 0.35rem;
+  display: none;
 }
 
-.chip .bar i {
-  height: 5px;
-  flex: 1;
-  background: var(--rule);
-}
-
-.chip[data-phases*='acceso'] .bar i[data-on='1'] {
-  background: var(--acceso);
-}
-
-.chip[data-phases*='admision']:not([data-phases*='acceso']) .bar i[data-on='1'] {
-  background: var(--admision);
+.chip.is-dim {
+  opacity: 0.45;
 }
 
 /* --------------------------------------------------------------- archivo */
 
 .archive {
-  padding-block: clamp(1.5rem, 3vw, 2.25rem) clamp(1.5rem, 3vw, 2rem);
+  padding-block: clamp(1.25rem, 3vw, 2rem) clamp(2rem, 4vw, 3rem);
 }
 
 .year-group {
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  overflow: hidden;
+  border-top: 2px solid var(--ink);
+  padding-top: 0.8rem;
 }
 
 .year-group + .year-group {
-  margin-top: 1.15rem;
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
 }
 
 .year-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem 0.75rem;
-  padding: 0.5rem 0.9rem;
-  background: var(--sheet-2);
+  gap: 0.3rem 0.85rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--rule);
 }
 
-/* el año y la convocatoria son encabezados de tabla: mono y en pequeño */
 .year-head h3 {
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 0.8125rem;
-  letter-spacing: 0.02em;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 1.2rem + 1vw, 2rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .year-head .session {
-  font-family: var(--mono);
-  font-size: 0.6875rem;
-  color: var(--ink-2);
+  font-family: var(--sans);
+  font-style: italic;
+  font-size: 0.9375rem;
+  color: var(--ink-3);
 }
 
 .year-head .n {
@@ -751,8 +835,8 @@ main {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  padding: 0.6rem 0.9rem;
-  border-bottom: 1px solid var(--rule);
+  padding: 0.55rem 0.25rem;
+  border-bottom: 1px dotted var(--rule);
   transition: background-color 0.14s var(--ease);
 }
 
@@ -761,19 +845,28 @@ main {
 }
 
 .row:hover {
-  background: var(--sheet-2);
+  background: var(--card);
 }
 
 .row .stripe {
   flex: none;
-  width: 4px;
+  width: 3px;
   align-self: stretch;
-  min-height: 2.1rem;
-  background: var(--acceso);
+  min-height: 1.7rem;
+  background: var(--accent);
 }
 
 .row[data-p*='admision']:not([data-p*='acceso']) .stripe {
-  background: var(--admision);
+  background: var(--teal);
+}
+
+.row-code {
+  flex: none;
+  width: 2.8rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
 }
 
 .row-title {
@@ -782,64 +875,62 @@ main {
 }
 
 .row-title a {
-  font-weight: 550;
-  letter-spacing: -0.01em;
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  letter-spacing: -0.005em;
   border-bottom: 1px solid transparent;
   transition: border-color var(--dur-1) var(--ease);
 }
 
-.row-title a:hover {
+.row:hover .row-title a {
   border-bottom-color: var(--rule);
 }
 
 .row-meta {
+  margin-top: 0.12rem;
   font-family: var(--mono);
   font-size: 0.6875rem;
   color: var(--ink-3);
-  margin-top: 0.2rem;
   font-variant-numeric: tabular-nums;
 }
 
-/* el tipo de documento usa la etiqueta del panel: punto de color y mono, sin
-   caja, para que el color siga siendo de la fase y el punto, del tipo */
+/* el tipo, en versalitas: el color lo pone el documento, no una caja */
 .tag {
   flex: none;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   font-family: var(--mono);
-  font-size: 0.6875rem;
-  color: var(--ink-2);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
   white-space: nowrap;
 }
 
 .tag i {
-  width: 7px;
-  height: 7px;
-  flex: none;
-  background: var(--ink);
+  display: none;
 }
 
-.tag[data-t='soluciones'] i {
-  background: var(--seal);
+.tag[data-t='soluciones'] {
+  color: var(--accent);
 }
 
-.tag[data-t='criterios'] i {
-  background: var(--stamp);
+.tag[data-t='criterios'] {
+  color: var(--ochre);
 }
 
-.tag[data-t='plantilla'] i {
-  background: none;
-  border: 1px solid var(--ink-3);
+.tag[data-t='plantilla'] {
+  color: var(--teal);
 }
 
 .unofficial {
   flex: none;
-  border: 1px solid var(--stamp);
+  border: 1px solid var(--accent);
   padding: 0 0.25rem;
   font-family: var(--mono);
   font-size: 0.625rem;
-  color: var(--stamp);
+  color: var(--accent);
   white-space: nowrap;
 }
 
@@ -851,94 +942,101 @@ main {
 
 .dl {
   display: inline-flex;
-  text-align: center;
   align-items: center;
-  gap: 0.4rem;
-  border: 1px solid var(--rule);
-  background: var(--sheet);
-  padding: 0.3rem 0.55rem;
+  gap: 0.35rem;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  padding: 0.12rem 0;
   font-family: var(--mono);
   font-size: 0.6875rem;
+  letter-spacing: 0.04em;
   color: var(--ink);
   white-space: nowrap;
-  transition: border-color var(--dur-1) var(--ease),
-    background-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+  transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
 }
 
 .dl svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   transition: transform var(--dur-1) var(--ease);
 }
 
-/* el icono de abrir fuera apunta hacia donde va el PDF */
-.dl:hover svg {
-  transform: translate(1px, -1px);
+.dl:hover {
+  border-bottom-color: var(--ink);
 }
 
-.dl:hover {
-  border-color: var(--ink);
-  background: var(--stock-deep);
+.dl:hover svg {
+  transform: translate(1px, -1px);
 }
 
 /* --------------------------------------------------------- estados vacíos */
 
 .empty {
-  background: var(--sheet);
-  border: 1px solid var(--rule);
-  padding: clamp(1.75rem, 5vw, 3.25rem) clamp(1.25rem, 4vw, 2.5rem);
-  text-align: center;
+  border-top: 2px solid var(--ink);
+  padding-block: clamp(1.75rem, 5vw, 3rem);
 }
 
 .empty .badge {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1.25rem;
-  background: var(--sheet-2);
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1.1rem;
   border: 1px solid var(--rule);
   color: var(--ink-2);
   display: grid;
   place-items: center;
   font-family: var(--mono);
-  font-weight: 500;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .empty p {
   color: var(--ink-2);
   max-width: 54ch;
-  margin-inline: auto;
 }
 
 .empty h2 + p {
-  margin-top: 0.75rem;
+  margin-top: 0.7rem;
 }
 
 .empty-cta {
-  margin-top: 1.5rem;
+  margin-top: 1.35rem;
 }
 
-/* la llamada a la acción principal, en cualquier contexto */
 .empty-cta .dl,
 button.dl {
+  border: 1px solid var(--ink);
   background: var(--ink);
-  border-color: var(--ink);
-  color: var(--sheet);
+  color: var(--paper);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
-  font-family: var(--mono);
-  font-size: 0.75rem;
 }
 
 .empty-cta .dl:hover,
 button.dl:hover {
-  background: var(--acceso);
-  border-color: var(--acceso);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.empty .link,
+.practice-note .link,
+.foot-note a {
+  border-bottom: 1px solid var(--rule);
+}
+
+.empty .link:hover,
+.practice-note .link:hover,
+.foot-note a:hover {
+  border-bottom-color: var(--ink);
 }
 
 .owner-note {
-  margin-top: 1.75rem;
-  padding-top: 1.1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--rule-2);
+  font-size: 0.75rem;
   color: var(--ink-3);
 }
 
@@ -946,7 +1044,6 @@ button.dl:hover {
   white-space: nowrap;
   font-family: var(--mono);
   font-size: 0.9em;
-  background: var(--stock-deep);
   border: 1px solid var(--rule);
   padding: 0 0.3rem;
 }
@@ -955,7 +1052,7 @@ button.dl:hover {
 
 .site-foot {
   margin-top: clamp(2rem, 5vw, 3.5rem);
-  background: var(--sheet);
+  background: var(--paper-2);
   border-top: 1px solid var(--rule);
   padding-block: clamp(2rem, 4vw, 2.75rem);
 }
@@ -970,10 +1067,10 @@ button.dl:hover {
   font-family: var(--mono);
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-3);
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.75rem;
 }
 
 .foot-grid p,
@@ -986,7 +1083,7 @@ button.dl:hover {
   list-style: none;
   padding: 0;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .foot-grid a {
@@ -1000,8 +1097,8 @@ button.dl:hover {
 
 .foot-note {
   margin-top: 2rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--rule-2);
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--rule);
   font-size: 0.75rem;
   color: var(--ink-3);
   max-width: 78ch;
@@ -1022,14 +1119,14 @@ button.dl:hover {
 
 .ctrl {
   appearance: none;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--sheet) 92%, transparent);
-  backdrop-filter: blur(10px) saturate(1.2);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--rule);
-  color: var(--ink);
+  color: var(--ink-2);
   cursor: pointer;
   transition: background-color 0.15s var(--ease), color 0.15s var(--ease),
     border-color 0.15s var(--ease), transform 0.15s var(--ease);
@@ -1038,7 +1135,7 @@ button.dl:hover {
 .ctrl:hover {
   background: var(--ink);
   border-color: var(--ink);
-  color: var(--stock);
+  color: var(--paper);
 }
 
 .ctrl:active {
@@ -1046,12 +1143,10 @@ button.dl:hover {
 }
 
 .ctrl svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
-/* los dos iconos comparten celda y se relevan girando, en vez de cambiar de
-   golpe: el icono mostrado describe el modo al que cambiarás */
 .ctrl-ico {
   grid-area: 1 / 1;
   display: grid;
@@ -1110,17 +1205,16 @@ button.dl:hover {
 }
 
 .notfound .badge {
-  width: 76px;
-  height: 76px;
-  background: var(--stamp-wash);
-  border: 1px solid var(--stamp);
-  color: var(--stamp);
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: var(--accent-wash);
   display: grid;
   place-items: center;
   font-family: var(--mono);
-  font-size: 1.35rem;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  margin-bottom: 1.35rem;
 }
 
 .notfound h1 {
@@ -1134,7 +1228,7 @@ button.dl:hover {
 }
 
 .notfound .empty-cta {
-  margin-top: 1.75rem;
+  margin-top: 1.6rem;
 }
 
 .notfound .owner-note {
@@ -1148,23 +1242,19 @@ button.dl:hover {
   border-bottom: 1px solid var(--rule);
 }
 
-.notfound .owner-note a:hover {
-  color: var(--ink);
-}
-
 /* --------------------------------------------------------------- práctica */
-/* La sala de práctica es una tarjeta de reloj y el visor del enunciado: dos
-   columnas en escritorio, una en móvil, con el cronómetro pegado arriba. */
 
 .practice-hero {
-  padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(0.5rem, 2vw, 0.75rem);
+  border-bottom: 1px solid var(--rule);
+  padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 2rem);
 }
 
 .practice-back {
   margin-top: 1.2rem;
 }
 
-.practice-back a {
+.practice-back a,
+.practice-hero .lede a {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--ink-2);
@@ -1178,12 +1268,12 @@ button.dl:hover {
 }
 
 .practice-run {
-  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+  padding-block: clamp(1.5rem, 3vw, 2.25rem) clamp(2rem, 5vw, 3.5rem);
 }
 
 .practice-grid {
   display: grid;
-  grid-template-columns: minmax(230px, 310px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
 }
@@ -1192,7 +1282,7 @@ button.dl:hover {
   font-family: var(--mono);
   font-size: 0.6875rem;
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
@@ -1200,7 +1290,7 @@ button.dl:hover {
 .timer,
 .reader,
 .correccion {
-  background: var(--sheet);
+  background: var(--card);
   border: 1px solid var(--rule);
 }
 
@@ -1208,6 +1298,47 @@ button.dl:hover {
   position: sticky;
   top: calc(var(--header-h) + 1rem);
   padding: 1rem 1.1rem 1.1rem;
+}
+
+/* en escritorio el cronómetro es una barra pegada bajo la cabecera */
+@media (min-width: 901px) {
+  .timer {
+    z-index: 20;
+    display: grid;
+    grid-template-columns: auto auto minmax(8rem, 1fr) auto;
+    align-items: center;
+    column-gap: 1rem;
+    row-gap: 0.35rem;
+    padding: 0.7rem 1rem;
+  }
+
+  .timer .practice-sub,
+  .timer .clock,
+  .timer .timer-state,
+  .timer .timer-controls {
+    margin: 0;
+  }
+
+  .timer .clock {
+    font-size: clamp(1.8rem, 1.2rem + 1.4vw, 2.6rem);
+  }
+
+  .timer .timer-state {
+    min-height: 0;
+  }
+
+  .timer .timer-controls {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .timer .timer-controls .select {
+    flex: 0 0 7rem;
+  }
+
+  .timer .timer-hint {
+    display: none;
+  }
 }
 
 .clock {
@@ -1220,7 +1351,7 @@ button.dl:hover {
 }
 
 .clock[data-state='done'] {
-  color: var(--acceso);
+  color: var(--accent);
 }
 
 .clock[data-state='paused'] {
@@ -1244,7 +1375,6 @@ button.dl:hover {
 .timer-controls .select {
   flex: 1 1 6rem;
   font-size: 0.8125rem;
-  padding-block: 0.45rem;
 }
 
 .timer-controls .btn-primary,
@@ -1268,17 +1398,17 @@ button.dl:hover {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.7rem 0.9rem;
+  padding: 0.65rem 0.9rem;
   border-bottom: 1px solid var(--rule);
-  background: var(--sheet-2);
+  background: var(--paper-2);
 }
 
 .reader-frame {
   display: block;
   width: 100%;
-  height: clamp(420px, 72vh, 900px);
+  height: clamp(600px, 86vh, 1400px);
   border: 0;
-  background: var(--stock-deep);
+  background: var(--paper-2);
 }
 
 .reader-note {
@@ -1298,7 +1428,7 @@ button.dl:hover {
 }
 
 .correccion h2 {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
 }
 
 .correccion p {
@@ -1310,7 +1440,7 @@ button.dl:hover {
 .doc-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin-top: 1rem;
   list-style: none;
   padding: 0;
@@ -1322,12 +1452,11 @@ button.dl:hover {
   color: var(--ink-3);
 }
 
-/* la lista de exámenes disponibles */
+/* lista de exámenes disponibles */
 .practice-list {
   list-style: none;
   padding: 0;
-  border: 1px solid var(--rule);
-  background: var(--sheet);
+  border-top: 2px solid var(--ink);
 }
 
 .practice-set {
@@ -1335,17 +1464,13 @@ button.dl:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem 1rem;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--rule-2);
+  padding: 0.8rem 0.25rem;
+  border-bottom: 1px dotted var(--rule);
   transition: background-color var(--dur-1) var(--ease);
 }
 
-.practice-set:last-child {
-  border-bottom: 0;
-}
-
 .practice-set:hover {
-  background: var(--sheet-2);
+  background: var(--card);
 }
 
 .practice-set-main {
@@ -1354,13 +1479,14 @@ button.dl:hover {
 }
 
 .practice-set-main h3 {
-  font-size: 1rem;
+  font-family: var(--serif);
+  font-size: 1.0625rem;
 }
 
 .practice-docs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.3rem;
   list-style: none;
   padding: 0;
 }
@@ -1368,7 +1494,7 @@ button.dl:hover {
 .practice-docs li {
   font-family: var(--mono);
   font-size: 0.625rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-3);
   border: 1px solid var(--rule);
@@ -1376,13 +1502,13 @@ button.dl:hover {
 }
 
 .practice-docs li[data-t='soluciones'] {
-  color: var(--acceso);
-  border-color: color-mix(in srgb, var(--acceso) 35%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .practice-docs li[data-t='criterios'] {
-  color: var(--stamp);
-  border-color: color-mix(in srgb, var(--stamp) 35%, transparent);
+  color: var(--ochre);
+  border-color: color-mix(in srgb, var(--ochre) 40%, transparent);
 }
 
 .practice-note {
@@ -1391,63 +1517,54 @@ button.dl:hover {
   color: var(--ink-3);
 }
 
-.empty .link,
-.practice-note .link {
+/* --------------------------------------------------------- página de materia */
+
+.subject-hero {
+  border-bottom: 1px solid var(--rule);
+  padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 2rem);
+}
+
+.subject-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  margin-top: 1rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+
+.subject-facts .sep {
+  color: var(--rule);
+}
+
+.subject-back {
+  margin-top: 1.1rem;
+}
+
+.subject-back a {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
   border-bottom: 1px solid var(--rule);
 }
 
-.empty .link:hover {
-  border-color: var(--ink);
+.subject-back a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
 }
 
-@media (max-width: 900px) {
-  .practice-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .timer {
-    position: static;
-  }
-}
-
-@media (max-width: 700px) {
-  /* en el móvil la etiqueta es un adorno: la línea ya empieza por las fechas */
-  .next-exam-tag {
-    display: none;
-  }
-
-  .reader-frame {
-    height: 62vh;
-    min-height: 360px;
-  }
-
-  .practice-set .dl {
-    margin-left: auto;
-  }
-
-  .timer-controls .btn-primary,
-  .timer-controls .btn-ghost {
-    flex: 1 1 100%;
-  }
+.subject-archive {
+  padding-top: clamp(1.25rem, 3vw, 2rem);
 }
 
 /* --------------------------------------------------------------- movimiento */
-/* Las piezas entran como se ordena un archivador: la barra se pega, el titular
-   se posa y los filtros llegan en cadencia. Solo se animan opacidad y
-   transformación —nunca alturas ni márgenes— y todo cabe en medio segundo,
-   para que leer siga siendo más rápido que mirar. */
 
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
-@keyframes row-in {
-  from {
-    opacity: 0;
-    transform: translateY(3px);
+    transform: translateY(7px);
   }
 }
 
@@ -1458,7 +1575,6 @@ button.dl:hover {
   }
 }
 
-/* el contador late cuando cambia la cuenta */
 @keyframes count-bump {
   40% {
     opacity: 0.4;
@@ -1470,46 +1586,37 @@ button.dl:hover {
   animation: bar-in var(--dur-2) var(--ease) backwards;
 }
 
-.hero .wrap > * {
+.hero-copy > *,
+.ficha {
   animation: rise-in var(--dur-3) var(--ease) backwards;
 }
 
-.hero .wrap > :nth-child(2) {
-  animation-delay: 60ms;
+.hero-copy > :nth-child(2) {
+  animation-delay: 50ms;
 }
 
-.hero .wrap > :nth-child(3) {
+.hero-copy > :nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.hero-copy > :nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.ficha {
   animation-delay: 120ms;
-}
-
-.hero .wrap > :nth-child(4) {
-  animation-delay: 180ms;
 }
 
 .results-head,
 .legend,
-.chips {
+.chips,
+.year-head,
+.practice-list {
   animation: rise-in var(--dur-3) var(--ease) backwards;
 }
 
-.results-head {
-  animation-delay: 80ms;
-}
-
-.legend {
-  animation-delay: 140ms;
-}
-
 .chips {
-  animation-delay: 180ms;
-}
-
-/* Encabezado y filas se posan juntos. La animación se cancela mientras el
-   elemento está en `display:none`, así que al volver de un filtro vuelve a
-   empezar: el archivo se reordena a la vista sin tocar el script. */
-.year-head,
-.row {
-  animation: row-in var(--dur-2) var(--ease) backwards;
+  animation-delay: 60ms;
 }
 
 .empty,
@@ -1521,7 +1628,6 @@ button.dl:hover {
   animation: count-bump var(--dur-2) var(--ease);
 }
 
-/* la pulsación baja un píxel: el gesto del sello al apoyarse */
 .cta:active,
 .btn-primary:active,
 .btn-ghost:active,
@@ -1531,8 +1637,6 @@ button.dl:hover {
   transform: translateY(1px);
 }
 
-/* El cambio de tema se funde con la página; la clase la pone el conmutador y
-   dura algo más que la transición. Solo si no se ha pedido menos movimiento. */
 @media (prefers-reduced-motion: no-preference) {
   .theme-fade,
   .theme-fade *,
@@ -1547,12 +1651,26 @@ button.dl:hover {
 /* --------------------------------------------------------------- responsive */
 
 @media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+  }
+
   .head-nav {
     display: none;
   }
 
   .foot-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .practice-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .timer {
+    position: static;
   }
 }
 
@@ -1562,21 +1680,22 @@ button.dl:hover {
   }
 
   .head-bar {
-    padding-left: 0.85rem;
-    gap: 0.6rem;
+    gap: 0.5rem 0.75rem;
   }
 
   .hero {
-    padding-block: 1.5rem 0.5rem;
+    padding-block: 0;
   }
 
-  .filters {
+  .hero-grid {
+    padding-block: 1.75rem 1.25rem;
   }
 
   .filter-row.find {
     flex-wrap: wrap;
   }
 
+  .field,
   .field.grow {
     flex: 1 1 100%;
   }
@@ -1585,56 +1704,20 @@ button.dl:hover {
     flex: 1 1 100%;
   }
 
-  /* en el móvil el grupo ocupa la fila entera y reparte el ancho entre sus
-     segmentos: la tira de convocatoria cabe en una línea */
   .seg {
     width: 100%;
   }
 
   .seg button {
     flex: 1 1 auto;
-    padding-inline: 0.45rem;
+    padding-inline: 0.35rem;
   }
 
-  /* Los cinco tipos no caben en una tira estrecha y partían dejando una fila
-     coja a media anchura. En el móvil se rehacen como la rejilla de dos
-     columnas del panel, con «Todos» de reinicio a ancho completo, y los filetes
-     pasan a la rejilla para que cada fila quede cerrada. */
   .seg-type {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    border: 1px solid var(--rule);
-    background: var(--sheet);
-  }
-
-  .seg-type button {
-    margin: 0;
-    padding: 0.5rem 0.45rem;
-    border: 0;
-    border-right: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    text-align: center;
-  }
-
-  .seg-type button:first-child {
-    grid-column: 1 / -1;
-  }
-
-  /* sobra el filete derecho en la columna derecha y el de abajo en la última
-     fila: el marco ya lo pone la rejilla */
-  .seg-type button:first-child,
-  .seg-type button:nth-child(odd) {
-    border-right: 0;
-  }
-
-  .seg-type button:nth-last-child(-n + 2) {
-    border-bottom: 0;
-  }
-
-  /* el segmento activo se funde con su filete en vez de dibujar un marco claro
-     sobre la tinta */
-  .seg-type button[aria-pressed='true'] {
-    border-color: var(--ink);
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--rule-2);
+    padding-top: 0.5rem;
   }
 
   .select {
@@ -1646,23 +1729,35 @@ button.dl:hover {
   }
 
   .chips {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.25rem 1rem;
   }
 
   .row {
     flex-wrap: wrap;
-    row-gap: 0.5rem;
-    padding-inline: 1rem;
-  }
-
-  .row .stripe {
-    align-self: stretch;
+    row-gap: 0.35rem;
+    padding-block: 0.7rem;
   }
 
   .row-title {
     flex: 1 1 100%;
     order: -1;
-    padding-left: 0.95rem;
+    padding-left: 0.9rem;
+  }
+
+  .row .stripe {
+    position: absolute;
+    margin-top: 0.15rem;
+    min-height: 1.4rem;
+    align-self: auto;
+  }
+
+  .row {
+    position: relative;
+  }
+
+  .row-code {
+    width: auto;
+    padding-left: 0.9rem;
   }
 
   .row-actions {
@@ -1678,11 +1773,35 @@ button.dl:hover {
   }
 
   .field .input {
-    padding-right: 0.75rem;
+    padding-right: 0;
   }
 
   .foot-grid {
     grid-template-columns: 1fr;
+  }
+
+  .next-exam-tag {
+    display: none;
+  }
+
+  .reader-frame {
+    height: 78vh;
+    min-height: 460px;
+  }
+
+  .practice-set .dl {
+    margin-left: auto;
+  }
+
+  .timer-controls .btn-primary,
+  .timer-controls .btn-ghost {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cta-back {
+    display: none;
   }
 }
 

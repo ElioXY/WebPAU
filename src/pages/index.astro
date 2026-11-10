@@ -28,6 +28,13 @@ const sessionOrder = SESSIONS.map((s) => s.id);
 const sessionLong = new Map(SESSIONS.map((s) => [s.id, s.long]));
 
 const years = [...new Set(exams.map((e) => e.year))].sort((a, b) => b - a);
+
+/* resumen de convocatorias para la ficha: «jun · sep · modelos» */
+const sessionIds = new Set(exams.map((e) => e.session));
+const sessionSummary =
+  SESSIONS.filter((s) => sessionIds.has(s.id))
+    .map((s) => (s.id === 'ordinaria' ? 'jun' : s.id === 'extraordinaria' ? 'sep' : 'modelos'))
+    .join(' · ') || '—';
 const recentYears = years.slice(0, 4);
 const range = years.length
   ? years.length === 1
@@ -138,6 +145,9 @@ const subjectLinks = subjectRoutes(
         <span class="sep hide-s" aria-hidden="true">·</span>
         <span class="hide-s">{statSubjects} asignaturas</span>
       </p>
+      {/* el acceso a la sala de práctica, siempre a la vista: en móvil la
+          navegación de secciones se oculta y este botón queda como entrada */}
+      <a class="cta cta-practice" href={`${base}/practica`}>Practicar</a>
       <a
         class="cta"
         href="https://github.com/ElioXY/WebPAU"
@@ -150,15 +160,30 @@ const subjectLinks = subjectRoutes(
   <main>
     <section class="hero">
       <div class="wrap">
-        <p class="kicker">PAU · Andalucía</p>
-        <h1>Encuentra el ejercicio que <em>te toca</em>.</h1>
-        <p class="lede">
-          Enunciados, soluciones y criterios de corrección de la PAU en Andalucía,
-          reunidos por asignatura, año y convocatoria. Elige una materia y abre sus
-          PDFs en el navegador.
-        </p>
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="kicker">Prueba de Acceso a la Universidad · Andalucía</p>
+            <h1>El archivo de exámenes, <em>ordenado como un libro</em>.</h1>
+            <p class="lede">
+              Enunciados, soluciones y criterios de corrección de la PAU en Andalucía,
+              reunidos por asignatura, año y convocatoria. Elige una materia y abre sus
+              PDFs en el navegador.
+            </p>
 
-        <NextExam />
+            <NextExam />
+          </div>
+
+          <aside class="ficha" aria-label="Ficha del archivo">
+            <h2>Ficha del archivo</h2>
+            <dl>
+              <div><dt>Documentos</dt><dd>{statDocs}</dd></div>
+              <div><dt>Asignaturas</dt><dd>{statSubjects}</dd></div>
+              <div><dt>Años</dt><dd>{range}</dd></div>
+              <div><dt>Convocatorias</dt><dd>{sessionSummary}</dd></div>
+            </dl>
+          </aside>
+        </div>
+
 
         {exams.length > 0 && (
           <form class="filters" id="filters" role="search" autocomplete="off">
@@ -324,6 +349,7 @@ const subjectLinks = subjectRoutes(
                       data-t={exam.type}
                     >
                       <span class="stripe" aria-hidden="true"></span>
+                      <span class="row-code mono" aria-hidden="true">{exam.subject}</span>
                       <div class="row-title">
                         <a
                           href={pdfUrl(exam.file)}
