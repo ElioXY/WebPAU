@@ -45,11 +45,12 @@ export const DOC_TYPES: { id: DocType; label: string; short: string; hint: strin
   },
 ];
 
-export type Session = 'ordinaria' | 'extraordinaria';
+export type Session = 'ordinaria' | 'extraordinaria' | 'modelos';
 
 export const SESSIONS: { id: Session; label: string; long: string }[] = [
   { id: 'ordinaria', label: 'Ordinaria', long: 'Convocatoria ordinaria · junio' },
   { id: 'extraordinaria', label: 'Extraordinaria', long: 'Convocatoria extraordinaria · julio' },
+  { id: 'modelos', label: 'Modelos', long: 'Modelos sin convocatoria asignada' },
 ];
 
 export interface Exam {
@@ -153,10 +154,17 @@ export function saveCatalog(catalog: CatalogFile): void {
   fs.writeFileSync(DATA_FILE, JSON.stringify(catalog, null, 2) + '\n', 'utf8');
 }
 
+/** Orden de las convocatorias: ordinaria, extraordinaria y, al final, los
+ *  modelos de los años que llegaron sin convocatoria identificable. */
+const sessionRank = (id: string): number => {
+  const index = SESSIONS.findIndex((s) => s.id === id);
+  return index === -1 ? SESSIONS.length : index;
+};
+
 export function sortExams(a: Exam, b: Exam): number {
   return (
     b.year - a.year ||
-    a.session.localeCompare(b.session) ||
+    sessionRank(a.session) - sessionRank(b.session) ||
     a.subject.localeCompare(b.subject, 'ca') ||
     a.type.localeCompare(b.type) ||
     a.id.localeCompare(b.id)

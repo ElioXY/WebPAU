@@ -729,11 +729,17 @@ $('#btnClearFiles').addEventListener('click', () => {
 
 /* --------------------------------------------------------------- publicar */
 
+/** Mismo orden de convocatorias que el catálogo del sitio. */
+const sessionRank = (id: string): number => {
+  const index = SESSIONS.findIndex((s) => s.id === id);
+  return index === -1 ? SESSIONS.length : index;
+};
+
 function sortedExams(exams: Exam[]): Exam[] {
   return [...exams].sort(
     (a, b) =>
       b.year - a.year ||
-      a.session.localeCompare(b.session) ||
+      sessionRank(a.session) - sessionRank(b.session) ||
       a.subject.localeCompare(b.subject) ||
       a.type.localeCompare(b.type) ||
       a.id.localeCompare(b.id)

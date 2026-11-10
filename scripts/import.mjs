@@ -25,7 +25,7 @@ import { estimatePdfPages, parseExamName, slugify } from '../src/lib/exam-name.j
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = path.resolve(HERE, '..');
 
-const SESSION_IDS = ['ordinaria', 'extraordinaria'];
+const SESSION_IDS = ['ordinaria', 'extraordinaria', 'modelos'];
 const TYPE_IDS = ['enunciados', 'soluciones', 'criterios', 'plantilla'];
 const TYPE_LABEL = {
   enunciados: 'enunciado',
@@ -42,8 +42,7 @@ function usage(message) {
   --move               mueve los archivos en lugar de copiarlos
   --root <dir>         raíz del proyecto (por defecto, la de este script)
   --subject <código>   fuerza la asignatura
-  --year <aaaa>        fuerza el año
-  --session <id>       fuerza la convocatoria (ordinaria | extraordinaria)
+  --year <aaaa>        fuerza el año   --session <id>       fuerza la convocatoria (ordinaria | extraordinaria | modelos)
   --type <id>          fuerza el tipo (enunciados | soluciones | criterios | plantilla)
 `);
   process.exit(1);
@@ -130,7 +129,7 @@ if (files.length === 0) usage(`No hay ningún PDF en «${options.input}».`);
 
 const sortExams = (a, b) =>
   b.year - a.year ||
-  a.session.localeCompare(b.session) ||
+  SESSION_IDS.indexOf(a.session) - SESSION_IDS.indexOf(b.session) ||
   a.subject.localeCompare(b.subject) ||
   a.type.localeCompare(b.type) ||
   a.id.localeCompare(b.id);

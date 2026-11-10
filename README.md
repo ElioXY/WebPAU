@@ -63,6 +63,10 @@ El catálogo sigue el modelo vigente de la **PAU** andaluza:
   la nota.
 - **Dos convocatorias al año**: ordinaria (junio) y extraordinaria (julio).
 
+Los años antiguos llegaron sin convocatoria identificable: son los modelos
+numerados que el tribunal guarda como reserva. Esos documentos se archivan bajo
+**Modelos**, un tercer estado que no les inventa un junio ni un septiembre.
+
 Cada asignatura de `data/subjects.json` declara en qué fases entra. Varias
 materias de modalidad cuentan en las dos, por eso `phases` es una lista.
 
@@ -237,7 +241,7 @@ El estado vive en la URL, así que cualquier vista se puede compartir o enlazar:
 ```
 ?s=MAT          asignatura
 ?y=2025         año
-?ss=ordinaria   convocatoria (ordinaria | extraordinaria)
+?ss=ordinaria   convocatoria (ordinaria | extraordinaria | modelos)
 ?t=enunciados   tipo de documento (enunciados | soluciones | criterios | plantilla)
 ?p=acceso       fase (acceso | admision)
 ?q=filosofia    búsqueda libre
