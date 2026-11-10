@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-10T18:41:25.188Z",
+  "updatedAt": "2026-11-10T18:45:33.145Z",
   "exams": [
     {
       "id": "fis-2026-ordinaria-enunciados",
@@ -42,13 +42,13 @@
       "type": "criterios",
       "pages": 3,
       "file": "exams/2026/ordinaria/FIS/fis-2026-ordinaria-criterios.pdf",
-      "originalName": "Criterios Suplente 2_Física.pdf",
+      "originalName": "Criterios Titular Física.pdf",
       "sizeKB": 88,
       "language": "es",
       "official": true,
-      "notes": "Suplente",
-      "addedAt": "2026-11-10T18:41:25.188Z",
-      "updatedAt": "2026-11-10T18:41:25.188Z"
+      "notes": "",
+      "addedAt": "2026-10-17T16:24:16.622Z",
+      "updatedAt": "2026-10-17T16:24:16.622Z"
     },
     {
       "id": "hes-2026-ordinaria-enunciados",
@@ -273,22 +273,6 @@
       "notes": "Titular",
       "addedAt": "2026-11-10T18:41:25.188Z",
       "updatedAt": "2026-11-10T18:41:25.188Z"
-    },
-    {
-      "id": "lcl-2026-ordinaria-criterios",
-      "subject": "LCL",
-      "year": 2026,
-      "session": "ordinaria",
-      "type": "criterios",
-      "pages": 2,
-      "file": "exams/2026/ordinaria/LCL/lcl-2026-ordinaria-criterios.pdf",
-      "originalName": "Criterios Titular_Lengua Castellana y Literatura_Ex.pdf",
-      "sizeKB": 136,
-      "language": "es",
-      "official": true,
-      "notes": "",
-      "addedAt": "2026-10-17T14:39:14.426Z",
-      "updatedAt": "2026-10-17T14:39:14.426Z"
     },
     {
       "id": "lcl-2026-ordinaria-criterios-2",
