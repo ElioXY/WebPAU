@@ -3,9 +3,14 @@
 **Un archivo público de los exámenes de la PAU de Andalucía** (Prueba de Acceso
 a la Universidad): los enunciados que se reparten en el aula, sus soluciones,
 los criterios con que se corrigen y la hoja de respuestas en blanco, de las
-convocatorias ordinaria y extraordinaria, ordenados por asignatura y año.
+convocatorias ordinaria y extraordinaria —y de los modelos sin convocatoria—,
+ordenados por asignatura y año.
 
 La web está en **<https://elioxy.github.io/WebPAU>**.
+
+Hoy reúne **1.281 documentos de 2008 a 2026** en 33 asignaturas: 211 de la
+ordinaria, 234 de la extraordinaria y 836 modelos que el tribunal guarda como
+reserva. Son 1.282 PDF, unos 209 MB, y ninguno vive fuera del repositorio.
 
 Es estática y gratuita, sin cuentas ni registro: se entra, se filtra por
 asignatura, año, convocatoria, fase o tipo de documento, y el PDF **se abre en
@@ -223,14 +228,16 @@ src/
   lib/dates.ts       fechas de convocatoria y cuenta atrás
   components/NextExam.astro  «Próxima PAU» de la portada
   pages/index.astro  la web pública
+  pages/asignatura/[slug].astro  una página por asignatura
   pages/admin.astro  el panel
   pages/practica.astro       lista de exámenes para practicar
   pages/practica/[set].astro sala de práctica de un examen
+  pages/404.astro    página de error
   scripts/archive.ts filtrado de la web pública
   scripts/admin.ts   lógica del panel: subida, edición y commits
   scripts/practice.ts cronómetro de la sala de práctica
   scripts/dates.ts   actualiza la cuenta atrás en el navegador
-  styles/global.css  el sistema visual de la web
+  styles/global.css  el sistema visual (el índice editorial)
   styles/admin.css   el del panel
 ```
 
@@ -251,22 +258,43 @@ Ejemplo: <https://elioxy.github.io/WebPAU/?s=HFI&y=2025&t=soluciones>
 
 ### Interfaz
 
-- **El PDF se abre, no se descarga.** El botón «Ver» de cada fila (y el título)
+La web no intenta parecer una aplicación: se maqueta como el **índice de un
+boletín**. Papel cálido, titulares en serif, filetes de un píxel y versalitas
+mono para los datos; la jerarquía la hacen el tamaño y la alineación, no las
+tarjetas. El sistema está en `src/styles/global.css` y el panel conserva su
+propia hoja.
+
+- **Ficha del archivo.** La portada abre con el titular y una ficha de
+  catálogo —documentos, asignaturas, años y convocatorias— calculada desde el
+  propio catálogo, no escrita a mano.
+- **Los filtros son una franja de herramientas**, no un formulario: campos con
+  subrayado, buscador con atajo y la convocatoria y el tipo como texto con
+  subrayado activo. El estado sigue viviendo en la URL.
+- **Las asignaturas se leen como epígrafes** de índice, con su recuento, y cada
+  una tiene su página con todos sus documentos agrupados por año y convocatoria.
+- **Las filas llevan el código de la asignatura** a la izquierda, el título en
+  serif, el tipo en versalitas con su color y «Ver» como enlace de texto. Los
+  grupos se abren con el año en número grande y la convocatoria en cursiva.
+- **El PDF se abre, no se descarga.** El enlace de cada fila (y el título)
   abren el documento en el visor del navegador, en otra pestaña, para poder
   leerlo sin pasar por la carpeta de descargas.
+- **Practicar, a un clic.** La cabecera y cada asignatura llevan a la sala de
+  práctica, donde el examen se hace con cronómetro y la corrección queda tapada
+  hasta el final.
 - **Tema claro / oscuro.** Se elige automáticamente según el sistema y puedes
   cambiarlo con el botón flotante; la preferencia se guarda en el navegador, y
   el cambio se funde en vez de dar un salto.
 - **Atajo `/`.** Enfoca el buscador al instante. `Esc` lo desenfoca.
 - **Volver arriba.** Aparece un botón flotante al bajar por la página.
-- **Móvil.** Las filas se apilan y los cinco tipos de documento pasan a una
-  rejilla de dos columnas, sin nada que se salga de la pantalla.
+- **Móvil.** Las filas se apilan —código, título, tipo y enlace— y la franja de
+  filtros pasa a una columna, sin nada que se salga de la pantalla.
 - **Próxima PAU.** La portada lleva una cuenta atrás con la siguiente
   convocatoria: sale de `data/dates.json`, y si la fecha aún no es oficial se
   marca como provisional.
-- **Movimiento discreto.** Cada pieza entra o se reordena en menos de medio
-  segundo, con opacidad y desplazamiento; con «reducir movimiento» del sistema
-  no se anima nada.
+- **Movimiento discreto.** La cabecera, la ficha y los grupos entran en menos de
+  medio segundo, con opacidad y desplazamiento; con «reducir movimiento» del
+  sistema no se anima nada. Las 1.281 filas no se animan una a una: filtrar
+  tiene que seguir siendo instantáneo.
 - Cuando el archivo está vacío, la web oculta los filtros y muestra un estado
   de bienvenida con acceso al repositorio.
 
@@ -290,10 +318,10 @@ corrección se ve desde el principio.
 ## Notas prácticas
 
 - **Tamaño del repositorio.** Cada PDF aumenta el tamaño del repo para siempre
-  (Git guarda el histórico). Con ~300 documentos de 1–2 MB el repo se queda
-  alrededor de 400–600 MB. GitHub Pages admite 1 GB por sitio. Si te acercas al
-  límite, sirve los PDF desde otro sitio (un bucket, un CDN) y guarda en
-  `exams.json` solo la URL externa.
+  (Git guarda el histórico). Los 1.282 PDF actuales ocupan 209 MB y el repo
+  ronda los 400 MB contando el histórico. GitHub Pages admite 1 GB por sitio.
+  Si te acercas al límite, sirve los PDF desde otro sitio (un bucket, un CDN) y
+  guarda en `exams.json` solo la URL externa.
 - **Sin base de datos ni servidor.** El panel se sirve como una página estática
   más y habla con la API de GitHub desde el navegador: no hay nada encendido,
   ni en tu máquina ni en la nube. A cambio, «borrar» es un commit y no un
@@ -303,7 +331,9 @@ corrección se ve desde el principio.
   sin aire. Para escaneos enormes, súbelos por `git` a mano y añade la entrada
   a `data/exams.json`.
 - **Primera publicación.** En GitHub: *Settings → Pages → Source → GitHub
-  Actions*. Las ejecuciones siguientes ya se lanzan solas.
+  Actions*. Las ejecuciones siguientes ya se lanzan solas. El repositorio tiene
+  que ser **público**: en el plan gratuito Pages no publica repos privados, y la
+  URL responde «Site not found» aunque el workflow termine en verde.
 - **Dominio propio.** Si lo añades, define `SITE_URL` y `SITE_BASE=/` en el
   workflow y ajusta `site` en `astro.config.mjs`.
 
