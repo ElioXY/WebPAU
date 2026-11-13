@@ -7,7 +7,7 @@
 //   npx wrangler deploy
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "webpau",
+  "name": "pau",
   "compatibility_date": "2026-11-13",
   // Dominio propio, servido por la zona elioxy.us.ci en Cloudflare.
   "routes": [{ "pattern": "pau.elioxy.us.ci", "custom_domain": true }],
