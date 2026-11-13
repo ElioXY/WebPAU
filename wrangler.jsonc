@@ -1,0 +1,21 @@
+// Publicación en Cloudflare Workers como *static assets*, sin script (`main`).
+// Sin script no hay invocaciones del Worker: las peticiones a los archivos son
+// gratis e ilimitadas, igual que en Pages.
+//
+//   SITE_BASE=/ SITE_URL=https://pau.elioxy.us.ci \
+//   PUBLIC_GH_OWNER=ElioXY PUBLIC_GH_REPO=WebPAU npm run build
+//   npx wrangler deploy
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "webpau",
+  "compatibility_date": "2026-11-13",
+  // Dominio propio, servido por la zona elioxy.us.ci en Cloudflare.
+  "routes": [{ "pattern": "pau.elioxy.us.ci", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    // Astro compila con build.format 'file' (admin.html, practica.html…),
+    // así que /admin tiene que resolver a admin.html.
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
