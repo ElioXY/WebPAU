@@ -48,12 +48,6 @@ móvil, sin instalar nada.
 │  /WebPAU/admin     │                   │  data/*.json  │               │  Pages   │
 └────────────────────┘                   │  public/exams │               │  (web)   │
                                          └───────────────┘               └──────────┘
-```
-
-La web se publica en **GitHub Pages** sin coste: el workflow
-`.github/workflows/deploy.yml` reconstruye el sitio en cada push que toque
-`src/`, `data/` o `public/` (1–2 minutos).
-
 ---
 
 ## La PAU en Andalucía
