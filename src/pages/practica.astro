@@ -82,7 +82,7 @@ groups.sort((a, b) => a.name.localeCompare(b.name, 'es'));
     ) : (
       <section class="archive">
         <div class="wrap">
-          <div class="results-head">
+          <div class="results-head" data-reveal>
             <h2>Exámenes listos para practicar</h2>
             <p class="count">
               {sets.length} {sets.length === 1 ? 'examen' : 'exámenes'} · {groups.length}{' '}
@@ -129,7 +129,7 @@ groups.sort((a, b) => a.name.localeCompare(b.name, 'es'));
             </section>
           ))}
 
-          <p class="practice-note">
+          <p class="practice-note" data-reveal>
             Sin cronómetro también sirve: en el <a class="link" href={`${base}/archivo`}>archivo</a>{' '}
             están todos los documentos, con sus enunciados y correcciones.
           </p>

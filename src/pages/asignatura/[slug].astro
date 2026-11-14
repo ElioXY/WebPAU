@@ -137,7 +137,7 @@ const description = `${count} ${count === 1 ? 'documento' : 'documentos'} de ${s
     <section class="archive subject-archive">
       <div class="wrap">
         {groups.map((group) => (
-          <div class="year-group">
+          <div class="year-group" data-reveal>
             <div class="year-head">
               <h3>{group.year}</h3>
               <span class="session">{sessionLong.get(group.session) ?? group.session}</span>

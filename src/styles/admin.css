@@ -303,6 +303,35 @@ textarea {
   cursor: not-allowed;
 }
 
+/* el mismo gesto que en la web pública: se levantan al acercarse y se hunden
+   al pulsarlos */
+.btn,
+.icon-btn {
+  transition: transform 0.14s var(--ease), background-color 0.14s var(--ease),
+    border-color 0.14s var(--ease), color 0.14s var(--ease), opacity 0.14s var(--ease);
+}
+
+@media (hover: hover) {
+  .btn:hover:not(:disabled),
+  .icon-btn:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.btn:active:not(:disabled),
+.icon-btn:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover:not(:disabled),
+  .icon-btn:hover,
+  .btn:active:not(:disabled),
+  .icon-btn:active {
+    transform: none;
+  }
+}
+
 .btn svg {
   width: 13px;
   height: 13px;

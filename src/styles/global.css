@@ -1873,39 +1873,17 @@ button.dl:hover {
 /* el script añade `reveal-ready`: si no llega a cargar, no se esconde nada */
 .reveal-ready [data-reveal] {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(14px);
+  transition: opacity 0.55s var(--ease) var(--rv-delay, 0ms),
+    transform 0.55s var(--ease) var(--rv-delay, 0ms);
 }
 
 .reveal-ready [data-reveal].is-in {
   opacity: 1;
   transform: none;
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
 }
 
-/* los últimos documentos entran en cascada, no todos a la vez */
-.reveal-ready .recent .row:nth-child(2) {
-  transition-delay: 40ms;
-}
-
-.reveal-ready .recent .row:nth-child(3) {
-  transition-delay: 80ms;
-}
-
-.reveal-ready .recent .row:nth-child(4) {
-  transition-delay: 120ms;
-}
-
-.reveal-ready .recent .row:nth-child(5) {
-  transition-delay: 160ms;
-}
-
-.reveal-ready .recent .row:nth-child(6) {
-  transition-delay: 200ms;
-}
-
-.reveal-ready .recent .row:nth-child(n + 7) {
-  transition-delay: 240ms;
-}
+/* la cascada de los hermanos la reparte el script en `--rv-delay` */
 
 /* ------------------------------------------------------------- enunciado */
 
@@ -2009,6 +1987,74 @@ button.dl:hover {
   color: var(--accent);
 }
 
+/* ----------------------------------------------------------------- botones */
+
+/* Un solo gesto para todos los controles: al acercarse se levantan un píxel y
+   el filete se tiñe; al pulsarlos se hunden. */
+.btn-primary,
+.btn-ghost,
+.chip,
+.seg button,
+.dl,
+.cta,
+.icon-btn,
+.ctrl {
+  transition: transform var(--dur-2) var(--ease),
+    background-color var(--dur-2) var(--ease),
+    border-color var(--dur-2) var(--ease), color var(--dur-2) var(--ease),
+    opacity var(--dur-2) var(--ease);
+}
+
+@media (hover: hover) {
+  .btn-primary:hover,
+  .btn-ghost:hover,
+  .chip:hover,
+  .seg button:hover,
+  .dl:hover,
+  .cta:hover,
+  .icon-btn:hover,
+  .ctrl:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.btn-primary:active,
+.btn-ghost:active,
+.chip:active,
+.seg button:active,
+.dl:active,
+.cta:active,
+.icon-btn:active,
+.ctrl:active {
+  transform: translateY(1px) scale(0.99);
+  transition-duration: 60ms;
+}
+
+/* el botón de tinta del índice deja pasar un reflejo al acercarse */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 34%,
+    color-mix(in srgb, var(--paper) 26%, transparent) 50%,
+    transparent 66%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.55s var(--ease);
+}
+
+.btn-primary:hover::after {
+  transform: translateX(130%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ctrl:not([hidden]) {
     animation: none;
@@ -2017,5 +2063,40 @@ button.dl:hover {
   .reveal-ready [data-reveal] {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+
+  .btn-primary,
+  .btn-ghost,
+  .chip,
+  .seg button,
+  .dl,
+  .cta,
+  .icon-btn,
+  .ctrl {
+    transition: none;
+  }
+
+  .btn-primary:hover,
+  .btn-primary:active,
+  .btn-ghost:hover,
+  .btn-ghost:active,
+  .chip:hover,
+  .chip:active,
+  .seg button:hover,
+  .seg button:active,
+  .dl:hover,
+  .dl:active,
+  .cta:hover,
+  .cta:active,
+  .icon-btn:hover,
+  .icon-btn:active,
+  .ctrl:hover,
+  .ctrl:active {
+    transform: none;
+  }
+
+  .btn-primary::after {
+    display: none;
   }
 }

@@ -209,7 +209,7 @@ const fmtSize = (kb?: number | null) =>
         )}
 
         {exams.length > 0 && (
-          <nav class="year-index" aria-label="Ir a un año">
+          <nav class="year-index" aria-label="Ir a un año" data-reveal>
             <span class="year-index-label">Años</span>
             {yearIndex.map((item) => (
               <a href={`#${item.anchor}`}>
@@ -219,7 +219,7 @@ const fmtSize = (kb?: number | null) =>
           </nav>
         )}
 
-        <div class="results-head">
+        <div class="results-head" data-reveal>
           <h2>Documentos</h2>
           <p class="count" aria-live="polite" aria-atomic="true">
             <span id="resultCount">{statDocs}</span>&nbsp;<span id="resultWord">{statDocs === 1

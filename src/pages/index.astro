@@ -195,20 +195,20 @@ const phaseLabel = (phases: string[]) =>
     {exams.length > 0 && (
       <section class="subjects" id="asignaturas">
         <div class="wrap">
-          <div class="results-head">
+          <div class="results-head" data-reveal>
             <h2>Explora por asignatura</h2>
             <p class="count">
               {statSubjects} {statSubjects === 1 ? 'materia' : 'materias'} · {range}
             </p>
           </div>
 
-          <div class="legend">
+          <div class="legend" data-reveal>
             <span><i aria-hidden="true"></i> Fase de acceso</span>
             <span><i data-phase="admision" aria-hidden="true"></i> Fase de admisión</span>
           </div>
 
           <div class="chips" role="group" aria-label="Asignatura">
-            <a class="chip chip-all" href={`${base}/archivo`}>
+            <a class="chip chip-all" data-reveal href={`${base}/archivo`}>
               <span class="nm">Todas las asignaturas</span>
               <span class="ct">
                 <em>{statDocs}</em> <span class="unit">docs.</span> · {range}
@@ -221,6 +221,7 @@ const phaseLabel = (phases: string[]) =>
               return (
                 <a
                   class="chip"
+                  data-reveal
                   href={`${base}/asignatura/${subjectLinks.get(subject.code)}`}
                   title={`${subject.name} · ${phaseLabel(subject.phases)}`}
                 >
@@ -241,7 +242,7 @@ const phaseLabel = (phases: string[]) =>
     {exams.length > 0 && (
       <section class="archive home-recent" id="ultimos">
         <div class="wrap">
-          <div class="results-head">
+          <div class="results-head" data-reveal>
             <h2>Lo último del archivo</h2>
             <p class="count">
               {recent.length} de {statDocs} documentos
@@ -303,7 +304,7 @@ const phaseLabel = (phases: string[]) =>
             })}
           </div>
 
-          <p class="recent-foot">
+          <p class="recent-foot" data-reveal>
             <a class="dl" href={`${base}/archivo`}>
               <span>Ver los {statDocs} documentos del archivo</span>
               <ArrowIcon />

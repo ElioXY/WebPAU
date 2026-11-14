@@ -83,7 +83,7 @@ const enunciadoFacts = [
 
     <section class="practice-run">
       <div class="wrap practice-grid">
-        <section class="timer" aria-labelledby="timerTitle">
+        <section class="timer" aria-labelledby="timerTitle" data-reveal>
           <h2 class="practice-sub" id="timerTitle">Cronómetro</h2>
           <p class="clock" id="clock" role="timer" data-state="idle">{DEFAULT_MINUTES}:00</p>
           <p class="timer-state" id="clockState" aria-live="polite">
@@ -110,7 +110,7 @@ const enunciadoFacts = [
           </p>
         </section>
 
-        <section class="reader" aria-labelledby="readerTitle">
+        <section class="reader" aria-labelledby="readerTitle" data-reveal>
           <div class="reader-head">
             <h2 class="practice-sub" id="readerTitle">Enunciado</h2>
             <span class="reader-tag mono">{sessionShort}</span>
@@ -137,7 +137,14 @@ const enunciadoFacts = [
       </div>
 
       <div class="wrap">
-        <section class="correccion" id="correccion" tabindex="-1" hidden aria-labelledby="correccionTitle">
+        <section
+          class="correccion"
+          id="correccion"
+          tabindex="-1"
+          hidden
+          data-reveal
+          aria-labelledby="correccionTitle"
+        >
           <h2 id="correccionTitle">Corrección</h2>
           <p id="correccionIntro">
             Ya puedes comprobar tus respuestas con los documentos oficiales de este examen.
