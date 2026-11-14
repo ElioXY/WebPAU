@@ -1547,6 +1547,15 @@ a.ctrl-admin:hover {
   margin-bottom: 1.1rem;
 }
 
+.practice-chips {
+  margin-bottom: 1.4rem;
+}
+
+.practice-chips .chip .ct em {
+  font-style: normal;
+  color: var(--ink-2);
+}
+
 .practice-count {
   margin-top: 0.55rem;
   font-size: 0.6875rem;
@@ -1568,56 +1577,23 @@ a.ctrl-admin:hover {
   border-top: 2px solid var(--ink);
 }
 
-.practice-set {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1rem;
-  padding: 0.8rem 0.25rem;
-  border-bottom: 1px dotted var(--rule);
-  transition: background-color var(--dur-1) var(--ease);
+/* sin filtros se enseña la punta de cada asignatura y el resto queda plegado */
+.practice-subject:not([data-expanded]) [data-extra] {
+  display: none;
 }
 
-.practice-set:hover {
-  background: var(--card);
+.practice-more {
+  margin-top: 0.55rem;
 }
 
-.practice-set-main {
-  flex: 1 1 16rem;
-  min-width: 0;
-}
-
-.practice-set-main h3 {
-  font-family: var(--serif);
-  font-size: 1.0625rem;
-}
-
-.practice-docs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  list-style: none;
+.practice-more button {
   padding: 0;
-}
-
-.practice-docs li {
-  font-family: var(--mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  border: 1px solid var(--rule);
-  padding: 0.1rem 0.35rem;
-}
-
-.practice-docs li[data-t='soluciones'] {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-}
-
-.practice-docs li[data-t='criterios'] {
-  color: var(--ochre);
-  border-color: color-mix(in srgb, var(--ochre) 40%, transparent);
+  border: 0;
+  background: none;
+  font: inherit;
+  white-space: normal;
+  text-align: left;
+  cursor: pointer;
 }
 
 .practice-note {

@@ -5,8 +5,10 @@
    Cada examen tiene su propia página estática (`/practica/fis-2026-ordinaria`),
    así el cronómetro funciona sin servidor y el enlace se puede compartir.
 
-   Los exámenes se agrupan por asignatura: con más de doscientos practicables,
-   una lista suelta era imposible de recorrer.
+   La página se lee como la portada: ficha, buscador y un índice por
+   asignatura. Con más de doscientos practicables no se vuelcan todos de golpe:
+   cada asignatura enseña sus tres convocatorias más recientes y el resto se
+   abre eligiéndola arriba.
    ========================================================================= */
 import Base from '../layouts/Base.astro';
 import HeadNav from '../components/HeadNav.astro';
@@ -25,7 +27,27 @@ for (const set of sets) yearCounts.set(set.year, (yearCounts.get(set.year) ?? 0)
 
 const subjectName = (code: string) => subjects.find((s) => s.code === code)?.name ?? code;
 const sessionLong = (id: string) => SESSIONS.find((s) => s.id === id)?.long ?? id;
+const sessionShort = (id: string) => SESSIONS.find((s) => s.id === id)?.label ?? id;
 const typeLabel = (id: string) => DOC_TYPES.find((t) => t.id === id)?.label ?? id;
+
+/* «2018–2026» o la lista corta, como en la ficha del archivo */
+const rangeLabel = (list: typeof sets): string => {
+  const wanted = [...new Set(list.map((set) => set.year))].sort((a, b) => b - a);
+  if (wanted.length === 0) return '—';
+  return wanted.length <= 3 ? wanted.join(', ') : `${wanted[wanted.length - 1]}–${wanted[0]}`;
+};
+
+const allRange = rangeLabel(sets);
+const sessionSummary =
+  SESSIONS.filter((session) => sets.some((set) => set.session === session.id))
+    .map((session) =>
+      session.id === 'ordinaria'
+        ? 'jun'
+        : session.id === 'extraordinaria'
+          ? 'sep'
+          : session.label.toLowerCase()
+    )
+    .join(' · ') || '—';
 
 interface SetGroup {
   code: string;
@@ -43,6 +65,9 @@ for (const set of sets) {
    suele ser la última convocatoria */
 const latest = (group: SetGroup) => Math.max(...group.sets.map((set) => set.year));
 groups.sort((a, b) => latest(b) - latest(a) || a.name.localeCompare(b.name, 'es'));
+
+/* sin filtros, cada asignatura enseña solo la punta del índice */
+const VISIBLE = 3;
 ---
 
 <Base
@@ -61,17 +86,6 @@ groups.sort((a, b) => latest(b) - latest(a) || a.name.localeCompare(b.name, 'es'
   </header>
 
   <main>
-    <section class="hero practice-hero">
-      <div class="wrap">
-        <p class="kicker">Práctica</p>
-        <h1>Haz el examen <em>a tiempo</em>.</h1>
-        <p class="lede">
-          Elige un examen del archivo, pon el cronómetro y trabaja con el enunciado delante. Las
-          soluciones y los criterios quedan tapados hasta que termines.
-        </p>
-      </div>
-    </section>
-
     {sets.length === 0 ? (
       <section class="archive">
         <div class="wrap">
@@ -79,113 +93,188 @@ groups.sort((a, b) => latest(b) - latest(a) || a.name.localeCompare(b.name, 'es'
             <p class="badge" aria-hidden="true">0</p>
             <h2>Todavía no hay exámenes que practicar</h2>
             <p>
-              En cuanto haya un enunciado en el archivo, aparecerá aquí con su cronómetro. Mientras
-              tanto, puedes <a class="link" href={`${base}/archivo`}>ver el archivo completo</a>.
+              En cuanto haya un enunciado en el archivo, aparecerá aquí con su cronómetro.
+              Mientras tanto, puedes <a class="link" href={`${base}/archivo`}>
+                ver el archivo completo
+              </a>.
             </p>
           </div>
         </div>
       </section>
     ) : (
-      <section class="archive">
-        <div class="wrap">
-          <div class="results-head" data-reveal>
-            <h2>Exámenes listos para practicar</h2>
-            <p class="count">
-              {sets.length} {sets.length === 1 ? 'examen' : 'exámenes'} · {groups.length}{' '}
-              {groups.length === 1 ? 'asignatura' : 'asignaturas'}
-            </p>
-          </div>
-
-          <form class="filters practice-search" role="search" autocomplete="off">
-            <div class="filter-row find">
-              <div class="field grow">
-                <SearchIcon />
-                <label class="visually-hidden" for="q">Buscar un examen</label>
-                <input
-                  class="input"
-                  id="q"
-                  name="q"
-                  type="search"
-                  placeholder="Buscar asignatura, año o convocatoria…"
-                />
-                <kbd class="kbd" aria-hidden="true">/</kbd>
-              </div>
-
-              <label class="visually-hidden" for="py">Año</label>
-              <select class="select" id="py" name="py">
-                <option value="">Todos los años</option>
-                {years.map((year) => (
-                  <option value={year}>{year} · {yearCounts.get(year)}</option>
-                ))}
-              </select>
-
-              <button class="btn-ghost" type="button" id="practiceClear" hidden>
-                Limpiar
-              </button>
-            </div>
-
-            <p class="practice-count mono" id="practiceCount" aria-live="polite">
-              {sets.length} {sets.length === 1 ? 'examen' : 'exámenes'}
-            </p>
-          </form>
-
-          {groups.map((group) => (
-            <section class="practice-subject" data-subject data-reveal>
-              <div class="practice-subject-head">
-                <h3>{group.name}</h3>
-                <p class="n" data-group-count>
-                  {group.sets.length} {group.sets.length === 1 ? 'examen' : 'exámenes'}
+      <>
+        <section class="hero practice-hero">
+          <div class="wrap">
+            <div class="hero-grid">
+              <div class="hero-copy">
+                <p class="kicker">Práctica</p>
+                <h1>Haz el examen <em>a tiempo</em>.</h1>
+                <p class="lede">
+                  Elige convocatoria, pon el cronómetro y trabaja con el enunciado al lado. Al
+                  terminar, las soluciones y los criterios se abren en el mismo panel.
                 </p>
               </div>
 
-              <ul class="practice-list">
-                {group.sets.map((set) => {
-                  const docs = (['enunciados', 'soluciones', 'criterios', 'plantilla'] as DocType[]).filter(
-                    (type) => set.docs[type]
-                  );
-                  return (
-                    <li
-                      class="practice-set"
-                      data-set
-                      data-year={set.year}
-                      data-q={`${group.name} ${set.year} ${sessionLong(set.session)} ${docs
-                        .map((type) => typeLabel(type))
-                        .join(' ')}`}
-                    >
-                      <div class="practice-set-main">
-                        <h4>
-                          {set.year} · {sessionLong(set.session)}
-                        </h4>
-                        <p class="row-meta">
-                          {docs.length} {docs.length === 1 ? 'documento' : 'documentos'}
-                        </p>
-                      </div>
-                      <ul class="practice-docs" aria-label="Documentos disponibles">
-                        {docs.map((type) => (
-                          <li data-t={type}>{typeLabel(type)}</li>
-                        ))}
-                      </ul>
-                      <a class="dl" href={`${base}/practica/${set.slug}`}>
-                        Practicar
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ))}
+              <aside class="ficha" aria-label="Ficha de la práctica">
+                <h2>Ficha de la práctica</h2>
+                <dl>
+                  <div><dt>Exámenes</dt><dd>{sets.length}</dd></div>
+                  <div><dt>Asignaturas</dt><dd>{groups.length}</dd></div>
+                  <div><dt>Años</dt><dd>{allRange}</dd></div>
+                  <div><dt>Convocatorias</dt><dd>{sessionSummary}</dd></div>
+                </dl>
+              </aside>
+            </div>
 
-          <p class="practice-empty" id="practiceEmpty" hidden>
-            No hay exámenes con esos filtros. Prueba con otra asignatura, otro año, o borra la
-            búsqueda.
-          </p>
+            <form class="filters home-search practice-search" role="search" autocomplete="off">
+              <div class="filter-row find">
+                <div class="field grow">
+                  <SearchIcon />
+                  <label class="visually-hidden" for="q">Buscar un examen</label>
+                  <input
+                    class="input"
+                    id="q"
+                    name="q"
+                    type="search"
+                    placeholder="Buscar asignatura, año o convocatoria…"
+                  />
+                  <kbd class="kbd" aria-hidden="true">/</kbd>
+                </div>
 
-          <p class="practice-note" data-reveal>
-            Sin cronómetro también sirve: en el <a class="link" href={`${base}/archivo`}>archivo</a>{' '}
-            están todos los documentos, con sus enunciados y correcciones.
-          </p>
-        </div>
-      </section>
+                <label class="visually-hidden" for="py">Año</label>
+                <select class="select" id="py" name="py">
+                  <option value="">Todos los años</option>
+                  {years.map((year) => (
+                    <option value={year}>{year} · {yearCounts.get(year)}</option>
+                  ))}
+                </select>
+
+                <button class="btn-ghost" type="button" id="practiceClear" hidden>
+                  Limpiar
+                </button>
+              </div>
+
+              <p class="practice-count mono" id="practiceCount" aria-live="polite">
+                {sets.length} {sets.length === 1 ? 'examen' : 'exámenes'}
+              </p>
+            </form>
+          </div>
+        </section>
+
+        <section class="archive" id="examenes">
+          <div class="wrap">
+            <div class="results-head" data-reveal>
+              <h2>Elige asignatura</h2>
+              <p class="count">
+                {sets.length} {sets.length === 1 ? 'examen' : 'exámenes'} · {groups.length}{' '}
+                {groups.length === 1 ? 'asignatura' : 'asignaturas'}
+              </p>
+            </div>
+
+            <div class="chips practice-chips" role="group" aria-label="Asignatura">
+              <button
+                class="chip chip-all"
+                type="button"
+                data-subject-filter=""
+                aria-pressed="true"
+              >
+                <span class="nm">Todas</span>
+                <span class="ct"><em>{sets.length}</em> exámenes</span>
+              </button>
+
+              {groups.map((group) => (
+                <button
+                  class="chip"
+                  type="button"
+                  data-subject-filter={group.code}
+                  aria-pressed="false"
+                >
+                  <span class="nm">{group.name}</span>
+                  <span class="ct">
+                    <em>{group.sets.length}</em> · {rangeLabel(group.sets)}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {groups.map((group) => (
+              <section
+                class="practice-subject"
+                id={`practica-${group.code.toLowerCase()}`}
+                data-group={group.code}
+                data-reveal
+              >
+                <div class="practice-subject-head">
+                  <h3>{group.name}</h3>
+                  <p class="n" data-group-count>
+                    {group.sets.length} {group.sets.length === 1 ? 'examen' : 'exámenes'} ·{' '}
+                    {rangeLabel(group.sets)}
+                  </p>
+                </div>
+
+                <ul class="practice-list">
+                  {group.sets.map((set, index) => {
+                    const docs = (
+                      ['enunciados', 'soluciones', 'criterios', 'plantilla'] as DocType[]
+                    ).filter((type) => set.docs[type]);
+                    const corrected = docs.some((type) => type !== 'enunciados');
+                    return (
+                      <li
+                        class="row"
+                        data-set
+                        data-year={set.year}
+                        data-q={`${group.name} ${set.year} ${sessionLong(set.session)} ${docs
+                          .map((type) => typeLabel(type))
+                          .join(' ')}`}
+                        data-extra={index >= VISIBLE ? '' : undefined}
+                      >
+                        <span class="stripe" aria-hidden="true" />
+                        <span class="row-code mono" aria-hidden="true">{set.year}</span>
+                        <div class="row-title">
+                          <a href={`${base}/practica/${set.slug}`}>
+                            {sessionLong(set.session)}
+                          </a>
+                          <p class="row-meta">
+                            {docs.length} {docs.length === 1 ? 'documento' : 'documentos'} ·{' '}
+                            {docs.map((type) => typeLabel(type)).join(', ')}
+                          </p>
+                        </div>
+                        <span class="tag" data-t={corrected ? 'soluciones' : 'enunciados'}>
+                          {corrected ? 'Con corrección' : 'Solo enunciado'}
+                        </span>
+                        <div class="row-actions">
+                          <a class="dl" href={`${base}/practica/${set.slug}`}>
+                            Practicar
+                          </a>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {group.sets.length > VISIBLE && (
+                  <p class="practice-more">
+                    <button class="dl" type="button" data-show-all={group.code}>
+                      Ver los {group.sets.length} exámenes
+                    </button>
+                  </p>
+                )}
+              </section>
+            ))}
+
+            <p class="practice-empty" id="practiceEmpty" hidden>
+              No hay exámenes con esos filtros. Prueba con otra asignatura, otro año, o borra la
+              búsqueda.
+            </p>
+
+            <p class="practice-note" data-reveal>
+              Sin cronómetro también sirve: en el{' '}
+              <a class="link" href={`${base}/archivo`}>archivo</a> están todos los documentos,
+              con sus enunciados y correcciones.
+            </p>
+          </div>
+        </section>
+      </>
     )}
   </main>
 
