@@ -7,6 +7,7 @@
    JavaScript el servidor ya renderiza el listado entero.
    ========================================================================= */
 import Base from '../layouts/Base.astro';
+import HeadNav from '../components/HeadNav.astro';
 import {
   DOC_TYPES,
   SESSIONS,
@@ -108,11 +109,7 @@ const fmtSize = (kb?: number | null) =>
         <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         WebPAU
       </a>
-      <nav class="head-nav" aria-label="Secciones">
-        <a href={`${base}/#asignaturas`}>Asignaturas</a>
-        <a href={`${base}/archivo`} aria-current="page">Archivo</a>
-        <a href={`${base}/practica`}>Practicar</a>
-      </nav>
+      <HeadNav current="archivo" />
       <a class="cta" href={`${base}/practica`}>Practicar</a>
       <a class="cta cta-back" href={`${base}/`}>Volver a la portada</a>
     </div>

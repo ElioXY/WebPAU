@@ -8,6 +8,7 @@
    lee de un vistazo.
    ========================================================================= */
 import Base from '../layouts/Base.astro';
+import HeadNav from '../components/HeadNav.astro';
 import {
   DOC_TYPES,
   SESSIONS,
@@ -107,11 +108,7 @@ const phaseLabel = (phases: string[]) =>
         <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         WebPAU
       </a>
-      <nav class="head-nav" aria-label="Secciones">
-        {exams.length > 0 && <a href="#asignaturas">Asignaturas</a>}
-        <a href={`${base}/archivo`}>Archivo</a>
-        <a href={`${base}/practica`}>Practicar</a>
-      </nav>
+      <HeadNav home withAsignaturas={exams.length > 0} />
       <p class="head-meta mono">
         <span class="hide-s">{statDocs} documentos</span>
         <span class="sep hide-s" aria-hidden="true">·</span>

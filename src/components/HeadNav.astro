@@ -1,0 +1,50 @@
+---
+/**
+ * Secciones de la cabecera.
+ *
+ * En escritorio son tres enlaces en línea. Por debajo de 900 px no caben al
+ * lado de la marca, así que se guardan en un desplegable que pinta este mismo
+ * componente: el botón solo aparece en esa franja y `scripts/menu.ts` se
+ * encarga de abrirlo y cerrarlo. Sin JavaScript los enlaces siguen en el pie,
+ * así que ninguna página se queda sin camino.
+ */
+interface Props {
+  /** sección en la que está la página, para marcarla */
+  current?: 'asignaturas' | 'archivo' | 'practica';
+  /** la portada enlaza a su propia ancla en lugar de recargar */
+  home?: boolean;
+  /** la portada esconde «Asignaturas» mientras no haya documentos */
+  withAsignaturas?: boolean;
+}
+
+const { current, home = false, withAsignaturas = true } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<button
+  class="menu-toggle"
+  type="button"
+  aria-expanded="false"
+  aria-controls="site-menu"
+  data-menu-toggle
+>
+  <span class="menu-bars" aria-hidden="true"></span>
+  <span class="visually-hidden">Secciones</span>
+</button>
+
+<nav class="head-nav" id="site-menu" aria-label="Secciones" data-menu-panel>
+  {withAsignaturas && (
+    <a
+      href={home ? '#asignaturas' : `${base}/#asignaturas`}
+      aria-current={current === 'asignaturas' ? 'page' : undefined}
+    >
+      Asignaturas
+    </a>
+  )}
+  <a href={`${base}/archivo`} aria-current={current === 'archivo' ? 'page' : undefined}>
+    Archivo
+  </a>
+  <a href={`${base}/practica`} aria-current={current === 'practica' ? 'page' : undefined}>
+    Practicar
+  </a>
+</nav>

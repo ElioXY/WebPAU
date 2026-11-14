@@ -6,6 +6,7 @@
    en sessionStorage, así que no hay servidor que sostener ni cuenta que crear.
    ========================================================================= */
 import Base from '../../layouts/Base.astro';
+import HeadNav from '../../components/HeadNav.astro';
 import OpenIcon from '../../components/icons/Open.astro';
 import { DOC_TYPES, SESSIONS, loadSubjects, type DocType } from '../../lib/catalog';
 import { practiceSets, type PracticeSet } from '../../lib/practice';
@@ -57,11 +58,7 @@ const enunciadoFacts = [
         <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         WebPAU
       </a>
-      <nav class="head-nav" aria-label="Secciones">
-        <a href={`${base}/#asignaturas`}>Asignaturas</a>
-        <a href={`${base}/#archivo`}>Archivo</a>
-        <a href={`${base}/practica`} aria-current="page">Practicar</a>
-      </nav>
+      <HeadNav current="practica" />
       <a class="cta" href={`${base}/`}>Volver al archivo</a>
     </div>
   </header>

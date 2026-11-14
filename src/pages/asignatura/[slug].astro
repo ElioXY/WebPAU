@@ -7,6 +7,7 @@
    del mosaico no tenga que volver a filtrar. Es estática: una URL por materia.
    ========================================================================= */
 import Base from '../../layouts/Base.astro';
+import HeadNav from '../../components/HeadNav.astro';
 import OpenIcon from '../../components/icons/Open.astro';
 import {
   DOC_TYPES,
@@ -97,11 +98,7 @@ const description = `${count} ${count === 1 ? 'documento' : 'documentos'} de ${s
         <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         WebPAU
       </a>
-      <nav class="head-nav" aria-label="Secciones">
-        <a href={`${base}/#asignaturas`}>Asignaturas</a>
-        <a href={`${base}/archivo`}>Archivo</a>
-        <a href={`${base}/practica`}>Practicar</a>
-      </nav>
+      <HeadNav />
       <a class="cta cta-practice" href={`${base}/practica`}>Practicar</a>
       <a class="cta cta-back" href={`${base}/archivo`}>Volver al archivo</a>
     </div>

@@ -312,15 +312,101 @@ main {
   color: var(--ink-3);
 }
 
+/* el filete de la sección se dibuja al acercarse: el mismo gesto que el resto
+   de enlaces del sitio, en lugar de aparecer de golpe */
 .head-nav a {
-  border-bottom: 1px solid transparent;
+  position: relative;
   padding-block: 0.15rem;
-  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+  transition: color var(--dur-2) var(--ease);
 }
 
-.head-nav a:hover {
+.head-nav a::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-2) var(--ease);
+}
+
+.head-nav a:hover,
+.head-nav a[aria-current='page'] {
   color: var(--ink);
-  border-bottom-color: var(--rule);
+}
+
+.head-nav a:hover::after,
+.head-nav a[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+/* el desplegable de secciones: solo existe en pantallas estrechas */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease),
+    transform var(--dur-1) var(--ease);
+}
+
+.menu-toggle:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.menu-toggle:active {
+  transform: scale(0.94);
+}
+
+.menu-bars,
+.menu-bars::before,
+.menu-bars::after {
+  display: block;
+  width: 15px;
+  height: 1px;
+  background: currentColor;
+  transition: transform var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease);
+}
+
+.menu-bars {
+  position: relative;
+}
+
+.menu-bars::before,
+.menu-bars::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.menu-bars::before {
+  top: -4px;
+}
+
+.menu-bars::after {
+  top: 4px;
+}
+
+/* abierto, las tres rayas se cruzan en aspa */
+.menu-toggle[aria-expanded='true'] .menu-bars {
+  background: transparent;
+}
+
+.menu-toggle[aria-expanded='true'] .menu-bars::before {
+  transform: translateY(4px) rotate(45deg);
+}
+
+.menu-toggle[aria-expanded='true'] .menu-bars::after {
+  transform: translateY(-4px) rotate(-45deg);
 }
 
 .head-meta {
@@ -1086,13 +1172,18 @@ button.dl:hover {
   gap: 0.35rem;
 }
 
+/* el filete del pie crece de izquierda a derecha al acercarse */
 .foot-grid a {
-  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(var(--rule), var(--rule));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition: color var(--dur-2) var(--ease), background-size var(--dur-2) var(--ease);
 }
 
 .foot-grid a:hover {
   color: var(--ink);
-  border-bottom-color: var(--rule);
+  background-size: 100% 1px;
 }
 
 .foot-note {
@@ -1707,8 +1798,60 @@ a.ctrl-admin:hover svg {
     align-items: start;
   }
 
+  /* en una pantalla estrecha la marca, los accesos y tres enlaces no caben:
+     las secciones se guardan en un desplegable bajo la cabecera */
+  .head-bar {
+    position: relative;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    order: 3;
+  }
+
   .head-nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.2rem var(--gut) 0.7rem;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    box-shadow: 0 18px 30px -26px rgb(0 0 0 / 55%);
+    font-size: 0.875rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease),
+      visibility 0s linear var(--dur-2);
+  }
+
+  .site-head[data-menu='open'] .head-nav {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
+  }
+
+  .head-nav a {
+    padding-block: 0.6rem;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .head-nav a:last-child {
+    border-bottom: 0;
+  }
+
+  /* dentro del desplegable la raya de la sección sobra: ya hay filete */
+  .head-nav a::after {
     display: none;
+  }
+
+  .head-nav a[aria-current='page'] {
+    color: var(--accent);
   }
 
   .foot-grid {
