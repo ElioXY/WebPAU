@@ -10,12 +10,18 @@
    ========================================================================= */
 import Base from '../layouts/Base.astro';
 import HeadNav from '../components/HeadNav.astro';
+import SearchIcon from '../components/icons/Search.astro';
 import { DOC_TYPES, SESSIONS, loadSubjects, type DocType } from '../lib/catalog';
 import { practiceSets } from '../lib/practice';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const subjects = loadSubjects();
 const sets = practiceSets();
+
+/* años del listado, para el filtro del buscador */
+const years = [...new Set(sets.map((set) => set.year))].sort((a, b) => b - a);
+const yearCounts = new Map<number, number>();
+for (const set of sets) yearCounts.set(set.year, (yearCounts.get(set.year) ?? 0) + 1);
 
 const subjectName = (code: string) => subjects.find((s) => s.code === code)?.name ?? code;
 const sessionLong = (id: string) => SESSIONS.find((s) => s.id === id)?.long ?? id;
@@ -33,7 +39,10 @@ for (const set of sets) {
   if (group) group.sets.push(set);
   else groups.push({ code: set.subject, name: subjectName(set.subject), sets: [set] });
 }
-groups.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+/* primero las asignaturas con exámenes más recientes: lo que se va a practicar
+   suele ser la última convocatoria */
+const latest = (group: SetGroup) => Math.max(...group.sets.map((set) => set.year));
+groups.sort((a, b) => latest(b) - latest(a) || a.name.localeCompare(b.name, 'es'));
 ---
 
 <Base
@@ -87,11 +96,44 @@ groups.sort((a, b) => a.name.localeCompare(b.name, 'es'));
             </p>
           </div>
 
+          <form class="filters practice-search" role="search" autocomplete="off">
+            <div class="filter-row find">
+              <div class="field grow">
+                <SearchIcon />
+                <label class="visually-hidden" for="q">Buscar un examen</label>
+                <input
+                  class="input"
+                  id="q"
+                  name="q"
+                  type="search"
+                  placeholder="Buscar asignatura, año o convocatoria…"
+                />
+                <kbd class="kbd" aria-hidden="true">/</kbd>
+              </div>
+
+              <label class="visually-hidden" for="py">Año</label>
+              <select class="select" id="py" name="py">
+                <option value="">Todos los años</option>
+                {years.map((year) => (
+                  <option value={year}>{year} · {yearCounts.get(year)}</option>
+                ))}
+              </select>
+
+              <button class="btn-ghost" type="button" id="practiceClear" hidden>
+                Limpiar
+              </button>
+            </div>
+
+            <p class="practice-count mono" id="practiceCount" aria-live="polite">
+              {sets.length} {sets.length === 1 ? 'examen' : 'exámenes'}
+            </p>
+          </form>
+
           {groups.map((group) => (
-            <section class="practice-subject" data-reveal>
+            <section class="practice-subject" data-subject data-reveal>
               <div class="practice-subject-head">
                 <h3>{group.name}</h3>
-                <p class="n">
+                <p class="n" data-group-count>
                   {group.sets.length} {group.sets.length === 1 ? 'examen' : 'exámenes'}
                 </p>
               </div>
@@ -102,7 +144,14 @@ groups.sort((a, b) => a.name.localeCompare(b.name, 'es'));
                     (type) => set.docs[type]
                   );
                   return (
-                    <li class="practice-set">
+                    <li
+                      class="practice-set"
+                      data-set
+                      data-year={set.year}
+                      data-q={`${group.name} ${set.year} ${sessionLong(set.session)} ${docs
+                        .map((type) => typeLabel(type))
+                        .join(' ')}`}
+                    >
                       <div class="practice-set-main">
                         <h4>
                           {set.year} · {sessionLong(set.session)}
@@ -126,6 +175,11 @@ groups.sort((a, b) => a.name.localeCompare(b.name, 'es'));
             </section>
           ))}
 
+          <p class="practice-empty" id="practiceEmpty" hidden>
+            No hay exámenes con esos filtros. Prueba con otra asignatura, otro año, o borra la
+            búsqueda.
+          </p>
+
           <p class="practice-note" data-reveal>
             Sin cronómetro también sirve: en el <a class="link" href={`${base}/archivo`}>archivo</a>{' '}
             están todos los documentos, con sus enunciados y correcciones.
@@ -134,4 +188,8 @@ groups.sort((a, b) => a.name.localeCompare(b.name, 'es'));
       </section>
     )}
   </main>
+
+  <script>
+    import '../scripts/practice-filter.ts';
+  </script>
 </Base>

@@ -6,7 +6,7 @@
    corrigen. Solo cuenta como examen practicable el que tiene enunciado.
    ========================================================================= */
 
-import { loadCatalog, type DocType, type Exam } from './catalog';
+import { SESSIONS, loadCatalog, type DocType, type Exam } from './catalog';
 
 export interface PracticeSet {
   /** `FIS|2026|ordinaria` */
@@ -41,12 +41,19 @@ export function practiceSets(): PracticeSet[] {
     groups.set(key, set);
   }
 
+  /* la convocatoria sigue el orden del calendario (junio antes que
+     septiembre), no el alfabético */
+  const sessionOrder = (id: string) => {
+    const index = SESSIONS.findIndex((session) => session.id === id);
+    return index < 0 ? SESSIONS.length : index;
+  };
+
   return [...groups.values()]
     .filter((set) => Boolean(set.docs.enunciados))
     .sort(
       (a, b) =>
         b.year - a.year ||
         a.subject.localeCompare(b.subject, 'ca') ||
-        a.session.localeCompare(b.session)
+        sessionOrder(a.session) - sessionOrder(b.session)
     );
 }

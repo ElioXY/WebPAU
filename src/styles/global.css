@@ -1454,44 +1454,30 @@ a.ctrl-admin:hover {
   padding: 1rem 1.1rem 1.1rem;
 }
 
-/* en escritorio el cronómetro es una barra pegada bajo la cabecera */
+/* en escritorio el cronómetro ocupa algo menos de la mitad y el enunciado el
+   resto: el examen se hace sin cambiar de pestaña */
 @media (min-width: 901px) {
+  .practice-grid {
+    grid-template-columns: minmax(15rem, 0.42fr) minmax(0, 0.58fr);
+    gap: 1.25rem;
+  }
+
   .timer {
     z-index: 20;
-    display: grid;
-    grid-template-columns: auto auto minmax(8rem, 1fr) auto;
-    align-items: center;
-    column-gap: 1rem;
-    row-gap: 0.35rem;
-    padding: 0.7rem 1rem;
   }
 
-  .timer .practice-sub,
-  .timer .clock,
-  .timer .timer-state,
-  .timer .timer-controls {
-    margin: 0;
+  .reader {
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - var(--header-h) - 3rem);
   }
 
-  .timer .clock {
-    font-size: clamp(1.8rem, 1.2rem + 1.4vw, 2.6rem);
-  }
-
-  .timer .timer-state {
+  .reader-frame {
+    flex: 1 1 auto;
     min-height: 0;
-  }
-
-  .timer .timer-controls {
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-  }
-
-  .timer .timer-controls .select {
-    flex: 0 0 7rem;
-  }
-
-  .timer .timer-hint {
-    display: none;
+    height: auto;
   }
 }
 
@@ -1590,6 +1576,25 @@ a.ctrl-admin:hover {
   margin-top: 1rem;
   font-size: 0.875rem;
   color: var(--ink-3);
+}
+
+/* buscador del índice de práctica */
+.practice-search {
+  margin-bottom: 1.1rem;
+}
+
+.practice-count {
+  margin-top: 0.55rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-empty {
+  border-top: 2px solid var(--ink);
+  padding-block: 1.5rem 0.5rem;
+  color: var(--ink-2);
 }
 
 /* lista de exámenes disponibles */
@@ -2120,33 +2125,40 @@ a.ctrl-admin:hover {
   color: var(--ink-3);
 }
 
-.reader-doc {
-  display: grid;
-  gap: 0.5rem;
-  padding: clamp(1.1rem, 3vw, 1.6rem);
+.reader-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
 }
 
-.reader-facts {
+/* el PDF vive dentro de su panel; el enlace de la cabecera es la salida */
+.reader-frame {
+  display: block;
+  width: 100%;
+  height: min(72vh, 760px);
+  border: 0;
+  background: var(--paper-2);
+}
+
+.reader-fallback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.6875rem;
   color: var(--ink-3);
 }
 
-.reader-copy {
-  color: var(--ink-2);
-  font-size: 0.9375rem;
-  max-width: 48ch;
+.reader-fallback a {
+  border-bottom: 1px solid var(--rule);
+  transition: color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
 }
 
-.reader-open {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.4rem;
-}
-
-.reader-open svg {
-  width: 12px;
-  height: 12px;
+.reader-fallback a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
 }
 
 /* iconos dentro de una línea de texto: sin `style` en el HTML, que la CSP

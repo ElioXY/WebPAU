@@ -110,26 +110,28 @@ const enunciadoFacts = [
         <section class="reader" aria-labelledby="readerTitle" data-reveal>
           <div class="reader-head">
             <h2 class="practice-sub" id="readerTitle">Enunciado</h2>
-            <span class="reader-tag mono">{sessionShort}</span>
+            <div class="reader-actions">
+              <span class="reader-tag mono">{sessionShort}</span>
+              <a class="dl" href={pdfUrl(enunciado.file)} target="_blank" rel="noreferrer">
+                <OpenIcon /><span>Abrir</span>
+              </a>
+            </div>
           </div>
-          {/* El PDF no se incrusta: el sitio se sirve con `frame-ancestors 'none'`
-              y el navegador bloquea el iframe (quedaba un hueco en blanco). Se
-              ofrece la hoja como lo que es, un documento que se abre aparte. */}
-          <div class="reader-doc">
-            <p class="reader-facts mono">{enunciadoFacts}</p>
-            <p class="reader-copy">
-              El enunciado se abre en otra pestaña, en el visor del navegador. El cronómetro
-              sigue corriendo aquí: vuelve cuando quieras y no pierdes el tiempo.
-            </p>
-            <a
-              class="btn-primary reader-open"
-              href={pdfUrl(enunciado.file)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <OpenIcon /><span>Abrir el enunciado</span>
+          {/* El PDF se incrusta desde este mismo origen: la CSP del sitio
+              (`default-src 'self'`) lo permite, así que el enunciado se lee sin
+              cambiar de pestaña y el cronómetro sigue a la vista. */}
+          <iframe
+            class="reader-frame"
+            src={pdfUrl(enunciado.file)}
+            title={`Enunciado de ${subjectName} · ${sessionLong} de ${set.year}`}
+          ></iframe>
+          <p class="reader-fallback mono">
+            {enunciadoFacts}
+            <span class="sep" aria-hidden="true">·</span>
+            <a href={pdfUrl(enunciado.file)} target="_blank" rel="noreferrer">
+              abrir en otra pestaña
             </a>
-          </div>
+          </p>
         </section>
       </div>
 
