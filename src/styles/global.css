@@ -1587,13 +1587,22 @@ a.ctrl-admin:hover {
 }
 
 .practice-more button {
-  padding: 0;
+  padding: 0.12rem 0;
   border: 0;
+  border-bottom: 1px solid var(--rule);
   background: none;
-  font: inherit;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
   white-space: normal;
   text-align: left;
   cursor: pointer;
+  transition: border-color var(--dur-1) var(--ease);
+}
+
+.practice-more button:hover {
+  border-bottom-color: var(--ink);
 }
 
 .practice-note {
