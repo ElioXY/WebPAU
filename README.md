@@ -385,8 +385,10 @@ corrección se ve desde el principio.
   `Content-Security-Policy: script-src 'self'`, así que el navegador bloquea
   cualquier script escrito dentro del HTML. Astro los compila todos a archivos
   (`vite.build.assetsInlineLimit: 0` en `astro.config.mjs`); si vuelves a meter
-  un `<script is:inline>` con código, se quedará sin ejecutar. Por lo mismo el
-  PDF no se incrusta en un `iframe`: la política lleva `frame-ancestors 'none'`.
+  un `<script is:inline>` con código, se quedará sin ejecutar. Y como la
+  política lleva `frame-ancestors 'none'` —también en las respuestas de los
+  PDF—, un `iframe` con el enunciado se queda en blanco: la sala de práctica lo
+  dibuja con pdf.js en canvas (`src/scripts/pdf-reader.ts`).
 - **PDF muy grandes.** La API de blobs de GitHub obliga a codificar el archivo
   en base64 en memoria del navegador; por encima de unos 50 MB puede quedarse
   sin aire. Para escaneos enormes, súbelos por `git` a mano y añade la entrada

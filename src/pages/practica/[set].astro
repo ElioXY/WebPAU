@@ -111,20 +111,22 @@ const enunciadoFacts = [
           <div class="reader-head">
             <h2 class="practice-sub" id="readerTitle">Enunciado</h2>
             <div class="reader-actions">
-              <span class="reader-tag mono">{sessionShort}</span>
+              <span class="reader-total mono" data-page-total></span>
+              <div class="reader-zoom" data-zoom-controls hidden>
+                <button type="button" data-zoom="-1" aria-label="Alejar el enunciado">−</button>
+                <span class="mono" data-zoom-level aria-live="polite">100%</span>
+                <button type="button" data-zoom="1" aria-label="Acercar el enunciado">+</button>
+              </div>
               <a class="dl" href={pdfUrl(enunciado.file)} target="_blank" rel="noreferrer">
                 <OpenIcon /><span>Abrir</span>
               </a>
             </div>
           </div>
-          {/* El PDF se incrusta desde este mismo origen: la CSP del sitio
-              (`default-src 'self'`) lo permite, así que el enunciado se lee sin
-              cambiar de pestaña y el cronómetro sigue a la vista. */}
-          <iframe
-            class="reader-frame"
-            src={pdfUrl(enunciado.file)}
-            title={`Enunciado de ${subjectName} · ${sessionLong} de ${set.year}`}
-          ></iframe>
+          {/* El enunciado se dibuja aquí con pdf.js: el borde sirve los PDF con
+              `frame-ancestors 'none'`, así que un iframe se queda en blanco. */}
+          <div class="reader-view" id="pdfView" data-src={pdfUrl(enunciado.file)}>
+            <p class="reader-loading mono">Cargando el enunciado…</p>
+          </div>
           <p class="reader-fallback mono">
             {enunciadoFacts}
             <span class="sep" aria-hidden="true">·</span>
@@ -175,5 +177,6 @@ const enunciadoFacts = [
   />
   <script>
     import '../../scripts/practice.ts';
+    import '../../scripts/pdf-reader.ts';
   </script>
 </Base>

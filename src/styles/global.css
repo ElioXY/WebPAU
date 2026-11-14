@@ -1474,9 +1474,7 @@ a.ctrl-admin:hover {
     height: calc(100dvh - var(--header-h) - 3rem);
   }
 
-  .reader-frame {
-    flex: 1 1 auto;
-    min-height: 0;
+  .reader-view {
     height: auto;
   }
 }
@@ -2131,13 +2129,74 @@ a.ctrl-admin:hover {
   gap: 0.9rem;
 }
 
-/* el PDF vive dentro de su panel; el enlace de la cabecera es la salida */
-.reader-frame {
-  display: block;
-  width: 100%;
+/* el PDF se dibuja dentro de su panel; el enlace de la cabecera es la salida */
+.reader-view {
+  flex: 1 1 auto;
+  min-height: 0;
   height: min(72vh, 760px);
-  border: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   background: var(--paper-2);
+}
+
+.reader-canvases {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: center;
+  width: max-content;
+  min-width: 100%;
+  padding: 0.9rem;
+}
+
+.reader-canvases canvas {
+  display: block;
+  height: auto;
+  background: #fff;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 6%), 0 10px 26px rgb(23 22 20 / 12%);
+}
+
+.reader-loading {
+  margin: 0;
+  padding: 1.1rem;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.reader-total {
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+}
+
+.reader-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+}
+
+.reader-zoom button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
+}
+
+.reader-zoom button:hover {
+  border-color: var(--ink);
+  background: var(--paper-2);
+}
+
+.reader-zoom button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .reader-fallback {
