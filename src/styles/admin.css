@@ -312,22 +312,38 @@ textarea {
 }
 
 @media (hover: hover) {
-  .btn:hover:not(:disabled),
-  .icon-btn:hover {
+  .btn:hover:not(:disabled) {
     transform: translateY(-1px);
+  }
+
+  /* En la tabla no se mueve nada. Con veinte filas seguidas, el icono que
+     salta bajo el cursor hay que perseguirlo, y en el borde de la fila entra y
+     sale del hover. Ahí la señal es el fondo y el filete, no el desplazamiento. */
+  .table .btn:hover:not(:disabled),
+  .table .icon-btn:hover {
+    transform: none;
   }
 }
 
-.btn:active:not(:disabled),
-.icon-btn:active {
+.btn:active:not(:disabled) {
   transform: translateY(1px);
+}
+
+/* el hundido dentro de la tabla es un encogido: no mueve el punto donde pulsas */
+.table .btn:active:not(:disabled),
+.table .icon-btn:active {
+  transform: scale(0.94);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .btn:hover:not(:disabled),
   .icon-btn:hover,
   .btn:active:not(:disabled),
-  .icon-btn:active {
+  .icon-btn:active,
+  .table .btn:hover:not(:disabled),
+  .table .icon-btn:hover,
+  .table .btn:active:not(:disabled),
+  .table .icon-btn:active {
     transform: none;
   }
 }
