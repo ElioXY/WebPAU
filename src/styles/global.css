@@ -1598,6 +1598,15 @@ a.ctrl-admin:hover svg {
   }
 }
 
+/* la portada entra por capas, de arriba abajo: antetítulo, titular, texto,
+   cuenta atrás, ficha y, detrás de todo, el buscador */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
 @keyframes bar-in {
   from {
     opacity: 0;
@@ -1617,24 +1626,35 @@ a.ctrl-admin:hover svg {
 }
 
 .hero-copy > *,
-.ficha {
-  animation: rise-in var(--dur-3) var(--ease) backwards;
+.hero .ficha,
+.hero .filters {
+  animation: hero-in 0.58s var(--ease) backwards;
+}
+
+.hero-copy > :nth-child(1) {
+  animation-delay: 40ms;
 }
 
 .hero-copy > :nth-child(2) {
-  animation-delay: 50ms;
+  animation-delay: 110ms;
 }
 
 .hero-copy > :nth-child(3) {
-  animation-delay: 100ms;
+  animation-delay: 180ms;
 }
 
 .hero-copy > :nth-child(4) {
-  animation-delay: 150ms;
+  animation-delay: 250ms;
 }
 
-.ficha {
-  animation-delay: 120ms;
+/* la ficha acompaña al texto, no espera a que termine */
+.hero .ficha {
+  animation-delay: 220ms;
+}
+
+/* el buscador es la última pieza: cierra la entrada de la portada */
+.hero .filters {
+  animation-delay: 310ms;
 }
 
 .results-head,
