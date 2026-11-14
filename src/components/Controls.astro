@@ -2,9 +2,21 @@
 import SunIcon from './icons/Sun.astro';
 import MoonIcon from './icons/Moon.astro';
 import ArrowUpIcon from './icons/ArrowUp.astro';
+import KeyIcon from './icons/Key.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+/* en el propio panel el atajo sobra: llevaría a donde ya estás */
+const inPanel = /\/admin(\.html)?$/.test(Astro.url.pathname);
 ---
 
 <div class="controls" aria-label="Controles de la página">
+  {!inPanel && (
+    <a class="ctrl ctrl-admin" href={`${base}/admin`} aria-label="Panel del archivo" title="Panel del archivo">
+      <KeyIcon />
+      <span class="ctrl-lbl" aria-hidden="true">Panel</span>
+    </a>
+  )}
   <button class="ctrl" type="button" id="themeToggle" aria-pressed="false">
     <span class="ctrl-ico" data-theme-ico="light"><MoonIcon /></span>
     <span class="ctrl-ico" data-theme-ico="dark"><SunIcon /></span>
