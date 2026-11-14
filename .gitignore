@@ -12,6 +12,10 @@ desktop.ini
 *.log
 npm-debug.log*
 
+# Secretos del Worker (login con GitHub)
+.dev.vars
+.wrangler/
+
 # Editor
 .vscode/
 .idea/

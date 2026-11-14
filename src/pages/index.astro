@@ -1,4 +1,12 @@
 ---
+/* =========================================================================
+   Portada.
+
+   La portada ya no vuelca las 1.281 filas del catálogo: enseña el archivo
+   como un índice —ficha, asignaturas y los últimos documentos— y manda a
+   `/archivo` para buscar y filtrar el resto. Así la página pesa poco y se
+   lee de un vistazo.
+   ========================================================================= */
 import Base from '../layouts/Base.astro';
 import {
   DOC_TYPES,
@@ -7,12 +15,11 @@ import {
   loadSubjects,
   subjectLabel,
   subjectRoutes,
-  type Session,
   type Subject,
 } from '../lib/catalog';
 import SearchIcon from '../components/icons/Search.astro';
 import OpenIcon from '../components/icons/Open.astro';
-import GitHubIcon from '../components/icons/GitHub.astro';
+import ArrowIcon from '../components/icons/Arrow.astro';
 import NextExam from '../components/NextExam.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -22,12 +29,22 @@ const catalog = loadCatalog();
 const subjects = loadSubjects();
 const exams = catalog.exams;
 
-const typeOrder = DOC_TYPES.map((t) => t.id);
 const typeById = new Map(DOC_TYPES.map((t) => [t.id, t]));
-const sessionOrder = SESSIONS.map((s) => s.id);
-const sessionLong = new Map(SESSIONS.map((s) => [s.id, s.long]));
+const sessionShort = new Map(SESSIONS.map((s) => [s.id, s.label]));
 
 const years = [...new Set(exams.map((e) => e.year))].sort((a, b) => b - a);
+
+const yearCounts = new Map<number, number>();
+const subjectCounts = new Map<string, number>();
+const subjectYears = new Map<string, number[]>();
+for (const exam of exams) {
+  yearCounts.set(exam.year, (yearCounts.get(exam.year) ?? 0) + 1);
+  subjectCounts.set(exam.subject, (subjectCounts.get(exam.subject) ?? 0) + 1);
+  const list = subjectYears.get(exam.subject) ?? [];
+  if (!list.includes(exam.year)) list.push(exam.year);
+  subjectYears.set(exam.subject, list);
+}
+for (const list of subjectYears.values()) list.sort((a, b) => b - a);
 
 /* resumen de convocatorias para la ficha: «jun · sep · modelos» */
 const sessionIds = new Set(exams.map((e) => e.session));
@@ -35,7 +52,7 @@ const sessionSummary =
   SESSIONS.filter((s) => sessionIds.has(s.id))
     .map((s) => (s.id === 'ordinaria' ? 'jun' : s.id === 'extraordinaria' ? 'sep' : 'modelos'))
     .join(' · ') || '—';
-const recentYears = years.slice(0, 4);
+
 const range = years.length
   ? years.length === 1
     ? String(years[0])
@@ -45,24 +62,8 @@ const range = years.length
 const statDocs = exams.length;
 const statSubjects = new Set(exams.map((e) => e.subject)).size;
 
-/* recuento y años de cada asignatura, para las tarjetas del mosaico */
-const subjectCounts = new Map<string, number>();
-const subjectYears = new Map<string, number[]>();
-const yearCounts = new Map<number, number>();
-for (const e of exams) {
-  subjectCounts.set(e.subject, (subjectCounts.get(e.subject) ?? 0) + 1);
-  yearCounts.set(e.year, (yearCounts.get(e.year) ?? 0) + 1);
-  const list = subjectYears.get(e.subject) ?? [];
-  if (!list.includes(e.year)) list.push(e.year);
-  subjectYears.set(e.subject, list);
-}
-for (const list of subjectYears.values()) list.sort((a, b) => b - a);
-
-/* El sitio enseña solo las asignaturas que ya tienen documentos: una materia
-   aparece en el mosaico en cuanto se publica su primer PDF, no antes. Las que
-   aún no tienen nada siguen en data/subjects.json para poder subirles algo.
-   Si un examen trae una asignatura que no está en la lista, se añade igual:
-   el payload del cliente viaja por índice y perderla descuadraría las filas. */
+/* el mosaico enseña solo las materias que ya tienen documentos; si un examen
+   trae una asignatura sin ficha, se añade con su código en vez de perderse */
 const usedCodes = new Set(exams.map((e) => e.subject));
 const visibleSubjects: Subject[] = subjects.filter((s) => usedCodes.has(s.code));
 for (const code of usedCodes) {
@@ -71,37 +72,19 @@ for (const code of usedCodes) {
   }
 }
 
-/* el payload del cliente debe usar el MISMO orden que las tarjetas:
-   si no, el índice de asignatura que viaja en cada fila apunta a otra materia */
-const subjectOrder = visibleSubjects.map((s) => s.code);
 const subjectPhases = new Map(visibleSubjects.map((s) => [s.code, s.phases.join(',')]));
+const subjectLinks = subjectRoutes(
+  visibleSubjects.map((s) => s.code),
+  subjects
+);
 
-/* datos compactos para el cliente: [id, subjectIdx, year, sessionIdx, typeIdx] */
-const compact = exams.map((e) => [
-  e.id,
-  subjectOrder.indexOf(e.subject),
-  e.year,
-  sessionOrder.indexOf(e.session),
-  typeOrder.indexOf(e.type),
-]);
+/* la portada enseña la punta del archivo: el catálogo ya viene ordenado */
+const RECENT = 12;
+const recent = exams.slice(0, RECENT);
+const footSubjects = visibleSubjects.slice(0, 8);
 
-/* agrupación por año + convocatoria, ya ordenado por el catálogo */
-interface Group {
-  year: number;
-  session: Session;
-  items: typeof exams;
-}
-const groups: Group[] = [];
-for (const exam of exams) {
-  const last = groups[groups.length - 1];
-  if (last && last.year === exam.year && last.session === exam.session) last.items.push(exam);
-  else groups.push({ year: exam.year, session: exam.session, items: [exam] });
-}
-
-const fmtSize = (kb?: number | null) => {
-  if (!kb) return '';
-  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`;
-};
+const fmtSize = (kb?: number | null) =>
+  !kb ? '' : kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`;
 
 const yearLabel = (list: number[]) =>
   list.length === 0
@@ -112,16 +95,6 @@ const yearLabel = (list: number[]) =>
 
 const phaseLabel = (phases: string[]) =>
   phases.map((p) => (p === 'acceso' ? 'Fase de acceso' : 'Fase de admisión')).join(' · ');
-
-/* el pie enlaza solo lo que existe: nada de anunciar asignaturas vacías */
-const footSubjects = visibleSubjects.slice(0, 8);
-
-/* código → URL de la página de la asignatura; la misma que genera
-   `asignatura/[slug].astro` */
-const subjectLinks = subjectRoutes(
-  visibleSubjects.map((s) => s.code),
-  subjects
-);
 ---
 
 <Base
@@ -135,9 +108,8 @@ const subjectLinks = subjectRoutes(
         WebPAU
       </a>
       <nav class="head-nav" aria-label="Secciones">
-        {/* el mosaico solo existe si hay documentos que enseñar */}
         {exams.length > 0 && <a href="#asignaturas">Asignaturas</a>}
-        <a href="#archivo">Archivo</a>
+        <a href={`${base}/archivo`}>Archivo</a>
         <a href={`${base}/practica`}>Practicar</a>
       </nav>
       <p class="head-meta mono">
@@ -184,13 +156,18 @@ const subjectLinks = subjectRoutes(
           </aside>
         </div>
 
-
         {exams.length > 0 && (
-          <form class="filters" id="filters" role="search" autocomplete="off">
+          <form
+            class="filters home-search"
+            role="search"
+            action={`${base}/archivo`}
+            method="get"
+            autocomplete="off"
+          >
             <div class="filter-row find">
               <div class="field grow">
                 <SearchIcon />
-                <label class="visually-hidden" for="q">Buscar asignatura o texto</label>
+                <label class="visually-hidden" for="q">Buscar en el archivo</label>
                 <input
                   class="input"
                   id="q"
@@ -198,41 +175,17 @@ const subjectLinks = subjectRoutes(
                   type="search"
                   placeholder="Buscar asignatura, año o convocatoria…"
                 />
-                <kbd class="kbd" aria-hidden="true">/</kbd>
               </div>
 
               <label class="visually-hidden" for="y">Año</label>
               <select class="select" id="y" name="y">
                 <option value="">Todos los años</option>
-                {years.map((y) => (
-                  <option value={y}>{y} · {yearCounts.get(y)}</option>
+                {years.map((year) => (
+                  <option value={year}>{year} · {yearCounts.get(year)}</option>
                 ))}
-              </select>
-
-              <label class="visually-hidden" for="phase">Fase</label>
-              <select class="select" id="phase" name="phase">
-                <option value="">Todas las fases</option>
-                <option value="acceso">Fase de acceso</option>
-                <option value="admision">Fase de admisión</option>
               </select>
 
               <button class="btn-primary" type="submit">Buscar</button>
-            </div>
-
-            <div class="filter-row tools">
-              <div class="seg" role="group" aria-label="Convocatoria" id="segSession">
-                <button type="button" data-ss="" aria-pressed="true">Cualquiera</button>
-                {SESSIONS.map((s) => (
-                  <button type="button" data-ss={s.id} aria-pressed="false">{s.label}</button>
-                ))}
-              </div>
-              <div class="seg seg-type" role="group" aria-label="Tipo de documento" id="segType">
-                <button type="button" data-t="" aria-pressed="true">Todos</button>
-                {DOC_TYPES.map((t) => (
-                  <button type="button" data-t={t.id} aria-pressed="false">{t.short}</button>
-                ))}
-              </div>
-              <button type="button" class="btn-ghost" id="clearFilters" hidden>Limpiar filtros</button>
             </div>
           </form>
         )}
@@ -252,45 +205,30 @@ const subjectLinks = subjectRoutes(
           <div class="legend">
             <span><i aria-hidden="true"></i> Fase de acceso</span>
             <span><i data-phase="admision" aria-hidden="true"></i> Fase de admisión</span>
-            <span>Las barras marcan los años con documentos</span>
           </div>
 
-          <div class="chips" role="group" aria-label="Asignatura" id="chips">
-            <button
-              class="chip"
-              type="button"
-              data-s=""
-              data-phases="acceso,admision"
-              aria-pressed="true"
-            >
+          <div class="chips" role="group" aria-label="Asignatura">
+            <a class="chip chip-all" href={`${base}/archivo`}>
               <span class="nm">Todas las asignaturas</span>
               <span class="ct">
-                <em>{statDocs}</em> <span class="unit">{statDocs === 1 ? 'doc.' : 'docs.'}</span> · {range}
+                <em>{statDocs}</em> <span class="unit">docs.</span> · {range}
               </span>
-              <span class="bar" aria-hidden="true">
-                {recentYears.map((y) => <i data-on={yearCounts.has(y) ? '1' : '0'} />)}
-              </span>
-            </button>
+            </a>
 
-            {visibleSubjects.map((s) => {
-              const list = subjectYears.get(s.code) ?? [];
-              const count = subjectCounts.get(s.code) ?? 0;
+            {visibleSubjects.map((subject) => {
+              const list = subjectYears.get(subject.code) ?? [];
+              const count = subjectCounts.get(subject.code) ?? 0;
               return (
                 <a
                   class="chip"
-                  href={`${base}/asignatura/${subjectLinks.get(s.code)}`}
-                  data-s={s.code}
-                  data-phases={s.phases.join(',')}
-                  title={`${s.name} · ${phaseLabel(s.phases)}`}
+                  href={`${base}/asignatura/${subjectLinks.get(subject.code)}`}
+                  title={`${subject.name} · ${phaseLabel(subject.phases)}`}
                 >
-                  <span class="nm">{s.name}</span>
+                  <span class="nm">{subject.name}</span>
                   <span class="ct">
                     <em>{count}</em> <span class="unit">{count === 1 ? 'doc.' : 'docs.'}</span> · {yearLabel(
                       list
                     )}
-                  </span>
-                  <span class="bar" aria-hidden="true">
-                    {recentYears.map((y) => <i data-on={list.includes(y) ? '1' : '0'} />)}
                   </span>
                 </a>
               );
@@ -300,127 +238,109 @@ const subjectLinks = subjectRoutes(
       </section>
     )}
 
-    <section class="archive" id="archivo">
-      <div class="wrap">
-        <div class="results-head">
-          <h2>Archivo</h2>
-          <p class="count" aria-live="polite" aria-atomic="true">
-            <span id="resultCount">{statDocs}</span>&nbsp;<span id="resultWord">{statDocs === 1
-              ? 'documento'
-              : 'documentos'}</span>
+    {exams.length > 0 && (
+      <section class="archive home-recent" id="ultimos">
+        <div class="wrap">
+          <div class="results-head">
+            <h2>Lo último del archivo</h2>
+            <p class="count">
+              {recent.length} de {statDocs} documentos
+            </p>
+          </div>
+
+          <div class="recent">
+            {recent.map((exam) => {
+              const type = typeById.get(exam.type) ?? {
+                id: exam.type,
+                short: exam.type,
+                label: exam.type,
+                hint: 'Tipo de documento no reconocido',
+              };
+              const meta = [
+                exam.year,
+                sessionShort.get(exam.session) ?? exam.session,
+                exam.pages ? `${exam.pages} p.` : null,
+                fmtSize(exam.sizeKB),
+              ]
+                .filter(Boolean)
+                .join('  ·  ');
+              return (
+                <div
+                  class="row"
+                  data-t={exam.type}
+                  data-p={subjectPhases.get(exam.subject) ?? ''}
+                  data-reveal
+                >
+                  <span class="stripe" aria-hidden="true" />
+                  <span class="row-code mono" aria-hidden="true">{exam.subject}</span>
+                  <div class="row-title">
+                    <a
+                      href={pdfUrl(exam.file)}
+                      title={exam.notes || undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {subjectLabel(subjects, exam.subject)}
+                    </a>
+                    <p class="row-meta">{meta}</p>
+                  </div>
+                  <span class="tag" data-t={exam.type} title={type.hint}>
+                    <i aria-hidden="true"></i>
+                    {type.short}
+                  </span>
+                  <div class="row-actions">
+                    <a
+                      class="dl"
+                      href={pdfUrl(exam.file)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <OpenIcon /><span>Ver</span>
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p class="recent-foot">
+            <a class="dl" href={`${base}/archivo`}>
+              <span>Ver los {statDocs} documentos del archivo</span>
+              <ArrowIcon />
+            </a>
           </p>
         </div>
+      </section>
+    )}
 
-        <div id="results">
-          {groups.length > 0 ? (
-            groups.map((group) => (
-              <div class="year-group" data-year={group.year} data-ss={group.session}>
-                <div class="year-head">
-                  <h3>{group.year}</h3>
-                  <span class="session">{sessionLong.get(group.session) ?? group.session}</span>
-                  <span class="n" data-group-count>
-                    {group.items.length}&nbsp;{group.items.length === 1 ? 'documento' : 'documentos'}
-                  </span>
-                </div>
-                {group.items.map((exam) => {
-                  /* un tipo desconocido no debe tumbar el build entero: se
-                     muestra tal cual en vez de reventar */
-                  const type = typeById.get(exam.type) ?? {
-                    id: exam.type,
-                    short: exam.type,
-                    label: exam.type,
-                    hint: 'Tipo de documento no reconocido',
-                  };
-                  const meta = [
-                    exam.subject,
-                    exam.pages ? `${exam.pages} p.` : null,
-                    fmtSize(exam.sizeKB),
-                  ]
-                    .filter(Boolean)
-                    .join('  ·  ');
-                  return (
-                    <div
-                      class="row"
-                      data-id={exam.id}
-                      data-s={exam.subject}
-                      data-p={subjectPhases.get(exam.subject) ?? ''}
-                      data-y={exam.year}
-                      data-ss={exam.session}
-                      data-t={exam.type}
-                    >
-                      <span class="stripe" aria-hidden="true"></span>
-                      <span class="row-code mono" aria-hidden="true">{exam.subject}</span>
-                      <div class="row-title">
-                        <a
-                          href={pdfUrl(exam.file)}
-                          title={exam.notes || undefined}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {subjectLabel(subjects, exam.subject)}
-                        </a>
-                        <p class="row-meta">{meta}</p>
-                      </div>
-                      {exam.official === false && (
-                        <span class="unofficial" title="Documento no oficial">no oficial</span>
-                      )}
-                      <span class="tag" data-t={exam.type} title={type.hint}>
-                        <i aria-hidden="true"></i>
-                        {type.short}
-                      </span>
-                      <div class="row-actions">
-                        {/* el PDF se abre en el visor del navegador: sin `download`,
-                            que obligaba a guardarlo antes de poder leerlo */}
-                        <a
-                          class="dl"
-                          href={pdfUrl(exam.file)}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <OpenIcon /><span>Ver</span>
-                        </a>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))
-          ) : (
-            <div class="empty empty-state" id="catalogEmpty">
-              <p class="badge" aria-hidden="true">0</p>
-              <h2>Aún no hay nada en el archivo</h2>
-              <p>
-                Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán aquí
-                ordenados por asignatura, año y convocatoria, listos para consultar.
-              </p>
-              <p class="empty-cta">
-                <a
-                  class="dl"
-                  href="https://github.com/ElioXY/WebPAU"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <GitHubIcon /><span>Ver el proyecto en GitHub</span>
-                </a>
-              </p>
-              <p class="owner-note mono">
-                Si gestionas el archivo: entra en <code>/admin</code> con tu token de GitHub,
-                sube el primero y pulsa «Publicar».
-              </p>
-            </div>
-          )}
-
-          <div class="empty" id="noMatches" role="status" hidden>
-            <p class="badge" aria-hidden="true">?</p>
-            <h2>Ningún documento coincide</h2>
-            <p id="noMatchesText"></p>
+    {exams.length === 0 && (
+      <section class="archive">
+        <div class="wrap">
+          <div class="empty empty-state" id="catalogEmpty">
+            <p class="badge" aria-hidden="true">0</p>
+            <h2>Aún no hay nada en el archivo</h2>
+            <p>
+              Todavía no se ha publicado ningún examen. Cuando haya PDFs, aparecerán aquí
+              ordenados por asignatura, año y convocatoria, listos para consultar.
+            </p>
             <p class="empty-cta">
-              <button class="dl" type="button" id="clearFilters2">Quitar todos los filtros</button>
+              <a
+                class="dl"
+                href="https://github.com/ElioXY/WebPAU"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>Ver el proyecto en GitHub</span>
+              </a>
+            </p>
+            <p class="owner-note mono">
+              Si gestionas el archivo: entra en <code>/admin</code> con tu token de GitHub,
+              sube el primero y pulsa «Publicar».
             </p>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    )}
   </main>
 
   <footer class="site-foot">
@@ -438,10 +358,10 @@ const subjectLinks = subjectRoutes(
           <h3>Asignaturas</h3>
           {footSubjects.length > 0 ? (
             <ul>
-              {footSubjects.map((s) => (
+              {footSubjects.map((subject) => (
                 <li>
-                  <a href={`${base}/asignatura/${subjectLinks.get(s.code)}`}>
-                    {s.name} <span class="mono">{subjectCounts.get(s.code) ?? 0}</span>
+                  <a href={`${base}/asignatura/${subjectLinks.get(subject.code)}`}>
+                    {subject.name} <span class="mono">{subjectCounts.get(subject.code) ?? 0}</span>
                   </a>
                 </li>
               ))}
@@ -453,6 +373,7 @@ const subjectLinks = subjectRoutes(
         <div>
           <h3>El proyecto</h3>
           <ul>
+            <li><a href={`${base}/archivo`}>El archivo completo</a></li>
             <li><a href={`${base}/practica`}>Practicar un examen</a></li>
             <li><a href="https://github.com/ElioXY/WebPAU" target="_blank" rel="noreferrer">Código en GitHub</a></li>
             <li><a href="https://github.com/ElioXY/WebPAU/issues" target="_blank" rel="noreferrer">Falta un examen</a></li>
@@ -467,21 +388,4 @@ const subjectLinks = subjectRoutes(
       </p>
     </div>
   </footer>
-
-  <script type="application/json" id="catalog-data" set:html={JSON.stringify({
-    exams: compact,
-    subjects: visibleSubjects.map((s) => [
-      s.code,
-      s.phases.join(','),
-      s.name,
-      s.aliases.join(' '),
-    ]),
-    types: DOC_TYPES.map((t) => [t.id, t.short, t.label]),
-    sessions: SESSIONS.map((s) => [s.id, s.long]),
-    base,
-  })} />
-
-  <script>
-    import '../scripts/archive.ts';
-  </script>
 </Base>

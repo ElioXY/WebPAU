@@ -37,19 +37,9 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site ?? 'htt
     <link rel="alternate" hreflang="es" href={canonicalUrl} />
     <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
 
-    <script is:inline>
-      (() => {
-        try {
-          const saved = localStorage.getItem('theme');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const theme =
-            saved === 'light' || saved === 'dark' ? saved : prefersDark ? 'dark' : 'light';
-          document.documentElement.dataset.theme = theme;
-        } catch {
-          document.documentElement.dataset.theme = 'light';
-        }
-      })();
-    </script>
+    {/* el tema se decide en un archivo aparte: un script inline lo bloquearía
+        la CSP del sitio (`script-src 'self'`) */}
+    <script is:inline src={`${base}/theme.js`}></script>
 
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
@@ -62,5 +52,8 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site ?? 'htt
   <body>
     <slot />
     <Controls />
+    <script>
+      import '../scripts/reveal.ts';
+    </script>
   </body>
 </html>

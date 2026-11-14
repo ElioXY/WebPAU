@@ -1,0 +1,16 @@
+# Copia este archivo a `.dev.vars` para probar el Worker en local con
+# `npx wrangler dev`. `.dev.vars` no se sube al repositorio: los secretos no
+# viajan en el código.
+#
+# En producción se ponen con:
+#   npx wrangler secret put GITHUB_CLIENT_SECRET
+#   npx wrangler secret put SESSION_SECRET
+#
+# SESSION_SECRET: cadena aleatoria larga, por ejemplo
+#   node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+SESSION_SECRET=
+ALLOWED_LOGIN=ElioXY
+GITHUB_SCOPE=public_repo

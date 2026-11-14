@@ -57,33 +57,49 @@ const config = {
         <h1>WebPAU</h1>
         <p class="gate-sub">Panel de administración del archivo</p>
 
-        <label for="tokenInput">Token de GitHub</label>
-        <input
-          id="tokenInput"
-          class="input"
-          type="password"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="github_pat_…"
-        />
         <p class="gate-error" id="gateError" role="alert" hidden></p>
-        <button class="btn btn-primary btn-block" type="submit" id="gateSubmit">Entrar</button>
 
-        <div class="gate-warn">
-          <b>El token se guarda en este navegador.</b> Crea uno <i>fine-grained</i> limitado a
-          <code>{owner}/{repo}</code>, con estos ajustes:
-          <ol>
-            <li>Repository access → <b>Only select repositories</b> → <code>{repo}</code></li>
-            <li>Permissions → <b>Contents: Read and write</b></li>
-            <li>Expiration → la que prefieras</li>
-          </ol>
-          Con otro ámbito, cualquiera que use este navegador podría tocar tus repositorios.
+        {/* Con el Worker delante, se entra con la cuenta de GitHub: el token
+            vive en una cookie HttpOnly y el navegador no lo ve. */}
+        <div id="gateGitHubBox" hidden>
+          <a class="btn btn-primary btn-block" id="gateGitHub" href={`${base}/api/login`}>
+            Entrar con GitHub
+          </a>
+          <p class="gate-hint">
+            Se abre GitHub y vuelves aquí con la sesión puesta. Solo una cuenta con permiso
+            de escritura sobre <code>{owner}/{repo}</code> puede publicar.
+          </p>
         </div>
 
-        <p class="gate-hint">
-          ¿Sin token? <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">Créalo en GitHub</a>
-          y pégalo aquí. Se guarda solo en este dispositivo.
-        </p>
+        {/* Sin Worker —GitHub Pages, una copia estática— queda el token a mano. */}
+        <div id="gateTokenBox">
+          <label for="tokenInput">Token de GitHub</label>
+          <input
+            id="tokenInput"
+            class="input"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="github_pat_…"
+          />
+          <button class="btn btn-primary btn-block" type="submit" id="gateSubmit">Entrar</button>
+
+          <div class="gate-warn">
+            <b>El token se guarda en este navegador.</b> Crea uno <i>fine-grained</i> limitado a
+            <code>{owner}/{repo}</code>, con estos ajustes:
+            <ol>
+              <li>Repository access → <b>Only select repositories</b> → <code>{repo}</code></li>
+              <li>Permissions → <b>Contents: Read and write</b></li>
+              <li>Expiration → la que prefieras</li>
+            </ol>
+            Con otro ámbito, cualquiera que use este navegador podría tocar tus repositorios.
+          </div>
+
+          <p class="gate-hint">
+            ¿Sin token? <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">Créalo en GitHub</a>
+            y pégalo aquí. Se guarda solo en este dispositivo.
+          </p>
+        </div>
       </form>
     </div>
 

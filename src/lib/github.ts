@@ -8,8 +8,22 @@
    Sin dependencias y sin `node:` (esto se ejecuta en el navegador).
    ========================================================================= */
 
-const API = 'https://api.github.com';
+const DIRECT_API = 'https://api.github.com';
 const API_VERSION = '2022-11-28';
+
+/* El panel puede hablar con la API directamente —token pegado a mano, el modo
+   que funciona en GitHub Pages— o a través del proxy del Worker (`/api/gh`),
+   que pone el token desde la cookie de sesión. En el segundo caso el navegador
+   no ve el token ni llama a otro origen. */
+let API = DIRECT_API;
+
+export function setApiBase(base: string): void {
+  API = base.replace(/\/+$/, '') || DIRECT_API;
+}
+
+export function resetApiBase(): void {
+  API = DIRECT_API;
+}
 
 export interface RepoRef {
   owner: string;
@@ -53,7 +67,8 @@ function request<T>(token: string, url: string, options: RequestOptions = {}): P
     const xhr = new XMLHttpRequest();
     xhr.open(options.method ?? 'GET', url, true);
     xhr.setRequestHeader('Accept', options.accept ?? 'application/vnd.github+json');
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    /* con el proxy la autorización viaja en la cookie: aquí no hay token */
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.setRequestHeader('X-GitHub-Api-Version', API_VERSION);
     if (options.body !== undefined) xhr.setRequestHeader('Content-Type', 'application/json');
 

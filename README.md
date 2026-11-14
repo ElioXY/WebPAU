@@ -48,6 +48,16 @@ móvil, sin instalar nada.
 │  /WebPAU/admin     │                   │  data/*.json  │               │  Pages   │
 └────────────────────┘                   │  public/exams │               │  (web)   │
                                          └───────────────┘               └──────────┘
+```
+
+La web se sirve desde **Cloudflare Workers** con dominio propio, que es donde
+vive el inicio de sesión del panel:
+
+```bash
+SITE_BASE=/ SITE_URL=https://pau.elioxy.us.ci PUBLIC_GH_OWNER=ElioXY PUBLIC_GH_REPO=WebPAU npm run build
+npx wrangler deploy
+```
+
 ---
 
 ## La PAU en Andalucía
@@ -152,10 +162,49 @@ El PDF y el catálogo viajan juntos en **un único commit**, y la acción
 **Deploy** de `.github/workflows/deploy.yml` recompila la web sola (1–2
 minutos). Cuando termina, el documento ya está en línea.
 
-### El token
+### Entrar con GitHub
 
-El panel no tiene login propio: la autenticación es un **token *fine-grained*
-de GitHub**, limitado a este repositorio y con permiso **Contents: Read and
+En el dominio de Cloudflare el panel tiene **inicio de sesión con GitHub**: se
+pulsa «Entrar con GitHub», se autoriza una vez y se vuelve al panel con la
+sesión puesta. No hay token que copiar ni guardar en el navegador.
+
+Funciona con un Worker mínimo (`worker/index.js`) que solo atiende `/api/*`. El
+canje del código de GitHub exige un `client_secret` y su endpoint no envía
+cabeceras CORS, así que el navegador no puede hacerlo solo. El resto del sitio
+—HTML, CSS y PDFs— lo siguen sirviendo los *static assets* sin ejecutar el
+Worker, de modo que esos accesos siguen siendo gratuitos e ilimitados.
+
+Para ponerlo en marcha, una vez:
+
+1. Crea una **OAuth App** en <https://github.com/settings/developers> → *New
+   OAuth App*:
+   - Homepage URL: `https://pau.elioxy.us.ci`
+   - Authorization callback URL: `https://pau.elioxy.us.ci/api/callback`
+2. Copia el **Client ID** en `wrangler.jsonc` (`vars.GITHUB_CLIENT_ID`).
+3. Guarda los dos secretos —no van en el repositorio—:
+
+   ```bash
+   npx wrangler secret put GITHUB_CLIENT_SECRET
+   npx wrangler secret put SESSION_SECRET
+   ```
+
+   El segundo es una cadena aleatoria larga, por ejemplo
+   `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`.
+4. Despliega: `npm run build` y `npx wrangler deploy`.
+
+`ALLOWED_LOGIN` (en `wrangler.jsonc`) dice qué cuentas pueden publicar; el
+alcance por defecto es `public_repo`, suficiente porque el repositorio es
+público y solo se escriben contenidos. La sesión va en una cookie `HttpOnly`
+firmada, caduca a las 12 horas y «Salir» la borra. El panel habla con la API a
+través de `/api/gh/*`, así que el token no llega al navegador.
+
+En **GitHub Pages** no hay Worker: allí el panel detecta que `/api/me` no
+existe y se queda con el token, como se explica abajo.
+
+### El token (GitHub Pages)
+
+Sin Worker no hay login: la autenticación es un **token *fine-grained* de
+GitHub**, limitado a este repositorio y con permiso **Contents: Read and
 write**. Créalo en
 <https://github.com/settings/personal-access-tokens/new> (el propio panel te
 recuerda los tres ajustes).
@@ -211,6 +260,9 @@ data/
   dates.json         calendario de convocatorias (edítalo a mano)
 public/
   exams/<año>/<convocatoria>/<asignatura>/<id>.pdf
+  theme.js           tema claro/oscuro, antes del primer pintado
+worker/
+  index.js           Worker de /api: login con GitHub y proxy de la API
 scripts/
   import.mjs         importador de PDFs en bloque
 src/
@@ -221,13 +273,15 @@ src/
   lib/practice.ts    agrupa los documentos de un mismo examen
   lib/dates.ts       fechas de convocatoria y cuenta atrás
   components/NextExam.astro  «Próxima PAU» de la portada
-  pages/index.astro  la web pública
+  pages/index.astro  la portada: ficha, asignaturas y últimos documentos
+  pages/archivo.astro        el archivo completo, con buscador y filtros
   pages/asignatura/[slug].astro  una página por asignatura
   pages/admin.astro  el panel
   pages/practica.astro       lista de exámenes para practicar
   pages/practica/[set].astro sala de práctica de un examen
   pages/404.astro    página de error
-  scripts/archive.ts filtrado de la web pública
+  scripts/archive.ts filtrado de /archivo
+  scripts/reveal.ts  entrada de los bloques al hacer scroll
   scripts/admin.ts   lógica del panel: subida, edición y commits
   scripts/practice.ts cronómetro de la sala de práctica
   scripts/dates.ts   actualiza la cuenta atrás en el navegador
@@ -248,7 +302,7 @@ El estado vive en la URL, así que cualquier vista se puede compartir o enlazar:
 ?q=filosofia    búsqueda libre
 ```
 
-Ejemplo: <https://elioxy.github.io/WebPAU/?s=HFI&y=2025&t=soluciones>
+Ejemplo: <https://elioxy.github.io/WebPAU/archivo?s=HFI&y=2025&t=soluciones>
 
 ### Interfaz
 
@@ -261,6 +315,10 @@ propia hoja.
 - **Ficha del archivo.** La portada abre con el titular y una ficha de
   catálogo —documentos, asignaturas, años y convocatorias— calculada desde el
   propio catálogo, no escrita a mano.
+- **Portada corta, archivo aparte.** La portada no vuelca el catálogo: enseña
+  la ficha, el mosaico de asignaturas y los últimos documentos. El listado
+  completo —con su buscador, su filtro de asignatura y su índice de años— vive
+  en `/archivo`, que es la página que se comparte cuando hace falta.
 - **Los filtros son una franja de herramientas**, no un formulario: campos con
   subrayado, buscador con atajo y la convocatoria y el tipo como texto con
   subrayado activo. El estado sigue viviendo en la URL.
@@ -295,9 +353,10 @@ propia hoja.
 ## Hacer un examen a tiempo
 
 Cada examen del archivo que tenga enunciado tiene su **sala de práctica** en
-`/practica`: el enunciado en el visor, un cronómetro con la duración que elijas
-(60, 90, 120 o 180 minutos) y las soluciones y los criterios **tapados** hasta
-que termine el tiempo.
+`/practica`: el enunciado a un clic —se abre en otra pestaña, en el visor del
+navegador—, un cronómetro con la duración que elijas (60, 90, 120 o 180
+minutos) y las soluciones y los criterios **tapados** hasta que termine el
+tiempo.
 
 - El cronómetro guarda el estado en la pestaña: refrescar no lo reinicia, y
   sigue corriendo aunque cambies de pestaña (cuenta con la hora real).
@@ -316,10 +375,18 @@ corrección se ve desde el principio.
   ronda los 400 MB contando el histórico. GitHub Pages admite 1 GB por sitio.
   Si te acercas al límite, sirve los PDF desde otro sitio (un bucket, un CDN) y
   guarda en `exams.json` solo la URL externa.
-- **Sin base de datos ni servidor.** El panel se sirve como una página estática
-  más y habla con la API de GitHub desde el navegador: no hay nada encendido,
-  ni en tu máquina ni en la nube. A cambio, «borrar» es un commit y no un
-  `DELETE`, y publicar obliga a que Pages recompile (1–2 minutos).
+- **Sin base de datos.** El panel se sirve como una página estática más y habla
+  con la API de GitHub desde el navegador: no hay nada encendido que mantener.
+  Lo único que corre en servidor son las rutas `/api` del inicio de sesión con
+  GitHub, que no guardan nada —el token vive en una cookie firmada del
+  navegador—. A cambio, «borrar» es un commit y no un `DELETE`, y publicar
+  obliga a que la web se reconstruya (1–2 minutos).
+- **Sin scripts inline.** El sitio se sirve con
+  `Content-Security-Policy: script-src 'self'`, así que el navegador bloquea
+  cualquier script escrito dentro del HTML. Astro los compila todos a archivos
+  (`vite.build.assetsInlineLimit: 0` en `astro.config.mjs`); si vuelves a meter
+  un `<script is:inline>` con código, se quedará sin ejecutar. Por lo mismo el
+  PDF no se incrusta en un `iframe`: la política lleva `frame-ancestors 'none'`.
 - **PDF muy grandes.** La API de blobs de GitHub obliga a codificar el archivo
   en base64 en memoria del navegador; por encima de unos 50 MB puede quedarse
   sin aire. Para escaneos enormes, súbelos por `git` a mano y añade la entrada

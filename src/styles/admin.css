@@ -328,6 +328,23 @@ textarea {
 
 .btn-block {
   width: 100%;
+  justify-content: center;
+}
+
+/* el botón de GitHub es un enlace, no un botón: mismo aspecto, sin subrayado */
+a.btn-block {
+  text-align: center;
+  text-decoration: none;
+}
+
+#gateGitHubBox {
+  display: grid;
+  gap: 0.6rem;
+}
+
+#gateTokenBox {
+  display: grid;
+  gap: 0.5rem;
 }
 
 .btn-sm {

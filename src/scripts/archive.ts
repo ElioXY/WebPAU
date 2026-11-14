@@ -63,6 +63,7 @@ const $$ = <T extends Element>(sel: string): T[] => Array.from(document.querySel
 const form = $<HTMLFormElement>('#filters');
 const inputQ = $<HTMLInputElement>('#q');
 const selectY = $<HTMLSelectElement>('#y');
+const selectS = $<HTMLSelectElement>('#s');
 const selectPhase = $<HTMLSelectElement>('#phase');
 const clearBtn = $<HTMLButtonElement>('#clearFilters');
 const clearBtn2 = $<HTMLButtonElement>('#clearFilters2');
@@ -286,6 +287,7 @@ function setState(patch: Partial<State>, push = false): void {
 function paintControls(): void {
   if (inputQ) inputQ.value = state.q;
   if (selectY) selectY.value = state.y;
+  if (selectS) selectS.value = state.s;
   if (selectPhase) selectPhase.value = state.p;
   for (const b of sessionBtns) b.setAttribute('aria-pressed', String((b.dataset.ss ?? '') === state.ss));
   for (const b of typeBtns) b.setAttribute('aria-pressed', String((b.dataset.t ?? '') === state.t));
@@ -305,6 +307,7 @@ inputQ?.addEventListener('input', () => {
 });
 
 selectY?.addEventListener('change', () => setState({ y: selectY.value }));
+selectS?.addEventListener('change', () => setState({ s: selectS.value }));
 selectPhase?.addEventListener('change', () => setState({ p: selectPhase.value }));
 
 $('#segSession')?.addEventListener('click', (event) => {

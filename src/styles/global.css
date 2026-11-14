@@ -1403,20 +1403,6 @@ button.dl:hover {
   background: var(--paper-2);
 }
 
-.reader-frame {
-  display: block;
-  width: 100%;
-  height: clamp(600px, 86vh, 1400px);
-  border: 0;
-  background: var(--paper-2);
-}
-
-.reader-note {
-  padding: 0.6rem 0.9rem;
-  border-top: 1px solid var(--rule);
-  font-size: 0.75rem;
-  color: var(--ink-3);
-}
 
 .correccion {
   margin-top: 1rem;
@@ -1784,11 +1770,6 @@ button.dl:hover {
     display: none;
   }
 
-  .reader-frame {
-    height: 78vh;
-    min-height: 460px;
-  }
-
   .practice-set .dl {
     margin-left: auto;
   }
@@ -1805,8 +1786,236 @@ button.dl:hover {
   }
 }
 
+/* =========================================================================
+   Portada compacta, archivo y movimiento
+
+   La portada ya no vuelca el catálogo entero: enseña los últimos documentos
+   y manda a /archivo. Estas piezas son las que sostienen ese reparto.
+   ========================================================================= */
+
+/* --------------------------------------------------------- buscar y saltar */
+
+.home-search {
+  margin-bottom: clamp(1.25rem, 3vw, 2rem);
+}
+
+.archive-hero {
+  padding-block: clamp(1.75rem, 4vw, 2.75rem) clamp(1rem, 2vw, 1.5rem);
+}
+
+.archive-hero h1 {
+  max-width: 22ch;
+}
+
+.archive-hero .lede {
+  margin-top: 1rem;
+}
+
+/* el índice de años: una regla fina, no una lista de botones */
+.year-index {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.9rem;
+  margin: 1.35rem 0 1.5rem;
+  padding-block: 0.65rem;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.year-index-label {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-right: 0.25rem;
+}
+
+.year-index a {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+
+.year-index a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.year-index .n {
+  font-size: 0.625rem;
+  color: var(--ink-3);
+}
+
+/* ------------------------------------------------------ últimos documentos */
+
+.recent {
+  border-top: 2px solid var(--ink);
+}
+
+.recent .row:first-child {
+  border-top: 0;
+}
+
+.recent-foot {
+  margin-top: 1.25rem;
+}
+
+.chip-all .nm {
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------- movimiento */
+
+/* el script añade `reveal-ready`: si no llega a cargar, no se esconde nada */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.reveal-ready [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+}
+
+/* los últimos documentos entran en cascada, no todos a la vez */
+.reveal-ready .recent .row:nth-child(2) {
+  transition-delay: 40ms;
+}
+
+.reveal-ready .recent .row:nth-child(3) {
+  transition-delay: 80ms;
+}
+
+.reveal-ready .recent .row:nth-child(4) {
+  transition-delay: 120ms;
+}
+
+.reveal-ready .recent .row:nth-child(5) {
+  transition-delay: 160ms;
+}
+
+.reveal-ready .recent .row:nth-child(6) {
+  transition-delay: 200ms;
+}
+
+.reveal-ready .recent .row:nth-child(n + 7) {
+  transition-delay: 240ms;
+}
+
+/* ------------------------------------------------------------- enunciado */
+
+.reader-tag {
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.reader-doc {
+  display: grid;
+  gap: 0.5rem;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+}
+
+.reader-facts {
+  color: var(--ink-3);
+}
+
+.reader-copy {
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+  max-width: 48ch;
+}
+
+.reader-open {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.reader-open svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* iconos dentro de una línea de texto: sin `style` en el HTML, que la CSP
+   bloquea; el desplazamiento se hace con una clase */
+.ico-arrow,
+.ico-github {
+  display: inline-block;
+}
+
+.ico-arrow {
+  vertical-align: -1px;
+}
+
+.ico-github {
+  vertical-align: -2px;
+}
+
+/* sin JavaScript la corrección no puede esperar a un botón: se enseña ya */
+:root:not(.js) #correccion[hidden] {
+  display: block !important;
+}
+
+/* --------------------------------------------------------- práctica por materia */
+
+.practice-subject + .practice-subject {
+  margin-top: clamp(1.5rem, 3.5vw, 2.25rem);
+}
+
+.practice-subject-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem 1rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.practice-subject-head h3 {
+  font-family: var(--serif);
+  font-size: clamp(1.15rem, 1rem + 0.5vw, 1.35rem);
+}
+
+.practice-subject-head .n {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-subject .practice-list {
+  border-top: 0;
+  animation: none;
+}
+
+.practice-set-main h4 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+
+.practice-set:hover h4 {
+  color: var(--accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ctrl:not([hidden]) {
     animation: none;
+  }
+
+  .reveal-ready [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
 }

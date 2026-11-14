@@ -6,6 +6,7 @@
    en sessionStorage, así que no hay servidor que sostener ni cuenta que crear.
    ========================================================================= */
 import Base from '../../layouts/Base.astro';
+import OpenIcon from '../../components/icons/Open.astro';
 import { DOC_TYPES, SESSIONS, loadSubjects, type DocType } from '../../lib/catalog';
 import { practiceSets, type PracticeSet } from '../../lib/practice';
 
@@ -30,6 +31,20 @@ const DEFAULT_MINUTES = 90;
 const corrections = (['soluciones', 'criterios', 'plantilla'] as DocType[]).filter(
   (type) => set.docs[type]
 );
+
+const enunciado = set.docs.enunciados!;
+const enunciadoFacts = [
+  `${set.year}`,
+  sessionShort,
+  enunciado.pages ? `${enunciado.pages} p.` : null,
+  enunciado.sizeKB
+    ? enunciado.sizeKB < 1024
+      ? `${enunciado.sizeKB} KB`
+      : `${(enunciado.sizeKB / 1024).toFixed(1)} MB`
+    : null,
+]
+  .filter(Boolean)
+  .join('  ·  ');
 ---
 
 <Base
@@ -98,20 +113,26 @@ const corrections = (['soluciones', 'criterios', 'plantilla'] as DocType[]).filt
         <section class="reader" aria-labelledby="readerTitle">
           <div class="reader-head">
             <h2 class="practice-sub" id="readerTitle">Enunciado</h2>
-            <a class="dl" href={pdfUrl(set.docs.enunciados!.file)} target="_blank" rel="noreferrer">
-              Abrir en una pestaña
+            <span class="reader-tag mono">{sessionShort}</span>
+          </div>
+          {/* El PDF no se incrusta: el sitio se sirve con `frame-ancestors 'none'`
+              y el navegador bloquea el iframe (quedaba un hueco en blanco). Se
+              ofrece la hoja como lo que es, un documento que se abre aparte. */}
+          <div class="reader-doc">
+            <p class="reader-facts mono">{enunciadoFacts}</p>
+            <p class="reader-copy">
+              El enunciado se abre en otra pestaña, en el visor del navegador. El cronómetro
+              sigue corriendo aquí: vuelve cuando quieras y no pierdes el tiempo.
+            </p>
+            <a
+              class="btn-primary reader-open"
+              href={pdfUrl(enunciado.file)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <OpenIcon /><span>Abrir el enunciado</span>
             </a>
           </div>
-          <iframe
-            class="reader-frame"
-            src={pdfUrl(set.docs.enunciados!.file)}
-            title={`Enunciado de ${subjectName} · ${set.year} · ${sessionShort}`}
-            loading="lazy"
-          ></iframe>
-          <p class="reader-note">
-            Si el visor no carga en el móvil, usa «Abrir en una pestaña»: el cronómetro sigue
-            corriendo aquí.
-          </p>
         </section>
       </div>
 
@@ -137,10 +158,6 @@ const corrections = (['soluciones', 'criterios', 'plantilla'] as DocType[]).filt
             </p>
           )}
         </section>
-
-        <noscript>
-          <style>{`#correccion{display:block!important}`}</style>
-        </noscript>
       </div>
     </section>
   </main>

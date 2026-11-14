@@ -13,6 +13,8 @@ import {
   getRepoInfo,
   readJsonFile,
   readTreePaths,
+  resetApiBase,
+  setApiBase,
   textToBase64,
   type FileChange,
 } from '../lib/github';
@@ -86,6 +88,17 @@ const pdfPublicUrl = (exam: Exam) =>
 
 const TOKEN_KEY = 'webpau.admin.token';
 
+/** Raíz de /api del Worker. En GitHub Pages no existe y el panel se queda con
+ *  el token pegado a mano, como hasta ahora. */
+const API_BASE = `${config.base}/api`;
+
+/** El Worker responde en /api: hay inicio de sesión con GitHub. */
+let apiAvailable = false;
+/** La sesión viene de la cookie firmada, no de un token local. */
+let viaSession = false;
+/** Login de GitHub de la sesión, para enseñarlo en la barra. */
+let sessionLogin = '';
+
 /* ------------------------------------------------------------- utilidades */
 
 function $<T extends Element = HTMLElement>(sel: string, root: ParentNode = document): T {
@@ -130,6 +143,11 @@ let filesOnDisk = new Set<string>();
 let pending: PendingFile[] = [];
 let editingId: string | null = null;
 let busy = false;
+
+const authMessage = (): string =>
+  viaSession
+    ? 'La sesión ha caducado. Vuelve a entrar con GitHub.'
+    : 'El token no sirve para publicar aquí. Vuelve a entrar con uno válido.';
 
 const subjectByCode = (code: string) => subjects.find((s) => s.code === code);
 const typeById = (id: string) => TYPES.find((t) => t.id === id);
@@ -179,9 +197,11 @@ function toast(
 
 function reportError(error: unknown): void {
   if (error instanceof GithubError) {
-    if (error.status === 401 || error.status === 403) {
-      // Sin permisos no hay nada que hacer dentro del panel.
-      exit('El token no sirve para publicar aquí. Vuelve a entrar con uno válido.');
+    if (error.status === 401) {
+      // Sin sesión no hay nada que hacer dentro del panel. Un 403 puede ser
+      // solo una cuota agotada: eso se avisa, no se echa a nadie.
+      exit(authMessage());
+      return;
     }
     toast(error.detail ? `${error.message}\n${error.detail}` : error.message, 'error', 9000);
     return;
@@ -228,6 +248,11 @@ function progressEnd(state: 'ok' | 'error'): void {
 
 /* ---------------------------------------------------------------- acceso */
 
+function paintGate(): void {
+  $('#gateGitHubBox').hidden = !apiAvailable;
+  $('#gateTokenBox').hidden = apiAvailable;
+}
+
 function exit(message?: string): void {
   token = '';
   localStorage.removeItem(TOKEN_KEY);
@@ -239,7 +264,8 @@ function exit(message?: string): void {
   const error = $('#gateError');
   error.hidden = !message;
   error.textContent = message ?? '';
-  $('#tokenInput').focus();
+  paintGate();
+  if (!apiAvailable) $<HTMLInputElement>('#tokenInput').focus();
 }
 
 async function connect(): Promise<void> {
@@ -286,13 +312,13 @@ async function refresh(): Promise<void> {
     const missing = missingFiles().size;
     setStatus(
       missing > 0 ? 'warn' : 'idle',
-      `${ref.owner}/${ref.repo} · ${branch} · ${catalog.exams.length} doc.${
+      `${sessionLogin ? `@${sessionLogin} · ` : ''}${ref.owner}/${ref.repo} · ${branch} · ${catalog.exams.length} doc.${
         missing > 0 ? ` · ${missing} sin PDF` : ''
       }`
     );
   } catch (error) {
-    if (error instanceof GithubError && (error.status === 401 || error.status === 403)) {
-      exit(error.message);
+    if (error instanceof GithubError && error.status === 401) {
+      exit(authMessage());
       return;
     }
     setStatus('stale', 'Sin conexión con GitHub');
@@ -334,7 +360,18 @@ $('#gateForm').addEventListener('submit', async (event) => {
   }
 });
 
-$('#btnLogout').addEventListener('click', () => exit());
+$('#btnLogout').addEventListener('click', async () => {
+  if (viaSession) {
+    try {
+      await fetch(`${API_BASE}/logout`, { method: 'POST', credentials: 'same-origin' });
+    } catch {
+      /* si falla, la cookie caduca sola */
+    }
+    location.reload();
+    return;
+  }
+  exit();
+});
 $('#btnSync').addEventListener('click', async (event) => {
   const button = event.currentTarget as HTMLButtonElement;
   button.classList.add('is-busy');
@@ -1248,6 +1285,62 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+/* --------------------------------------------------- sesión con GitHub */
+
+/**
+ * Pregunta al Worker si hay sesión abierta.
+ *
+ * - `session`: hay cookie válida; se entra sin pedir nada.
+ * - `anonymous`: el Worker existe pero no hay sesión; se enseña el botón.
+ * - `none`: no hay Worker (GitHub Pages); se cae al token de siempre.
+ */
+async function probeSession(): Promise<'session' | 'anonymous' | 'none'> {
+  try {
+    const response = await fetch(`${API_BASE}/me`, {
+      credentials: 'same-origin',
+      headers: { accept: 'application/json' },
+    });
+    const type = response.headers.get('content-type') ?? '';
+    /* una copia estática devuelve su 404 en HTML: eso no es un Worker */
+    if (!type.includes('application/json')) return 'none';
+    if (response.ok) {
+      const data = (await response.json()) as { login?: string };
+      sessionLogin = typeof data.login === 'string' ? data.login : '';
+      return 'session';
+    }
+    return response.status === 401 ? 'anonymous' : 'none';
+  } catch {
+    return 'none';
+  }
+}
+
+async function boot(): Promise<void> {
+  const probe = await probeSession();
+
+  if (probe === 'none') {
+    /* sin Worker: token a mano, contra la API de GitHub */
+    apiAvailable = false;
+    viaSession = false;
+    resetApiBase();
+    if (token) await connect();
+    else exit();
+    return;
+  }
+
+  apiAvailable = true;
+  viaSession = probe === 'session';
+  setApiBase(`${API_BASE}/gh`);
+
+  if (probe === 'session') {
+    token = '';
+    localStorage.removeItem(TOKEN_KEY);
+    await connect();
+    return;
+  }
+
+  exit();
+}
+
 /* Sin propietario el panel no puede ni empezar: mejor decirlo que dejar que
    falle con un 404 de la API, que no explica nada. */
 if (!ref.owner || !ref.repo) {
@@ -1255,8 +1348,6 @@ if (!ref.owner || !ref.repo) {
     'El panel no sabe a qué repositorio apuntar: la web se ha construido sin propietario. Revisa la variable SITE_URL del workflow de despliegue.'
   );
   $<HTMLButtonElement>('#gateSubmit').disabled = true;
-} else if (token) {
-  connect();
 } else {
-  exit();
+  void boot();
 }

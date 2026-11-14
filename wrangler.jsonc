@@ -1,6 +1,9 @@
-// Publicación en Cloudflare Workers como *static assets*, sin script (`main`).
-// Sin script no hay invocaciones del Worker: las peticiones a los archivos son
-// gratis e ilimitadas, igual que en Pages.
+// Publicación en Cloudflare Workers.
+//
+// Los archivos de `dist/` los sirve Workers Static Assets *antes* de mirar el
+// script: sus peticiones no invocan el Worker, así que son gratis e ilimitadas.
+// Solo `/api/*` —el inicio de sesión con GitHub— ejecuta código, y son unas
+// pocas peticiones por sesión.
 //
 //   SITE_BASE=/ SITE_URL=https://pau.elioxy.us.ci \
 //   PUBLIC_GH_OWNER=ElioXY PUBLIC_GH_REPO=WebPAU npm run build
@@ -8,14 +11,33 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "pau",
+  "main": "worker/index.js",
   "compatibility_date": "2026-11-13",
   // Dominio propio, servido por la zona elioxy.us.ci en Cloudflare.
   "routes": [{ "pattern": "pau.elioxy.us.ci", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
+    // Sin este binding el Worker no podría devolver los estáticos que no casan
+    // con un archivo (la página 404, por ejemplo).
+    "binding": "ASSETS",
+    // Solo /api entra en el Worker *antes* de mirar los estáticos: sin esto,
+    // una navegación del navegador (Accept: text/html) a /api/login recibiría
+    // la página 404 en vez del redirect a GitHub. El resto del sitio sigue
+    // sirviéndose como estático, sin invocar el Worker.
+    "run_worker_first": ["/api", "/api/*"],
     // Astro compila con build.format 'file' (admin.html, practica.html…),
     // así que /admin tiene que resolver a admin.html.
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
+  },
+  "vars": {
+    // Client ID de la OAuth App de GitHub. No es secreto: rellénalo después de
+    // crearla (ver README, «Entrar con GitHub»).
+    "GITHUB_CLIENT_ID": "",
+    // Quién puede publicar. Separado por comas si algún día hay más de uno.
+    "ALLOWED_LOGIN": "ElioXY",
+    // `public_repo` basta: el repositorio es público y solo se escriben
+    // contenidos. Para un repositorio privado haría falta `repo`.
+    "GITHUB_SCOPE": "public_repo"
   }
 }

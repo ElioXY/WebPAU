@@ -20,5 +20,11 @@ export default defineConfig({
     css: {
       devSourcemap: true,
     },
+    build: {
+      // Sin scripts inline: el sitio se sirve con `script-src 'self'` y el
+      // navegador bloquea lo que venga escrito dentro del HTML. Con el límite
+      // a 0, Astro emite todos los scripts como archivos y la página funciona.
+      assetsInlineLimit: 0,
+    },
   },
 });
