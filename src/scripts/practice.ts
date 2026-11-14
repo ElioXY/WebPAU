@@ -9,6 +9,7 @@
 interface PracticeData {
   key: string;
   minutes: number;
+  corrections?: boolean;
 }
 
 interface Saved {
@@ -35,8 +36,6 @@ function setup(data: PracticeData): void {
   const pauseBtn = document.getElementById('btnPause');
   const finishBtn = document.getElementById('btnFinish');
   const resetBtn = document.getElementById('btnReset');
-  const correccion = document.getElementById('correccion');
-  const intro = document.getElementById('correccionIntro');
 
   if (!clock || !clockState || !duration || !startBtn || !pauseBtn || !finishBtn || !resetBtn) {
     return;
@@ -109,14 +108,12 @@ function setup(data: PracticeData): void {
     }
   };
 
-  const reveal = (message: string): void => {
-    if (!correccion) return;
-    correccion.hidden = false;
-    if (intro) intro.textContent = message;
-  };
-
-  const hideCorrection = (): void => {
-    if (correccion) correccion.hidden = true;
+  /* El visor escucha este aviso: al terminar cambia del enunciado a las
+     soluciones y los criterios. El atributo deja el estado en el HTML para el
+     visor, que se monta después y no oye el primer aviso. */
+  const announce = (): void => {
+    document.documentElement.dataset.practiceDone = state.done ? 'true' : 'false';
+    window.dispatchEvent(new CustomEvent('practice:state', { detail: { done: state.done } }));
   };
 
   const render = (): void => {
@@ -134,7 +131,9 @@ function setup(data: PracticeData): void {
     duration.disabled = state.running || paused || state.done;
 
     if (state.done) {
-      clockState.textContent = 'Terminado. La corrección está abajo.';
+      clockState.textContent = data.corrections
+        ? 'Terminado. La corrección está en el panel del enunciado.'
+        : 'Terminado. Este examen no tiene soluciones en el archivo.';
     } else if (state.running) {
       clockState.textContent = 'En marcha. El tiempo corre aunque cambies de pestaña.';
     } else if (paused) {
@@ -142,6 +141,8 @@ function setup(data: PracticeData): void {
     } else {
       clockState.textContent = 'Sin empezar. Elige la duración y pulsa «Empezar».';
     }
+
+    announce();
   };
 
   const stopTicking = (): void => {
@@ -154,7 +155,7 @@ function setup(data: PracticeData): void {
   const tick = (): void => {
     if (!state.running) return;
     if (liveRemaining() <= 0) {
-      finish(true);
+      finish();
       return;
     }
     clock.textContent = fmt(liveRemaining());
@@ -168,7 +169,6 @@ function setup(data: PracticeData): void {
   const start = (): void => {
     const minutes = Number(duration.value) || data.minutes;
     state = { minutes, remaining: minutes * 60_000, endsAt: Date.now() + minutes * 60_000, running: true, done: false };
-    hideCorrection();
     save();
     render();
     startTicking();
@@ -191,9 +191,8 @@ function setup(data: PracticeData): void {
     render();
   };
 
-  const finish = (outOfTime = false): void => {
+  const finish = (): void => {
     const left = liveRemaining();
-    const used = total(state) - left;
     state.remaining = left;
     state.endsAt = null;
     state.running = false;
@@ -201,13 +200,11 @@ function setup(data: PracticeData): void {
     stopTicking();
     save();
     render();
-    reveal(
-      outOfTime
-        ? 'Se acabó el tiempo. Así se corrige este examen:'
-        : `Has terminado en ${fmt(used)}. Comprueba tus respuestas:`
-    );
-    correccion?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    correccion?.focus?.({ preventScroll: true });
+
+    /* en el móvil el visor queda debajo: se lleva la mirada a la corrección */
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      document.querySelector('.reader')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const reset = (): void => {
@@ -218,13 +215,12 @@ function setup(data: PracticeData): void {
     } catch {
       /* nada */
     }
-    hideCorrection();
     render();
   };
 
   startBtn.addEventListener('click', start);
   pauseBtn.addEventListener('click', pause);
-  finishBtn.addEventListener('click', () => finish(false));
+  finishBtn.addEventListener('click', finish);
   resetBtn.addEventListener('click', reset);
 
   duration.addEventListener('change', () => {
@@ -239,7 +235,7 @@ function setup(data: PracticeData): void {
   document.addEventListener('visibilitychange', () => {
     if (!state.running) return;
     if (liveRemaining() <= 0) {
-      finish(true);
+      finish();
       return;
     }
     clock.textContent = fmt(liveRemaining());
@@ -251,9 +247,9 @@ function setup(data: PracticeData): void {
   /* Estado recuperado: un cronómetro en marcha sigue corriendo y uno terminado
      ya enseña la corrección. */
   if (state.done) {
-    reveal('Este examen ya está terminado. Aquí tienes la corrección:');
+    /* el visor enseña la corrección al montarse (data-practice-done) */
   } else if (state.running) {
-    if ((state.endsAt ?? 0) - Date.now() <= 0) finish(true);
+    if ((state.endsAt ?? 0) - Date.now() <= 0) finish();
     else startTicking();
   }
 

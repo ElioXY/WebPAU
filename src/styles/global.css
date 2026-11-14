@@ -1442,8 +1442,7 @@ a.ctrl-admin:hover {
 }
 
 .timer,
-.reader,
-.correccion {
+.reader {
   background: var(--card);
   border: 1px solid var(--rule);
 }
@@ -1542,39 +1541,6 @@ a.ctrl-admin:hover {
 }
 
 
-.correccion {
-  margin-top: 1rem;
-  padding: clamp(1.1rem, 3vw, 1.6rem);
-}
-
-.correccion:focus {
-  outline: none;
-}
-
-.correccion h2 {
-  font-size: 1.25rem;
-}
-
-.correccion p {
-  margin-top: 0.5rem;
-  color: var(--ink-2);
-  max-width: 60ch;
-}
-
-.doc-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  list-style: none;
-  padding: 0;
-}
-
-.practice-run .note {
-  margin-top: 1rem;
-  font-size: 0.875rem;
-  color: var(--ink-3);
-}
 
 /* buscador del índice de práctica */
 .practice-search {
@@ -2123,6 +2089,44 @@ a.ctrl-admin:hover {
   color: var(--ink-3);
 }
 
+/* al terminar el cronómetro, el mismo panel pasa a la corrección con estas
+   pestañas: enunciado, soluciones, criterios */
+.reader-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.reader-tabs button {
+  padding: 0.4rem 0.55rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+}
+
+.reader-tabs button:hover {
+  color: var(--ink);
+}
+
+.reader-tabs button[aria-pressed='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+.reader-tabs button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .reader-actions {
   display: flex;
   align-items: center;
@@ -2233,11 +2237,6 @@ a.ctrl-admin:hover {
 
 .ico-github {
   vertical-align: -2px;
-}
-
-/* sin JavaScript la corrección no puede esperar a un botón: se enseña ya */
-:root:not(.js) #correccion[hidden] {
-  display: block !important;
 }
 
 /* --------------------------------------------------------- práctica por materia */

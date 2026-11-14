@@ -34,18 +34,30 @@ const corrections = (['soluciones', 'criterios', 'plantilla'] as DocType[]).filt
 );
 
 const enunciado = set.docs.enunciados!;
-const enunciadoFacts = [
-  `${set.year}`,
-  sessionShort,
-  enunciado.pages ? `${enunciado.pages} p.` : null,
-  enunciado.sizeKB
-    ? enunciado.sizeKB < 1024
-      ? `${enunciado.sizeKB} KB`
-      : `${(enunciado.sizeKB / 1024).toFixed(1)} MB`
-    : null,
-]
-  .filter(Boolean)
-  .join('  ·  ');
+
+/* páginas y peso que se leen bajo el visor, para cada documento */
+const facts = (exam: { pages?: number | null; sizeKB?: number | null }): string =>
+  [
+    exam.pages ? `${exam.pages} p.` : null,
+    exam.sizeKB
+      ? exam.sizeKB < 1024
+        ? `${exam.sizeKB} KB`
+        : `${(exam.sizeKB / 1024).toFixed(1)} MB`
+      : null,
+  ]
+    .filter(Boolean)
+    .join('  ·  ');
+
+/* el enunciado primero: es lo que se lee hasta que suena el cronómetro */
+const documents = [
+  { id: 'enunciados', label: 'Enunciado', file: pdfUrl(enunciado.file), meta: facts(enunciado) },
+  ...corrections.map((type) => ({
+    id: type,
+    label: typeLabel(type),
+    file: pdfUrl(set.docs[type]!.file),
+    meta: facts(set.docs[type]!),
+  })),
+];
 ---
 
 <Base
@@ -69,8 +81,8 @@ const enunciadoFacts = [
         <p class="kicker">Práctica · {set.year}</p>
         <h1>{subjectName}</h1>
         <p class="lede">
-          {sessionLong} de {set.year}. Elige cuánto tiempo quieres darte, haz el examen con el
-          enunciado delante y, al terminar, se abre la corrección.
+          {sessionLong} de {set.year}.           Elige cuánto tiempo quieres darte, haz el examen con el enunciado delante y, al
+          terminar, la corrección aparece en el mismo panel.
         </p>
         <p class="practice-back">
           <a href={`${base}/practica`}>← Elegir otro examen</a>
@@ -109,18 +121,41 @@ const enunciadoFacts = [
 
         <section class="reader" aria-labelledby="readerTitle" data-reveal>
           <div class="reader-head">
-            <h2 class="practice-sub" id="readerTitle">Enunciado</h2>
+            <h2 class="practice-sub" id="readerTitle" data-reader-title>Enunciado</h2>
             <div class="reader-actions">
               <span class="reader-total mono" data-page-total></span>
               <div class="reader-zoom" data-zoom-controls hidden>
-                <button type="button" data-zoom="-1" aria-label="Alejar el enunciado">−</button>
+                <button type="button" data-zoom="-1" aria-label="Alejar el documento">−</button>
                 <span class="mono" data-zoom-level aria-live="polite">100%</span>
-                <button type="button" data-zoom="1" aria-label="Acercar el enunciado">+</button>
+                <button type="button" data-zoom="1" aria-label="Acercar el documento">+</button>
               </div>
-              <a class="dl" href={pdfUrl(enunciado.file)} target="_blank" rel="noreferrer">
+              <a
+                class="dl"
+                href={pdfUrl(enunciado.file)}
+                target="_blank"
+                rel="noreferrer"
+                data-reader-open
+              >
                 <OpenIcon /><span>Abrir</span>
               </a>
             </div>
+          </div>
+          <div
+            class="reader-tabs"
+            data-reader-tabs
+            role="group"
+            aria-label="Documentos del examen"
+            hidden
+          >
+            {documents.map((doc, index) => (
+              <button
+                type="button"
+                data-doc={index}
+                aria-pressed={index === 0 ? 'true' : 'false'}
+              >
+                {doc.label}
+              </button>
+            ))}
           </div>
           {/* El enunciado se dibuja aquí con pdf.js: el borde sirve los PDF con
               `frame-ancestors 'none'`, así que un iframe se queda en blanco. */}
@@ -128,52 +163,34 @@ const enunciadoFacts = [
             <p class="reader-loading mono">Cargando el enunciado…</p>
           </div>
           <p class="reader-fallback mono">
-            {enunciadoFacts}
+            <span>{set.year} · {sessionShort}</span>
             <span class="sep" aria-hidden="true">·</span>
-            <a href={pdfUrl(enunciado.file)} target="_blank" rel="noreferrer">
+            <span data-reader-meta>{documents[0]!.meta}</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <a
+              href={pdfUrl(enunciado.file)}
+              target="_blank"
+              rel="noreferrer"
+              data-reader-open
+            >
               abrir en otra pestaña
             </a>
           </p>
         </section>
       </div>
 
-      <div class="wrap">
-        <section
-          class="correccion"
-          id="correccion"
-          tabindex="-1"
-          hidden
-          data-reveal
-          aria-labelledby="correccionTitle"
-        >
-          <h2 id="correccionTitle">Corrección</h2>
-          <p id="correccionIntro">
-            Ya puedes comprobar tus respuestas con los documentos oficiales de este examen.
-          </p>
-          {corrections.length > 0 ? (
-            <ul class="doc-links">
-              {corrections.map((type) => (
-                <li>
-                  <a class="dl" href={pdfUrl(set.docs[type]!.file)} target="_blank" rel="noreferrer">
-                    {typeLabel(type)}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="note">
-              Este examen todavía no tiene soluciones ni criterios en el archivo.
-            </p>
-          )}
-        </section>
-      </div>
     </section>
   </main>
 
   <script
     type="application/json"
     id="practice-data"
-    set:html={JSON.stringify({ key: set.key, minutes: DEFAULT_MINUTES })}
+    set:html={JSON.stringify({
+      key: set.key,
+      minutes: DEFAULT_MINUTES,
+      corrections: corrections.length > 0,
+      docs: documents,
+    })}
   />
   <script>
     import '../../scripts/practice.ts';
