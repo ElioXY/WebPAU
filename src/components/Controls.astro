@@ -14,7 +14,6 @@ const inPanel = /\/admin(\.html)?$/.test(Astro.url.pathname);
   {!inPanel && (
     <a class="ctrl ctrl-admin" href={`${base}/admin`} aria-label="Panel del archivo" title="Panel del archivo">
       <KeyIcon />
-      <span class="ctrl-lbl" aria-hidden="true">Panel</span>
     </a>
   )}
   <button class="ctrl" type="button" id="themeToggle" aria-pressed="false">

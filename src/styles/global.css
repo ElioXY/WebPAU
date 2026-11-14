@@ -1229,12 +1229,47 @@ button.dl:hover {
   color: var(--paper);
 }
 
-/* el atajo al panel es el único control con tinta llena: se ve de un vistazo */
+/* ------------------------------------------------------------------ panel */
+
+/* La llave del panel vive en la cabecera, arriba a la derecha. En móvil no hay
+   sitio para ella ahí, así que se suma a los controles flotantes. */
+.head-admin {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  order: 4;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  transition: background-color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease),
+    color var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
+}
+
+.head-admin svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--dur-2) var(--ease);
+}
+
+.head-admin:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  transform: translateY(-1px);
+}
+
+.head-admin:hover svg {
+  transform: rotate(-12deg);
+}
+
+.head-admin:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+/* el flotante es el único control con tinta llena, para no confundirlo */
 a.ctrl-admin {
-  width: auto;
-  display: inline-flex;
-  gap: 0.35rem;
-  padding-inline: 0.55rem;
   background: var(--ink);
   border-color: var(--ink);
   color: var(--paper);
@@ -1246,30 +1281,14 @@ a.ctrl-admin:hover {
   color: var(--paper);
 }
 
-.ctrl-lbl {
-  font-family: var(--mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-a.ctrl-admin svg {
-  transition: transform var(--dur-2) var(--ease);
-}
-
-a.ctrl-admin:hover svg {
-  transform: rotate(-12deg);
-}
-
-/* en pantallas estrechas queda solo la llave: la palabra no cabe */
-@media (max-width: 700px) {
+@media (min-width: 901px) {
+  /* en escritorio basta el botón de la cabecera */
   a.ctrl-admin {
-    width: 40px;
-    padding-inline: 0;
+    display: none;
   }
 
-  .ctrl-lbl {
-    display: none;
+  .head-admin {
+    display: inline-flex;
   }
 }
 

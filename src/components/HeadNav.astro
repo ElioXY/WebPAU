@@ -17,6 +17,8 @@ interface Props {
   withAsignaturas?: boolean;
 }
 
+import KeyIcon from './icons/Key.astro';
+
 const { current, home = false, withAsignaturas = true } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
@@ -48,3 +50,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     Practicar
   </a>
 </nav>
+
+{/* en móvil esta llave no se pinta: allí vive en los controles flotantes */}
+<a class="head-admin" href={`${base}/admin`} aria-label="Panel del archivo" title="Panel del archivo">
+  <KeyIcon />
+</a>
