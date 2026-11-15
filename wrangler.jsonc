@@ -31,9 +31,9 @@
     "not_found_handling": "404-page"
   },
   "vars": {
-    // Client ID de la OAuth App de GitHub. No es secreto: rellénalo después de
-    // crearla (ver README, «Entrar con GitHub»).
-    "GITHUB_CLIENT_ID": "",
+    // Client ID de la OAuth App de GitHub. No es secreto: el secreto es
+    // GITHUB_CLIENT_SECRET, que se guarda con `wrangler secret put`.
+    "GITHUB_CLIENT_ID": "Ov23liSiEXa28RP6Uadb",
     // Quién puede publicar. Separado por comas si algún día hay más de uno.
     "ALLOWED_LOGIN": "ElioXY",
     // `public_repo` basta: el repositorio es público y solo se escriben
