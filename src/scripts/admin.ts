@@ -1357,30 +1357,37 @@ if (!ref.owner || !ref.repo) {
 /* El tema lo pone `theme.js` en el <head>, antes del primer pintado, con la
    misma clave de `localStorage` que el sitio público: si vienes de la web en
    oscuro, el panel también lo está. Aquí solo se cambia. */
-const themeBtn = document.querySelector<HTMLButtonElement>('#btnTheme');
+/* dos botones: el de la barra y el de la puerta de acceso */
+const themeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')
+);
 
-if (themeBtn) {
+if (themeButtons.length > 0) {
   const meta = document.getElementById('themeColor') as HTMLMetaElement | null;
 
   const syncTheme = (): void => {
     const dark = document.documentElement.dataset.theme === 'dark';
-    themeBtn.setAttribute('aria-pressed', String(dark));
-    themeBtn.setAttribute('aria-label', dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-    themeBtn.title = dark ? 'Modo claro' : 'Modo oscuro';
+    for (const button of themeButtons) {
+      button.setAttribute('aria-pressed', String(dark));
+      button.setAttribute('aria-label', dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+      button.title = dark ? 'Modo claro' : 'Modo oscuro';
+    }
     meta?.setAttribute('content', dark ? '#121110' : '#ddded7');
   };
 
-  themeBtn.addEventListener('click', () => {
-    const root = document.documentElement;
-    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = next;
-    try {
-      localStorage.setItem('theme', next);
-    } catch {
-      /* sin almacenamiento, el cambio dura lo que la pestaña */
-    }
-    syncTheme();
-  });
+  for (const button of themeButtons) {
+    button.addEventListener('click', () => {
+      const root = document.documentElement;
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        /* sin almacenamiento, el cambio dura lo que la pestaña */
+      }
+      syncTheme();
+    });
+  }
 
   syncTheme();
 }

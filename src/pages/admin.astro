@@ -67,6 +67,17 @@ const config = {
     <!-- ------------------------------------------------------------- acceso -->
     <div class="gate" id="gate" hidden>
       <form class="gate-card" id="gateForm">
+        {/* el tema también se cambia antes de entrar: la barra aún no está */}
+        <button
+          class="gate-theme"
+          type="button"
+          data-theme-toggle
+          aria-label="Cambiar a modo oscuro"
+          title="Modo oscuro"
+        >
+          <span class="theme-ico" data-theme-ico="light"><MoonIcon /></span>
+          <span class="theme-ico" data-theme-ico="dark"><SunIcon /></span>
+        </button>
         <div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         <h1>WebPAU</h1>
         <p class="gate-sub">Panel de administración del archivo</p>
@@ -134,9 +145,8 @@ const config = {
         <div class="bar-actions">
           <button
             class="btn btn-icon"
-            id="btnTheme"
             type="button"
-            aria-pressed="false"
+            data-theme-toggle
             aria-label="Cambiar a modo oscuro"
             title="Modo oscuro"
           >

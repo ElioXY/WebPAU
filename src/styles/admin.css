@@ -149,12 +149,41 @@ a:hover {
 }
 
 .gate-card {
+  position: relative;
   width: min(460px, 100%);
   background: var(--sheet);
   border: 1px solid var(--rule);
   padding: 1.75rem;
   display: grid;
   gap: 0.5rem;
+}
+
+/* cambio de tema en la puerta: la barra del panel todavía no se ve */
+.gate-theme {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--ink-3);
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+
+.gate-theme:hover {
+  color: var(--ink);
+  border-color: var(--rule);
+}
+
+.gate-theme svg {
+  width: 13px;
+  height: 13px;
 }
 
 .gate-card h1 {
