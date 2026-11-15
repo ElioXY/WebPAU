@@ -6,6 +6,8 @@
  * los PDFs en el repositorio, con lo que Pages reconstruye la web pública.
  */
 import '../styles/admin.css';
+import SunIcon from '../components/icons/Sun.astro';
+import MoonIcon from '../components/icons/Moon.astro';
 import { DOC_TYPES, SESSIONS } from '../lib/catalog';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -49,13 +51,17 @@ const config = {
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#ddded7" id="themeColor" />
     <title>WebPAU · Panel de administración</title>
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    {/* el mismo arranque de tema que el sitio público, antes del primer
+        pintado: sin esto el panel sería siempre claro */}
+    <script is:inline src={`${base}/theme.js`}></script>
   </head>
   <body>
     <!-- ------------------------------------------------------------- acceso -->
@@ -126,6 +132,17 @@ const config = {
         </div>
 
         <div class="bar-actions">
+          <button
+            class="btn btn-icon"
+            id="btnTheme"
+            type="button"
+            aria-pressed="false"
+            aria-label="Cambiar a modo oscuro"
+            title="Modo oscuro"
+          >
+            <span class="theme-ico" data-theme-ico="light"><MoonIcon /></span>
+            <span class="theme-ico" data-theme-ico="dark"><SunIcon /></span>
+          </button>
           <a class="btn" href={`${base}/`} target="_blank" rel="noreferrer">Ver la web</a>
           <button class="btn" id="btnSync" type="button">Sincronizar</button>
           <button class="btn" id="btnLogout" type="button">Salir</button>

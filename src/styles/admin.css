@@ -22,6 +22,8 @@
   --seal: #1b3a8f;
   --seal-wash: #e6e9f5;
   --stamp: #b0372a;
+  /* el rojo de relleno no se lee sobre papel oscuro: para texto va este */
+  --stamp-ink: #b0372a;
   --stamp-wash: #f7e8e5;
   --ok: #2f6b4f;
   --ok-wash: #e4efe8;
@@ -32,6 +34,32 @@
   --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Consolas, monospace;
   --bar-h: 52px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* --------------------------------------------------------------- noche */
+/* el mismo panel con la luz apagada: papel ahumado, tinta clara y los sellos
+   subidos de tono para que se lean sin brillar */
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --stock: #121110;
+  --sheet: #1a1816;
+  --sheet-2: #242119;
+  --ink: #ece7db;
+  --ink-2: #b7b0a2;
+  --ink-3: #8a8274;
+  --rule: #3a352d;
+  --rule-2: #2b2721;
+  --seal: #5b83e0;
+  --seal-wash: #1b2336;
+  --stamp: #b8503f;
+  --stamp-ink: #ea9a8b;
+  --stamp-wash: #2c1b18;
+  --ok: #3f7f5f;
+  --ok-wash: #17251d;
+  --warn: #b08a3f;
+  --warn-wash: #2a2318;
 }
 
 *,
@@ -65,6 +93,17 @@ textarea {
 :focus-visible {
   outline: 2px solid var(--seal);
   outline-offset: 2px;
+}
+
+/* los enlaces llevan el azul del sello; los botones que son <a> lo pisan */
+a {
+  color: var(--seal);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--seal) 35%, transparent);
+}
+
+a:hover {
+  border-bottom-color: var(--seal);
 }
 
 [hidden] {
@@ -143,9 +182,9 @@ textarea {
 .gate-error,
 .form-error {
   font-size: 0.8125rem;
-  color: var(--stamp);
+  color: var(--stamp-ink);
   background: var(--stamp-wash);
-  border: 1px solid color-mix(in srgb, var(--stamp) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--stamp-ink) 35%, transparent);
   padding: 0.4rem 0.55rem;
 }
 
@@ -352,6 +391,21 @@ textarea {
   width: 13px;
   height: 13px;
   flex: none;
+}
+
+/* el botón de tema: un icono solo, sin texto */
+.btn-icon {
+  padding-inline: 0.45rem;
+}
+
+.theme-ico {
+  display: none;
+}
+
+/* en claro se ofrece la luna (ir a oscuro) y al revés, como en el sitio */
+:root[data-theme='light'] .theme-ico[data-theme-ico='dark'],
+:root[data-theme='dark'] .theme-ico[data-theme-ico='light'] {
+  display: inline-flex;
 }
 
 .btn-primary {
@@ -600,7 +654,7 @@ a.btn-block {
 }
 
 .drop-list li.is-bad b {
-  color: var(--stamp);
+  color: var(--stamp-ink);
   text-decoration: line-through;
 }
 
@@ -616,7 +670,7 @@ a.btn-block {
 }
 
 .drop-list li button:hover {
-  color: var(--stamp);
+  color: var(--stamp-ink);
 }
 
 /* leído del nombre: el filete se rompe cuando faltan datos y se marca en rojo
@@ -626,13 +680,13 @@ a.btn-block {
 }
 
 .drop-list li.is-dup {
-  border-color: color-mix(in srgb, var(--stamp) 45%, transparent);
+  border-color: color-mix(in srgb, var(--stamp-ink) 45%, transparent);
 }
 
 .drop-list li .flag {
   flex: none;
-  color: var(--stamp);
-  border: 1px solid var(--stamp);
+  color: var(--stamp-ink);
+  border: 1px solid var(--stamp-ink);
   padding: 0 0.25rem;
   font-size: 0.625rem;
   letter-spacing: 0.02em;
@@ -982,8 +1036,8 @@ input[type='number'].input {
 }
 
 .icon-btn.danger:hover {
-  color: var(--stamp);
-  border-color: color-mix(in srgb, var(--stamp) 40%, transparent);
+  color: var(--stamp-ink);
+  border-color: color-mix(in srgb, var(--stamp-ink) 40%, transparent);
 }
 
 .icon-btn svg {
@@ -994,8 +1048,8 @@ input[type='number'].input {
 .badge-missing {
   font-family: var(--mono);
   font-size: 0.625rem;
-  color: var(--stamp);
-  border: 1px solid var(--stamp);
+  color: var(--stamp-ink);
+  border: 1px solid var(--stamp-ink);
   padding: 0 0.25rem;
   margin-left: 0.4rem;
 }

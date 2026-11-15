@@ -1351,3 +1351,36 @@ if (!ref.owner || !ref.repo) {
 } else {
   void boot();
 }
+
+/* ------------------------------------------------------------------ tema */
+
+/* El tema lo pone `theme.js` en el <head>, antes del primer pintado, con la
+   misma clave de `localStorage` que el sitio público: si vienes de la web en
+   oscuro, el panel también lo está. Aquí solo se cambia. */
+const themeBtn = document.querySelector<HTMLButtonElement>('#btnTheme');
+
+if (themeBtn) {
+  const meta = document.getElementById('themeColor') as HTMLMetaElement | null;
+
+  const syncTheme = (): void => {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    themeBtn.setAttribute('aria-pressed', String(dark));
+    themeBtn.setAttribute('aria-label', dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    themeBtn.title = dark ? 'Modo claro' : 'Modo oscuro';
+    meta?.setAttribute('content', dark ? '#121110' : '#ddded7');
+  };
+
+  themeBtn.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* sin almacenamiento, el cambio dura lo que la pestaña */
+    }
+    syncTheme();
+  });
+
+  syncTheme();
+}
